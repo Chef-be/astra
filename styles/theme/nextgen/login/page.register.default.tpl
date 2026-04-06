@@ -19,7 +19,7 @@
 					email: $("#email").val(),
 					secretQuestion: $("#secretQuestion").val(),
 					secretQuestionAnswer: $('#secretQuestionAnswer').val(),
-					language: $('#language option:selected').val(),
+					language: 'fr',
 					rules: $('#rules').is(':checked'),
 					referralID : $('#referralID').val(),
 					g_recaptcha_response: recaptchaResponse,
@@ -123,20 +123,7 @@
 		</div>
 
 
-		{if count($languages) > 1}
-		<div class="form-group d-flex flex-md-row flex-column justify-content-md-between align-items-center my-2">
-			<label class="fs-6 my-2 text-start w-100" for="language">{$LNG.registerLanguage}</label>
-			<select style="text-indent:5px;" class="bg-dark text-white form-select d-flex align-items-center my-2 fs-6 w-100 mx-0 px-0" name="lang" id="language">
-				{html_options options=$languages selected=$lang}
-			</select>
-		</div>
-		<div class="form-group d-flex flex-md-row flex-column justify-content-md-between align-items-center my-2">
-			{if !empty($error.language)}
-				<span class="error errorLanguage"></span>
-			{/if}
-			<div class="clear"></div>
-		</div>
-		{/if}
+		<input type="hidden" name="lang" id="language" value="fr">
 		{if !empty($referralData.name)}
 		<div class="form-group d-flex flex-md-row flex-column justify-content-md-between align-items-center my-2">
 			<label class="fs-6 my-2 text-start w-100" for="language">{$LNG.registerReferral}</label>

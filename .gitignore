@@ -7,6 +7,7 @@ backups
 *.log
 *.sql.gz
 *.sql
+!install/*.sql
 *.zip
 *.tar
 *.tar.gz

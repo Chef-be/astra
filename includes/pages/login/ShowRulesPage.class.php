@@ -29,9 +29,11 @@ class ShowRulesPage extends AbstractLoginPage
 
 	function show()
 	{
-		global $LNG;
+		global $LNG, $config;
+		require_once ROOT_PATH.'includes/classes/PublicContentService.class.php';
+		$publicContentService = new PublicContentService($config);
 		$this->assign(array(
-			'rules'		=> $LNG->getTemplate('rules'),
+			'rules'		=> $publicContentService->getRulesHtml($LNG),
 		));
 
 		$this->display('page.rules.default.tpl');

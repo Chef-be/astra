@@ -127,6 +127,7 @@ abstract class AbstractLoginPage
 
 		$config = Config::get();
 		$publicContentService = new PublicContentService($config);
+		$seoSettings = $publicContentService->getSeoSettings();
 
 		$this->tplObj->assign_vars(array(
 			'recaptchaEnable'		=> $config->capaktiv,
@@ -140,11 +141,11 @@ abstract class AbstractLoginPage
 			'referralEnable'		=> $config->ref_active,
 			'analyticsEnable'		=> $config->ga_active,
 			'analyticsUID'			=> $config->ga_key,
-			'lang'					=> $LNG->getLanguage(),
+			'lang'					=> 'fr',
 			'UNI'					=> Universe::current(),
 			'VERSION'				=> $config->VERSION,
 			'REV'					=> substr($config->VERSION, -4),
-			'languages'				=> Language::getAllowedLangs(false),
+			'languages'				=> array('fr' => 'Français'),
 			'loginInfo'				=> sprintf($LNG['loginInfo'], '<a href="index.php?page=rules">'.$LNG['menu_rules'].'</a>'),
 			'universeSelect'		=> $universeSelect,
 			'isMultiUniverse'		=> $this->isMultiverse(),
@@ -155,6 +156,10 @@ abstract class AbstractLoginPage
 			'publicPageFlags'		=> $publicContentService->getPageFlags(),
 			'publicRegistrationEnabled' => $publicContentService->isPageEnabled('register'),
 			'brandLogoUrl'			=> BrandingService::getActiveLogoUrl(),
+			'seoMetaTitle'			=> $seoSettings['title'],
+			'seoMetaDescription'	=> $seoSettings['description'],
+			'seoMetaKeywords'		=> $seoSettings['keywords'],
+			'seoOgImage'			=> $seoSettings['ogImage'],
 		));
 	}
 
@@ -205,7 +210,7 @@ abstract class AbstractLoginPage
 		}
 
 		$this->assign(array(
-            'lang'    			=> $LNG->getLanguage(),
+            'lang'    			=> 'fr',
 			'bodyclass'			=> $this->getWindow(),
 			'basepath'			=> $basePath,
 			'isMultiUniverse'	=> count(Universe::availableUniverses()) > 1,

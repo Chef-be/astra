@@ -141,6 +141,119 @@ body {
     letter-spacing: 0.04em;
 }
 
+.brand-title img {
+    display: block;
+    max-width: 100%;
+}
+
+.uk-navbar-right {
+    gap: 12px;
+}
+
+.uk-navbar-nav {
+    align-items: center;
+    gap: 6px;
+}
+
+.uk-navbar-nav .menu-item > a {
+    min-height: 48px;
+    padding: 0 12px;
+    font-size: 1.05rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.public-nav-more .dropdown-toggle::after {
+    margin-left: 8px;
+}
+
+.public-nav-dropdown {
+    min-width: 240px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(6, 9, 16, 0.96);
+    backdrop-filter: blur(12px);
+}
+
+.public-nav-dropdown .dropdown-item {
+    color: rgba(255,255,255,0.9);
+    padding: 10px 14px;
+}
+
+.public-nav-dropdown .dropdown-item.active,
+.public-nav-dropdown .dropdown-item:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+}
+
+.public-reading-shell {
+    max-width: 1024px;
+    margin: 0 auto 48px;
+}
+
+.public-reading-hero {
+    margin-bottom: 20px;
+}
+
+.public-reading-hero h1 {
+    margin-bottom: 10px;
+}
+
+.public-reading-hero p {
+    max-width: 820px;
+    margin: 0;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.7;
+}
+
+.public-reading-content {
+    line-height: 1.8;
+}
+
+.public-reading-content p:last-child {
+    margin-bottom: 0;
+}
+
+.public-screens-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+}
+
+.public-screen-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    text-decoration: none;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(0,0,0,0.45);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.32);
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.public-screen-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,180,80,0.4);
+    box-shadow: 0 24px 55px rgba(0,0,0,0.45);
+}
+
+.public-screen-thumb {
+    height: 180px;
+    display: block;
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.public-screen-label {
+    display: block;
+    padding: 14px 16px;
+    font-family: var(--secondary-font-family);
+    font-size: 1.08rem;
+}
+
   @media (max-width: 750px) {
     .uk-navbar-nav {
         display: none;
@@ -171,4 +284,15 @@ body {
         padding: 30px !important;
        
       }
+}
+
+@media (max-width: 1199px) {
+    .uk-navbar-nav .menu-item > a {
+        font-size: 0.98rem;
+        padding: 0 10px;
+    }
+
+    .brand-title {
+        font-size: 1.65rem !important;
+    }
 }

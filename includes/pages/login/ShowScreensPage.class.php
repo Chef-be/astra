@@ -29,25 +29,15 @@ class ShowScreensPage extends AbstractLoginPage
 
 	function show()
 	{
-		$screenshots	= array();
-		$directoryIterator = new DirectoryIterator('styles/resource/images/login/screens/');
-        foreach ($directoryIterator as $fileInfo)
-		{
-			/** @var $fileInfo DirectoryIterator */
-			if (!$fileInfo->isFile())
-			{
-				continue;
-            }
-
-			$thumbnail = 'styles/resource/images/login/screens/'.$fileInfo->getFilename();
-			if(file_exists('styles/resource/images/login/screens/thumbnails/'.$fileInfo->getFilename()))
-			{
-				$thumbnail = 'styles/resource/images/login/screens/thumbnails/'.$fileInfo->getFilename();
-			}
-
-			$screenshots[]	= array(
-				'path' 		=> 'styles/resource/images/login/screens/'.$fileInfo->getFilename(),
-				'thumbnail' => $thumbnail,
+		global $config;
+		require_once ROOT_PATH.'includes/classes/PublicContentService.class.php';
+		$publicContentService = new PublicContentService($config);
+		$screenshots = array();
+		foreach ($publicContentService->getPublicScreenshots() as $item) {
+			$screenshots[] = array(
+				'path' => $item['path'],
+				'thumbnail' => $item['path'],
+				'label' => $item['label'],
 			);
 		}
 

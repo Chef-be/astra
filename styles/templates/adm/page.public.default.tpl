@@ -11,7 +11,7 @@
 					<a class="btn btn-outline-light" href="index.php" target="_blank" rel="noopener">Voir le site public</a>
 				</div>
 
-				<form action="?page=public&mode=saveSettings" method="post" class="d-flex flex-column gap-4">
+				<form action="?page=public&mode=saveSettings" method="post" enctype="multipart/form-data" class="d-flex flex-column gap-4">
 					<div class="row g-3">
 						<div class="col-12 col-xl-7">
 							<div class="bg-dark border border-secondary rounded-3 p-3 h-100">
@@ -44,9 +44,66 @@
 					</div>
 
 					<div class="bg-dark border border-secondary rounded-3 p-3">
+						<label class="form-label fw-bold" for="public_rules_html">Page des règles</label>
+						<p class="text-secondary small">Si ce champ est vide, le texte de règles issu du fichier de langue reste utilisé.</p>
+						<textarea id="public_rules_html" name="public_rules_html" class="form-control bg-black text-white border-secondary rich-editor" rows="10">{$public_rules_html|escape:'html'}</textarea>
+					</div>
+
+					<div class="bg-dark border border-secondary rounded-3 p-3">
+						<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-2 mb-3">
+							<div>
+								<h2 class="h5 mb-1">Captures d’écran</h2>
+								<p class="text-secondary small mb-0">Téléversez des visuels pour la galerie publique et supprimez ceux qui ne doivent plus être affichés.</p>
+							</div>
+							<input type="file" name="public_screens_upload[]" multiple accept=".png,.jpg,.jpeg,.gif,.webp" class="form-control bg-black text-white border-secondary" style="max-width:360px;">
+						</div>
+						{if $public_screenshots|@count > 0}
+						<div class="row g-3">
+							{foreach $public_screenshots as $screen}
+							<div class="col-12 col-md-6 col-xl-4">
+								<div class="border border-secondary rounded-3 overflow-hidden bg-black h-100">
+									<div style="height:180px;background:#111 url('{$screen.path}') center center / cover no-repeat;"></div>
+									<div class="p-3">
+										<div class="fw-bold mb-2">{$screen.label|escape:'html'}</div>
+										<label class="form-check-label small text-secondary">
+											<input class="form-check-input me-2" type="checkbox" name="delete_public_screens[]" value="{$screen.path|escape:'html'}">Supprimer cette capture
+										</label>
+									</div>
+								</div>
+							</div>
+							{/foreach}
+						</div>
+						{else}
+						<div class="text-secondary small">Aucune capture personnalisée n’est enregistrée. La galerie utilise encore les visuels par défaut.</div>
+						{/if}
+					</div>
+
+					<div class="bg-dark border border-secondary rounded-3 p-3">
 						<label class="form-label fw-bold" for="secret_question_options">Questions secrètes de l’inscription</label>
 						<p class="text-secondary small">Une question par ligne. La liste est utilisée sur la page d’inscription et pour la validation serveur.</p>
 						<textarea id="secret_question_options" name="secret_question_options" class="form-control bg-black text-white border-secondary" rows="8">{$secret_question_options|escape:'html'}</textarea>
+					</div>
+
+					<div class="bg-dark border border-secondary rounded-3 p-3">
+						<h2 class="h5 mb-3">SEO et métadonnées</h2>
+						<div class="row g-3">
+							<div class="col-12">
+								<label class="form-label" for="seo_meta_title">Titre SEO</label>
+								<input id="seo_meta_title" name="seo_meta_title" type="text" class="form-control bg-black text-white border-secondary" value="{$seo_meta_title|escape:'html'}" maxlength="255">
+							</div>
+							<div class="col-12">
+								<label class="form-label" for="seo_meta_description">Description</label>
+								<textarea id="seo_meta_description" name="seo_meta_description" class="form-control bg-black text-white border-secondary" rows="4">{$seo_meta_description|escape:'html'}</textarea>
+							</div>
+							<div class="col-12">
+								<label class="form-label" for="seo_meta_keywords">Mots-clés</label>
+								<input id="seo_meta_keywords" name="seo_meta_keywords" type="text" class="form-control bg-black text-white border-secondary" value="{$seo_meta_keywords|escape:'html'}">
+							</div>
+							<div class="col-12">
+								<label class="form-label" for="seo_og_image_url">Image Open Graph</label>
+								<input id="seo_og_image_url" name="seo_og_image_url" type="text" class="form-control bg-black text-white border-secondary" value="{$seo_og_image_url|escape:'html'}" placeholder="styles/resource/images/meta.png ou https://...">
+							</div>
+						</div>
 					</div>
 
 					<div class="d-flex justify-content-end">

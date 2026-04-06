@@ -33,14 +33,14 @@
 	<link rel="manifest" href="/styles/resource/favicon/site.webmanifest">
 	
 	<!-- Meta  -->
-	<title>{$gameName}</title>
-	<meta name="keywords" content="{$gameName}, jeu spatial, jeu de stratégie, navigateur, MMO, empire galactique">
-	<meta name="description" content="{$gameName}, jeu de stratégie spatiale par navigateur, gratuit et multijoueur.">
+	<title>{$seoMetaTitle}</title>
+	<meta name="keywords" content="{$seoMetaKeywords}">
+	<meta name="description" content="{$seoMetaDescription}">
 	<!-- open graph protocol -->
-	<meta property="og:title" content="{$gameName}">
+	<meta property="og:title" content="{$seoMetaTitle}">
 	<meta property="og:type" content="website">
-	<meta property="og:description" content="{$gameName}, jeu de stratégie spatiale par navigateur, gratuit et multijoueur.">
-	<meta property="og:image" content="styles/resource/images/meta.png">
+	<meta property="og:description" content="{$seoMetaDescription}">
+	<meta property="og:image" content="{$seoOgImage}">
 	<!--[if lt IE 9]>
 	<script src="scripts/base/html5.js"></script>
 	<![endif]-->

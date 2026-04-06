@@ -118,7 +118,7 @@ class ShowRegisterPage extends AbstractLoginPage
 		$userName 		= HTTP::_GP('userName', '', UTF8_SUPPORT);
 		$password 		= HTTP::_GP('password', '', true);
 		$mailAddress 	= HTTP::_GP('email', '', true);
-		$language 		= HTTP::_GP('language', '');
+		$language 		= 'fr';
 		$rulesChecked	= HTTP::_GP('rules', 'false');
 		$csrfToken = HTTP::_GP('csrfToken','',true);
 

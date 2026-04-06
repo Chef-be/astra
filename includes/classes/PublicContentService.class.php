@@ -70,6 +70,56 @@ class PublicContentService
 		return implode("\n", $this->getSecretQuestions());
 	}
 
+	public function getRulesHtml($LNG = null)
+	{
+		$content = trim((string) $this->config->public_rules_html);
+		if ($content !== '') {
+			require_once ROOT_PATH.'includes/classes/RichTextService.class.php';
+			return RichTextService::render($content);
+		}
+
+		if ($LNG !== null) {
+			return $LNG->getTemplate('rules');
+		}
+
+		return '';
+	}
+
+	public function getPublicScreenshots()
+	{
+		require_once ROOT_PATH.'includes/classes/PublicScreenshotService.class.php';
+		return PublicScreenshotService::getScreenshotsFromConfig((string) $this->config->public_screens_json);
+	}
+
+	public function getSeoSettings()
+	{
+		$gameName = trim((string) $this->config->game_name);
+		$title = trim((string) $this->config->seo_meta_title);
+		$description = trim((string) $this->config->seo_meta_description);
+		$keywords = trim((string) $this->config->seo_meta_keywords);
+		$ogImage = trim((string) $this->config->seo_og_image_url);
+
+		if ($title === '') {
+			$title = $gameName;
+		}
+		if ($description === '') {
+			$description = $gameName.', jeu de stratégie spatiale par navigateur, gratuit et multijoueur.';
+		}
+		if ($keywords === '') {
+			$keywords = $gameName.', jeu spatial, jeu de stratégie, navigateur, MMO, empire galactique';
+		}
+		if ($ogImage === '') {
+			$ogImage = 'styles/resource/images/meta.png';
+		}
+
+		return array(
+			'title' => $title,
+			'description' => $description,
+			'keywords' => $keywords,
+			'ogImage' => $ogImage,
+		);
+	}
+
 	public function getPageFlags()
 	{
 		$flags = array();

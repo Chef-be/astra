@@ -15,10 +15,24 @@
 				<div class="uk-navbar-right">
 				<ul class="uk-navbar-nav">
 					{foreach $publicMenuItems as $menuItem}
+						{if $menuItem.id == 'index' || $menuItem.id == 'register' || $menuItem.id == 'news'}
 						<li class="menu-item">
 							<a class="uk-preserve-width {if $page == $menuItem.id || ($menuItem.id == 'index' && $page == '')}uk-active{/if}" href="{$menuItem.url}">{$menuItem.title}</a>
 						</li>
+						{/if}
 					{/foreach}
+					{if count($publicMenuItems) > 3}
+						<li class="menu-item dropdown public-nav-more">
+							<a class="uk-preserve-width dropdown-toggle" href="#" id="publicMoreMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">Découvrir</a>
+							<ul class="dropdown-menu dropdown-menu-dark public-nav-dropdown" aria-labelledby="publicMoreMenu">
+								{foreach $publicMenuItems as $menuItem}
+									{if $menuItem.id != 'index' && $menuItem.id != 'register' && $menuItem.id != 'news'}
+									<li><a class="dropdown-item {if $page == $menuItem.id}active{/if}" href="{$menuItem.url}">{$menuItem.title}</a></li>
+									{/if}
+								{/foreach}
+							</ul>
+						</li>
+					{/if}
 					{if $discordEnabled}
 						<li class="menu-item">
 							<a class="uk-preserve-width" href="{$discordUrl}" target="_blank" rel="noopener"><img src="styles/theme/nextgen/img/social/discord-mark-white.svg" width="30px" alt="Discord"></a>
@@ -27,26 +41,7 @@
 					
 				</ul>
 
-				{if count($languages) > 1}
 				<i class="bi bi-list d-flex d-md-none px-3 text-white fs-2 menu_icon" data-bs-toggle="offcanvas" data-bs-target="#phoneMenu"></i>
-
-				<div class="dropdown">
-				<button style="width:120px;height:32px;" class="btn btn-secondary dropdown-toggle p-1 menu-item justify-content-center" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown">
-					Langue
-				</button>
-				<ul style="width:auto;" class="dropdown-menu flex-column bg-dark p-0" aria-labelledby="dropdownMenuButton1">
-						{foreach $languages as $langKey => $langName}
-						<li class="d-flex w-100">
-								<a class="text-decoration-none hover-bg-color-grey menu-item w-100 px-2" href="?lang={$langKey}" rel="alternate" hreflang="{$langKey}" title="{$langName}">
-									<img src="styles/theme/nextgen/img/lang/{$langKey}.svg" class="lang-flag">
-									<span class="">{$langName}</span>
-								</a>
-							</li>
-						{/foreach}
-				</ul>
-				</div>
-			
-				{/if}
 				
 				</div>
 				

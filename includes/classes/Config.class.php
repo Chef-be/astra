@@ -40,7 +40,9 @@ class Config
 										   'discord_active', 'discord_url', 'homepage_intro_html',
 										   'secret_question_options', 'public_menu_register', 'public_menu_news',
 										   'public_menu_rules', 'public_menu_screens', 'public_menu_banlist',
-										   'public_menu_battlehall', 'public_menu_disclamer',
+										   'public_menu_battlehall', 'public_menu_disclamer', 'public_rules_html',
+										   'public_screens_json', 'seo_meta_title', 'seo_meta_description',
+										   'seo_meta_keywords', 'seo_og_image_url',
 										   'disclamerAddress','disclamerPhone','disclamerMail','disclamerNotice');
 
 	public static function getGlobalConfigKeys()
