@@ -11,11 +11,11 @@
 
 ## Installation rapide avec Docker
 
-Le dépôt fournit une stack Docker dédiée dans [`docker-compose.astra.yml`](/var/www/vhosts/astra-dominion.fr/httpdocs/docker-compose.astra.yml).
+Le dépôt fournit une stack Docker dédiée dans [`docker-compose.astra.yml`](../docker-compose.astra.yml).
 
 ### Étapes
 
-1. Copier [`includes/config.sample.php`](/var/www/vhosts/astra-dominion.fr/httpdocs/includes/config.sample.php) vers `includes/config.php`.
+1. Copier [`includes/config.sample.php`](../includes/config.sample.php) vers `includes/config.php`.
 2. Adapter les identifiants de base et le préfixe de tables.
 3. Vérifier les ports exposés :
    - application : `3848`
@@ -45,7 +45,7 @@ Créer une base MariaDB, un utilisateur dédié et un mot de passe fort.
 
 ### 3. Préparer la configuration
 
-Créer `includes/config.php` à partir de [`includes/config.sample.php`](/var/www/vhosts/astra-dominion.fr/httpdocs/includes/config.sample.php).
+Créer `includes/config.php` à partir de [`includes/config.sample.php`](../includes/config.sample.php).
 
 ### 4. Installer la base
 
@@ -55,7 +55,7 @@ Lancer l'installateur web via :
 https://votre-domaine/install
 ```
 
-ou importer le SQL initial fourni dans [`install/install.sql`](/var/www/vhosts/astra-dominion.fr/httpdocs/install/install.sql) si vous gérez l'initialisation manuellement.
+ou importer le SQL initial fourni dans [`install/install.sql`](../install/install.sql) si vous gérez l'initialisation manuellement.
 
 ### 5. Finaliser
 
@@ -68,11 +68,11 @@ ou importer le SQL initial fourni dans [`install/install.sql`](/var/www/vhosts/a
 
 La création d'un administrateur peut être automatisée par :
 
-- [`scripts/backend/provision_admin.php`](/var/www/vhosts/astra-dominion.fr/httpdocs/scripts/backend/provision_admin.php)
+- [`scripts/backend/provision_admin.php`](../scripts/backend/provision_admin.php)
 
 ## Points d'attention
 
 - ne jamais publier `includes/config.php` ;
 - changer tous les mots de passe d'exemple avant exposition publique ;
-- vérifier les restrictions Nginx décrites dans [`nginx.md`](/var/www/vhosts/astra-dominion.fr/httpdocs/nginx.md) ;
+- vérifier les restrictions Nginx décrites dans [`nginx.md`](../nginx.md) ;
 - si Docker est utilisé, éviter d'exposer inutilement la base au public.

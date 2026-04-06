@@ -2,14 +2,14 @@
 
 ## Entrées principales
 
-- [`index.php`](/var/www/vhosts/astra-dominion.fr/httpdocs/index.php) : pages publiques, connexion, inscription, actualités.
-- [`game.php`](/var/www/vhosts/astra-dominion.fr/httpdocs/game.php) : interface joueur.
-- [`admin.php`](/var/www/vhosts/astra-dominion.fr/httpdocs/admin.php) : administration.
-- [`cronjob.php`](/var/www/vhosts/astra-dominion.fr/httpdocs/cronjob.php) : exécution des tâches planifiées.
+- [`index.php`](../index.php) : pages publiques, connexion, inscription, actualités.
+- [`game.php`](../game.php) : interface joueur.
+- [`admin.php`](../admin.php) : administration.
+- [`cronjob.php`](../cronjob.php) : exécution des tâches planifiées.
 
 ## Noyau applicatif
 
-Le bootstrap central se trouve dans [`includes/common.php`](/var/www/vhosts/astra-dominion.fr/httpdocs/includes/common.php). Il prépare notamment :
+Le bootstrap central se trouve dans [`includes/common.php`](../includes/common.php). Il prépare notamment :
 
 - la connexion base de données ;
 - la configuration ;
@@ -56,7 +56,7 @@ Contient les composants opérationnels de la stack :
 
 ## Stack Astra
 
-La stack Docker de référence est définie dans [`docker-compose.astra.yml`](/var/www/vhosts/astra-dominion.fr/httpdocs/docker-compose.astra.yml).
+La stack Docker de référence est définie dans [`docker-compose.astra.yml`](../docker-compose.astra.yml).
 
 Services principaux :
 
@@ -86,8 +86,8 @@ L'administration est organisée autour de modules :
 
 Le temps réel repose sur :
 
-- [`ops/astra/realtime/server.js`](/var/www/vhosts/astra-dominion.fr/httpdocs/ops/astra/realtime/server.js)
-- [`scripts/game/realtime.js`](/var/www/vhosts/astra-dominion.fr/httpdocs/scripts/game/realtime.js)
+- [`ops/astra/realtime/server.js`](../ops/astra/realtime/server.js)
+- [`scripts/game/realtime.js`](../scripts/game/realtime.js)
 
 ### Contenu public
 
