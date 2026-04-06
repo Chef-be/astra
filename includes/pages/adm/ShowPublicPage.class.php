@@ -76,6 +76,12 @@ class ShowPublicPage extends AbstractAdminPage
 			$publicRulesHtml = RichTextService::prepareForStorage((string) $_POST['public_rules_html']);
 		}
 		$existingScreenshots = PublicScreenshotService::normalizeStoredList((string) $config->public_screens_json);
+		$existingScreenshots = PublicScreenshotService::applyMetadataFromRequest(
+			$existingScreenshots,
+			(array) HTTP::_GP('public_screens_path', array()),
+			(array) HTTP::_GP('public_screens_title', array()),
+			(array) HTTP::_GP('public_screens_description', array())
+		);
 		$existingScreenshots = PublicScreenshotService::deleteSelected((array) HTTP::_GP('delete_public_screens', array()), $existingScreenshots);
 		if (!empty($_FILES['public_screens_upload'])) {
 			$existingScreenshots = PublicScreenshotService::uploadMany($_FILES['public_screens_upload'], $existingScreenshots);

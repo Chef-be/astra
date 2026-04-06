@@ -64,7 +64,11 @@
 								<div class="border border-secondary rounded-3 overflow-hidden bg-black h-100">
 									<div style="height:180px;background:#111 url('{$screen.path}') center center / cover no-repeat;"></div>
 									<div class="p-3">
-										<div class="fw-bold mb-2">{$screen.label|escape:'html'}</div>
+										<input type="hidden" name="public_screens_path[]" value="{$screen.path|escape:'html'}">
+										<label class="form-label small mb-1">Titre</label>
+										<input type="text" name="public_screens_title[]" class="form-control bg-dark text-white border-secondary mb-2" value="{$screen.title|default:$screen.label|escape:'html'}">
+										<label class="form-label small mb-1">Texte</label>
+										<textarea name="public_screens_description[]" class="form-control bg-dark text-white border-secondary mb-3" rows="3">{$screen.description|escape:'html'}</textarea>
 										<label class="form-check-label small text-secondary">
 											<input class="form-check-input me-2" type="checkbox" name="delete_public_screens[]" value="{$screen.path|escape:'html'}">Supprimer cette capture
 										</label>

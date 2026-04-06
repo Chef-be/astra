@@ -36,6 +36,8 @@ class PublicScreenshotService
 					$items[] = array(
 						'path' => (string) $row['path'],
 						'label' => !empty($row['label']) ? (string) $row['label'] : self::buildDefaultLabel($row['path']),
+						'title' => !empty($row['title']) ? (string) $row['title'] : (!empty($row['label']) ? (string) $row['label'] : self::buildDefaultLabel($row['path'])),
+						'description' => !empty($row['description']) ? (string) $row['description'] : '',
 					);
 				}
 			}
@@ -106,6 +108,8 @@ class PublicScreenshotService
 			$items[] = array(
 				'path' => self::STORAGE_URL.$targetName,
 				'label' => self::buildDefaultLabel($targetName),
+				'title' => self::buildDefaultLabel($targetName),
+				'description' => '',
 			);
 		}
 
@@ -142,6 +146,48 @@ class PublicScreenshotService
 		return json_encode(array_values($items), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 	}
 
+	public static function applyMetadataFromRequest(array $existingItems, array $paths, array $titles, array $descriptions)
+	{
+		if (empty($paths)) {
+			return $existingItems;
+		}
+
+		$map = array();
+		foreach ($existingItems as $item) {
+			if (empty($item['path'])) {
+				continue;
+			}
+			$map[(string) $item['path']] = $item;
+		}
+
+		$rebuilt = array();
+		foreach ($paths as $index => $path) {
+			$path = (string) $path;
+			if ($path === '' || empty($map[$path])) {
+				continue;
+			}
+
+			$item = $map[$path];
+			$title = isset($titles[$index]) ? trim((string) $titles[$index]) : '';
+			$description = isset($descriptions[$index]) ? trim((string) $descriptions[$index]) : '';
+			if ($title === '') {
+				$title = !empty($item['title']) ? $item['title'] : self::buildDefaultLabel($path);
+			}
+
+			$item['title'] = $title;
+			$item['label'] = $title;
+			$item['description'] = $description;
+			$rebuilt[] = $item;
+			unset($map[$path]);
+		}
+
+		foreach ($map as $item) {
+			$rebuilt[] = $item;
+		}
+
+		return array_values($rebuilt);
+	}
+
 	protected static function getLegacyScreenshots()
 	{
 		$items = array();
@@ -161,6 +207,8 @@ class PublicScreenshotService
 			$items[] = array(
 				'path' => $path,
 				'label' => self::buildDefaultLabel($path),
+				'title' => self::buildDefaultLabel($path),
+				'description' => '',
 			);
 		}
 
@@ -182,6 +230,8 @@ class PublicScreenshotService
 			$items[] = array(
 				'path' => $path,
 				'label' => self::buildDefaultLabel($fileInfo->getFilename()),
+				'title' => self::buildDefaultLabel($fileInfo->getFilename()),
+				'description' => '',
 			);
 		}
 

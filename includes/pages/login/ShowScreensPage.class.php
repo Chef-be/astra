@@ -37,12 +37,17 @@ class ShowScreensPage extends AbstractLoginPage
 			$screenshots[] = array(
 				'path' => $item['path'],
 				'thumbnail' => $item['path'],
-				'label' => $item['label'],
+				'label' => !empty($item['title']) ? $item['title'] : $item['label'],
+				'title' => !empty($item['title']) ? $item['title'] : $item['label'],
+				'description' => !empty($item['description']) ? $item['description'] : '',
 			);
 		}
 
+		$featuredScreenshot = !empty($screenshots) ? array_shift($screenshots) : null;
+
 		$this->assign(array(
-			'screenshots' => $screenshots
+			'featuredScreenshot' => $featuredScreenshot,
+			'screenshots' => $screenshots,
 		));
 
 		$this->display('page.screens.default.tpl');
