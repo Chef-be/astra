@@ -1,0 +1,12 @@
+<div class="left">
+<h2>Informations sur la gestion multi-univers</h2>
+<p>La plateforme prend en charge plusieurs univers, à condition que votre serveur web soit correctement configuré.</p>
+<p>Vous pouvez vérifier les capacités de votre hébergement depuis la page d'information technique. En cas de doute, rapprochez-vous de votre hébergeur.</p>
+<h3>Apache</h3>
+<p>Si vous utilisez Apache, adaptez les règles de réécriture dans le fichier <code>.htaccess</code> principal selon la configuration attendue.<br>
+Le module <code>mod_rewrite</code> doit être actif.</p>
+<h3>Nginx</h3>
+<p>Si vous utilisez Nginx, ajoutez la règle de réécriture suivante dans la configuration du vhost :</p>
+<p><code>{NGINX-CODE}</code></p>
+<p>Placez ce bloc sous la directive <code>server_name</code>.</p>
+</div>

@@ -1,0 +1,8 @@
+Bonjour {USERNAME},
+
+Merci pour votre inscription sur {GAMENAME}.
+
+Nous sommes ravis de vous accueillir dans notre communauté et nous vous souhaitons une excellente conquête galactique.
+
+Cordialement,
+L’équipe {GAMENAME}

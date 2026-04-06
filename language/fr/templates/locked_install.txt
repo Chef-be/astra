@@ -1,0 +1,7 @@
+<h1>L’outil d’installation est verrouillé</h1>
+<p>Pour activer l’outil d’installation, le fichier <code>ENABLE_INSTALL_TOOL</code> doit être créé.</p>
+<ul>
+    <li>Dans le dossier <code>includes/</code>, créez un fichier nommé <code>ENABLE_INSTALL_TOOL</code>. Le nom respecte la casse, mais le fichier peut rester vide.</li>
+</ul>
+<p>Pour des raisons de sécurité, il est fortement recommandé de renommer ou de supprimer ce fichier après utilisation.</p>
+<p>Mesure de sécurité supplémentaire : si ce fichier a plus d’une heure, la plateforme le supprimera automatiquement.</p>

@@ -1,0 +1,16 @@
+includes/config.php
+includes/config.local.php
+includes/config.*.local.php
+includes/error.log
+cache
+backups
+*.log
+*.sql.gz
+*.sql
+*.zip
+*.tar
+*.tar.gz
+includes/libs/opbe/errors
+includes/ENABLE_INSTALL_TOOL
+.DS_Store
+Thumbs.db

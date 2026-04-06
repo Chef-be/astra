@@ -1,0 +1,63 @@
+<ul id="rules">
+	<li>
+		<h1>1. Comptes</h1>
+		<p>Chaque joueur ne peut contrôler qu'un seul compte. Un compte ne peut être joué que par une seule personne à la fois. La seule exception autorisée est le sitting de compte.</p>
+		<p>Le sitting est autorisé sous les conditions suivantes :</p>
+		<p>
+		<br />- Le support doit être prévenu avant la mise en place du sitting, via l'ouverture d'un ticket.
+		<br />- La durée maximale d'un sitting est de 48 heures consécutives, sauf autorisation explicite de l'équipe.
+		<br />- Un joueur ne peut pas surveiller plusieurs comptes sur une même période.
+		<br />- Un compte ne peut pas être placé en sitting de manière répétée sans respecter un délai raisonnable entre deux périodes.
+		</p>
+		<p>Pendant le sitting, le remplaçant peut :</p>
+		<p>
+		<br />- Dépenser des ressources dans les bâtiments ou les recherches.
+		<br />- Sauvegarder une flotte menacée par une attaque imminente, uniquement via un déploiement ou un transport vers une planète du compte concerné.
+		<br />- Activer le mode vacances.
+		</p>
+		<p>Pendant le sitting, le remplaçant ne peut pas :</p>
+		<p>
+		<br />- Transporter des ressources vers un autre joueur.
+		<br />- Construire des vaisseaux ou des défenses.
+		<br />- Retirer le compte du mode vacances.
+		<br />- Utiliser le compte comme relais économique ou militaire.
+		</p>
+	</li>
+	<li>
+		<h1>2. Poussée de ressources</h1>
+		<p>Il est interdit à un compte de tirer un avantage injuste d'un compte moins bien classé par l'intermédiaire de ressources, de flottes ou d'échanges déséquilibrés.</p>
+		<p>Cette règle inclut notamment :</p>
+		<p>
+		<br />- L'envoi de ressources d'un compte moins bien classé vers un compte mieux classé sans contrepartie réelle.
+		<br />- Le crash volontaire d'une flotte sur un joueur mieux classé afin qu'il conserve le champ de débris.
+		<br />- Les prêts non remboursés dans un délai de 48 heures.
+		<br />- Les échanges non équilibrés ou non régularisés dans un délai de 48 heures.
+		<br />- Le paiement de ressources sous la contrainte.
+		</p>
+		<p>Les échanges doivent rester dans des ratios raisonnables. À titre indicatif :</p>
+		<p>
+		<br />- 3:2:1
+		<br />- 2:1:1
+		</p>
+	</li>
+	<li>
+		<h1>3. Acharnement</h1>
+		<p>Il est interdit d'attaquer la planète ou la lune d'un joueur actif plus de 6 fois en 24 heures. Cette règle s'applique également aux missions de destruction de lune. Les sondes d'espionnage et les missiles interplanétaires ne sont pas concernés.</p>
+		<p>Le bash est autorisé uniquement dans le cadre d'une guerre d'alliances officiellement déclarée.</p>
+	</li>
+	<li>
+		<h1>4. Exploitation de bugs</h1>
+		<p>Exploiter volontairement un bug, une faille ou une erreur de conception afin d'obtenir un avantage personnel est strictement interdit. Tout bug découvert doit être signalé à l'équipe.</p>
+		<p>L'utilisation de scripts, d'outils externes, d'automatismes ou d'interfaces non autorisées entre le joueur et son compte est interdite.</p>
+	</li>
+	<li>
+		<h1>5. Contenus interdits</h1>
+		<p>Les menaces réelles, insultes graves, propos haineux, usurpations, spams et publicités pour des services extérieurs sont interdits. Les échanges doivent rester corrects envers les joueurs comme envers l'équipe.</p>
+	</li>
+	<li>
+		<h1>6. Guerres</h1>
+		<p>Une guerre d'alliances devient effective lorsque les dirigeants des deux alliances sont d'accord et que cette guerre est clairement annoncée. Tant que la guerre est active, la règle du bash ne s'applique pas entre les alliances concernées.</p>
+		<p>La fin d'une guerre doit être annoncée explicitement. Dès cet instant, la règle du bash redevient applicable. Les flottes déjà lancées avant l'annulation ne sont pas sanctionnées, mais toute nouvelle attaque envoyée après la fin officielle de la guerre retombe sous le régime normal des règles.</p>
+		<p>Les alliances peuvent convenir de règles complémentaires pour leur conflit, à condition qu'elles ne contredisent pas le règlement général de la plateforme.</p>
+	</li>
+</ul>

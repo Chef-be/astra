@@ -1,0 +1,111 @@
+name: astra
+
+services:
+  astra-web:
+    build: .
+    container_name: astra-web
+    restart: unless-stopped
+    depends_on:
+      - astra-db
+      - astra-cache
+      - astra-docker-socket-proxy
+      - astra-realtime
+    ports:
+      - "3848:80"
+    volumes:
+      - .:/var/www/html
+
+  astra-db:
+    image: mariadb:11.4
+    container_name: astra-db
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-name-resolve
+    environment:
+      MARIADB_ROOT_PASSWORD: "@Sharingan06200"
+      MARIADB_DATABASE: astra
+      MARIADB_USER: astra
+      MARIADB_PASSWORD: "@Sharingan06200"
+    ports:
+      - "3408:3306"
+    volumes:
+      - astra_dbdata:/var/lib/mysql
+
+  astra-cache:
+    image: redis:7-alpine
+    container_name: astra-cache
+    restart: unless-stopped
+    ports:
+      - "6389:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - astra_cachedata:/data
+
+  astra-adminer:
+    image: adminer:4
+    container_name: astra-adminer
+    restart: unless-stopped
+    depends_on:
+      - astra-db
+    environment:
+      ADMINER_DEFAULT_SERVER: astra-db
+    ports:
+      - "3849:8080"
+
+  astra-docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:0.3.0
+    container_name: astra-docker-socket-proxy
+    restart: unless-stopped
+    environment:
+      CONTAINERS: 1
+      IMAGES: 1
+      INFO: 1
+      PING: 1
+      VERSION: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  astra-observer:
+    image: twinproduction/gatus:stable
+    container_name: astra-observer
+    restart: unless-stopped
+    depends_on:
+      - astra-web
+      - astra-db
+      - astra-cache
+    ports:
+      - "3850:8080"
+    volumes:
+      - ./ops/astra/gatus:/config
+
+  astra-realtime:
+    build: ./ops/astra/realtime
+    container_name: astra-realtime
+    restart: unless-stopped
+    depends_on:
+      - astra-db
+    environment:
+      PORT: "8080"
+      DB_HOST: astra-db
+      DB_PORT: "3306"
+      DB_NAME: astra
+      DB_USER: astra
+      DB_PASSWORD: "@Sharingan06200"
+      DB_PREFIX: astra_
+      ASTRA_SHARED_SECRET: "Ab3./Yx9Km2Qp7Rt1ZwLs0"
+    ports:
+      - "127.0.0.1:3851:8080"
+
+volumes:
+  astra_dbdata:
+    external: true
+    name: httpdocs_astra_dbdata
+  astra_cachedata:
+    external: true
+    name: httpdocs_astra_cachedata
+
+networks:
+  default:
+    name: astra_default

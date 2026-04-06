@@ -1,0 +1,72 @@
+.tox.tox-tinymce {
+  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.35);
+}
+
+.tox .tox-toolbar,
+.tox .tox-toolbar__primary,
+.tox .tox-toolbar-overlord,
+.tox .tox-editor-header,
+.tox .tox-menubar {
+  background: linear-gradient(180deg, rgba(12, 18, 30, 0.96) 0%, rgba(17, 24, 39, 0.92) 100%) !important;
+  border-color: rgba(148, 163, 184, 0.2) !important;
+}
+
+.tox .tox-edit-area__iframe {
+  background: #0b1120 !important;
+}
+
+.tox .tox-statusbar {
+  background: rgba(10, 15, 28, 0.94) !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.16) !important;
+}
+
+.tox .tox-tbtn,
+.tox .tox-mbtn,
+.tox .tox-statusbar__path-item,
+.tox .tox-statusbar__wordcount {
+  color: #e5eef8 !important;
+}
+
+.tox .tox-collection,
+.tox .tox-menu,
+.tox .tox-dialog {
+  background: #0f172a !important;
+  color: #e5eef8 !important;
+}
+
+textarea.rich-editor {
+  background: #0b1120 !important;
+  color: #e5eef8 !important;
+  border-color: rgba(148, 163, 184, 0.3) !important;
+}
+
+textarea.admin-code-editor,
+textarea.admin-rich-editor,
+textarea.tinymce {
+  background: #0b1120 !important;
+  color: #e5eef8 !important;
+  border-color: rgba(148, 163, 184, 0.3) !important;
+}
+
+table.mceLayout,
+.mceLayout tbody,
+.mceToolbar,
+.mceStatusbar,
+.mceIframeContainer {
+  background: #0f172a !important;
+  border-color: rgba(148, 163, 184, 0.24) !important;
+  color: #e5eef8 !important;
+}
+
+.mceToolbar td,
+.mceToolbar span,
+.mceStatusbar,
+.mceStatusbar a {
+  color: #e5eef8 !important;
+}
+
+.mceIframeContainer iframe {
+  background: #0b1120 !important;
+}

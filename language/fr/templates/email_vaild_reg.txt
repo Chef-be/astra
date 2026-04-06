@@ -1,0 +1,19 @@
+Bonjour {USERNAME},
+
+Merci pour votre inscription sur {GAMENAME}.
+
+Avant d’activer votre compte, une dernière étape est nécessaire. Cette validation est obligatoire pour finaliser votre inscription.
+
+Pour confirmer votre compte, cliquez sur le lien suivant :
+{VERTIFYURL}
+
+Vos informations de connexion :
+
+Identifiant : {USERNAME}
+Mot de passe : {PASSWORD}
+
+En cas de difficulté avec l’inscription automatisée, vous pouvez contacter l’administration à l’adresse suivante :
+{GAMEMAIL}
+
+Cordialement,
+L’équipe {GAMENAME}

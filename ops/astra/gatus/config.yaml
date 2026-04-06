@@ -1,0 +1,43 @@
+storage:
+  type: memory
+
+ui:
+  title: Astra Observer
+  description: Supervision de la stack Astra locale
+  header: Astra Observer
+
+endpoints:
+  - name: Astra Web
+    group: astra
+    url: http://astra-web/index.php
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: Astra Admin
+    group: astra
+    url: http://astra-web/admin.php
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: Astra DB
+    group: services
+    url: tcp://astra-db:3306
+    interval: 30s
+    conditions:
+      - "[CONNECTED] == true"
+
+  - name: Astra Cache
+    group: services
+    url: tcp://astra-cache:6379
+    interval: 30s
+    conditions:
+      - "[CONNECTED] == true"
+
+  - name: Adminer
+    group: services
+    url: http://astra-adminer:8080
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"

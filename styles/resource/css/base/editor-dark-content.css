@@ -1,0 +1,25 @@
+body {
+	background: #0b1120;
+	color: #e5eef8;
+	font-family: "Segoe UI", Arial, sans-serif;
+	font-size: 14px;
+	line-height: 1.6;
+	margin: 0.75rem;
+}
+
+a {
+	color: #7dd3fc;
+}
+
+blockquote {
+	border-left: 3px solid rgba(125, 211, 252, 0.55);
+	margin: 0;
+	padding-left: 1rem;
+	color: #cbd5e1;
+}
+
+code,
+pre {
+	background: rgba(15, 23, 42, 0.92);
+	color: #e2e8f0;
+}

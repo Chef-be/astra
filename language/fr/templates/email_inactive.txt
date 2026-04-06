@@ -1,0 +1,10 @@
+Bonjour {USERNAME},
+
+Nous n’avons constaté aucune connexion à votre compte depuis le {LASTDATE} sur {GAMENAME}.
+
+Si vous souhaitez conserver votre compte actif, nous vous invitons à vous reconnecter prochainement. Sans nouvelle activité, il pourra être supprimé conformément aux règles du serveur.
+
+Si vous avez oublié votre mot de passe, rendez-vous sur {HTTPPATH} puis utilisez la procédure de récupération du mot de passe.
+
+Cordialement,
+L’équipe {GAMENAME}
