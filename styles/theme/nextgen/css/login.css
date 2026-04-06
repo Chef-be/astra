@@ -291,6 +291,14 @@ body {
     line-height: 1.65;
 }
 
+.public-screen-feature-copy > *:first-child {
+    margin-top: 0;
+}
+
+.public-screen-feature-copy > *:last-child {
+    margin-bottom: 0;
+}
+
 .public-screen-arrow {
     position: absolute;
     top: 50%;

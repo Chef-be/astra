@@ -53,22 +53,28 @@
 						<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-2 mb-3">
 							<div>
 								<h2 class="h5 mb-1">Captures d’écran</h2>
-								<p class="text-secondary small mb-0">Téléversez des visuels pour la galerie publique et supprimez ceux qui ne doivent plus être affichés.</p>
+								<p class="text-secondary small mb-0">Réorganisez l’ordre par glisser-déposer, choisissez la capture mise en avant et enrichissez chaque description.</p>
 							</div>
 							<input type="file" name="public_screens_upload[]" multiple accept=".png,.jpg,.jpeg,.gif,.webp" class="form-control bg-black text-white border-secondary" style="max-width:360px;">
 						</div>
 						{if $public_screenshots|@count > 0}
-						<div class="row g-3">
+						<div class="row g-3" id="publicScreensAdminGrid">
 							{foreach $public_screenshots as $screen}
-							<div class="col-12 col-md-6 col-xl-4">
+							<div class="col-12 col-md-6 col-xl-4 public-screen-admin-column" draggable="true" data-path="{$screen.path|escape:'html'}">
 								<div class="border border-secondary rounded-3 overflow-hidden bg-black h-100">
 									<div style="height:180px;background:#111 url('{$screen.path}') center center / cover no-repeat;"></div>
 									<div class="p-3">
 										<input type="hidden" name="public_screens_path[]" value="{$screen.path|escape:'html'}">
+										<div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+											<span class="badge text-bg-secondary">Déplacer</span>
+											<label class="form-check-label small text-warning">
+												<input class="form-check-input me-2" type="radio" name="public_screens_featured_path" value="{$screen.path|escape:'html'}" {if $foreach.first}checked{/if}>Mise en avant
+											</label>
+										</div>
 										<label class="form-label small mb-1">Titre</label>
 										<input type="text" name="public_screens_title[]" class="form-control bg-dark text-white border-secondary mb-2" value="{$screen.title|default:$screen.label|escape:'html'}">
 										<label class="form-label small mb-1">Texte</label>
-										<textarea name="public_screens_description[]" class="form-control bg-dark text-white border-secondary mb-3" rows="3">{$screen.description|escape:'html'}</textarea>
+										<textarea name="public_screens_description[]" class="form-control bg-dark text-white border-secondary mb-3 rich-editor" rows="6">{$screen.description|escape:'html'}</textarea>
 										<label class="form-check-label small text-secondary">
 											<input class="form-check-input me-2" type="checkbox" name="delete_public_screens[]" value="{$screen.path|escape:'html'}">Supprimer cette capture
 										</label>
@@ -118,4 +124,52 @@
 		</div>
 	</div>
 </div>
+{/block}
+{block name="script" append}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	var grid = document.getElementById('publicScreensAdminGrid');
+	if (!grid) {
+		return;
+	}
+
+	var dragged = null;
+
+	grid.querySelectorAll('.public-screen-admin-column').forEach(function(column) {
+		column.addEventListener('dragstart', function(event) {
+			dragged = column;
+			column.classList.add('opacity-50');
+			if (event.dataTransfer) {
+				event.dataTransfer.effectAllowed = 'move';
+			}
+		});
+
+		column.addEventListener('dragend', function() {
+			column.classList.remove('opacity-50');
+			dragged = null;
+		});
+
+		column.addEventListener('dragover', function(event) {
+			event.preventDefault();
+		});
+
+		column.addEventListener('drop', function(event) {
+			event.preventDefault();
+			if (!dragged || dragged === column) {
+				return;
+			}
+
+			var columns = Array.prototype.slice.call(grid.children);
+			var draggedIndex = columns.indexOf(dragged);
+			var targetIndex = columns.indexOf(column);
+
+			if (draggedIndex < targetIndex) {
+				grid.insertBefore(dragged, column.nextSibling);
+			} else {
+				grid.insertBefore(dragged, column);
+			}
+		});
+	});
+});
+</script>
 {/block}

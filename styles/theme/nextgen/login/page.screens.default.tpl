@@ -13,19 +13,19 @@
 			<span class="public-screen-feature-content">
 				<span class="public-screen-kicker">Vue principale</span>
 				<span id="publicScreenFeaturedTitle" class="public-screen-feature-title">{$featuredScreenshot.title|default:$featuredScreenshot.label|default:$LNG.siteTitleScreens}</span>
-				<span id="publicScreenFeaturedCopy" class="public-screen-feature-copy">{if $featuredScreenshot.description}{$featuredScreenshot.description}{else}Cliquez sur une vignette pour changer la vue principale, ou ouvrez la capture en grand pour observer les détails de l’interface.{/if}</span>
+				<span id="publicScreenFeaturedCopy" class="public-screen-feature-copy">{if $featuredScreenshot.description_html}{$featuredScreenshot.description_html nofilter}{else}<p>Cliquez sur une vignette pour changer la vue principale, ou ouvrez la capture en grand pour observer les détails de l’interface.</p>{/if}</span>
 			</span>
 		</a>
 		<button type="button" class="public-screen-arrow public-screen-arrow-prev" id="publicScreenPrev" aria-label="Capture précédente">‹</button>
 		<button type="button" class="public-screen-arrow public-screen-arrow-next" id="publicScreenNext" aria-label="Capture suivante">›</button>
 
 		<div class="public-screen-filmstrip">
-			<a class="public-screen-mini public-screen-switch is-active" href="{$featuredScreenshot.path}" data-path="{$featuredScreenshot.path}" data-thumb="{$featuredScreenshot.thumbnail}" data-label="{$featuredScreenshot.title|default:$featuredScreenshot.label|default:$LNG.siteTitleScreens|escape:'html'}" data-description="{$featuredScreenshot.description|default:''|escape:'html'}">
+			<a class="public-screen-mini public-screen-switch is-active" href="{$featuredScreenshot.path}" data-path="{$featuredScreenshot.path}" data-thumb="{$featuredScreenshot.thumbnail}" data-label="{$featuredScreenshot.title|default:$featuredScreenshot.label|default:$LNG.siteTitleScreens|escape:'html'}" data-description-html="{$featuredScreenshot.description_html|default:''|escape:'html'}">
 				<span class="public-screen-mini-thumb" style="background-image:url('{$featuredScreenshot.thumbnail}');"></span>
 				<span class="public-screen-mini-label">{$featuredScreenshot.title|default:$featuredScreenshot.label|default:$LNG.siteTitleScreens}</span>
 			</a>
 			{foreach $screenshots as $screenshot}
-				<a class="public-screen-mini public-screen-switch" href="{$screenshot.path}" data-path="{$screenshot.path}" data-thumb="{$screenshot.thumbnail}" data-label="{$screenshot.title|default:$screenshot.label|default:$LNG.siteTitleScreens|escape:'html'}" data-description="{$screenshot.description|default:''|escape:'html'}">
+				<a class="public-screen-mini public-screen-switch" href="{$screenshot.path}" data-path="{$screenshot.path}" data-thumb="{$screenshot.thumbnail}" data-label="{$screenshot.title|default:$screenshot.label|default:$LNG.siteTitleScreens|escape:'html'}" data-description-html="{$screenshot.description_html|default:''|escape:'html'}">
 					<span class="public-screen-mini-thumb" style="background-image:url('{$screenshot.thumbnail}');"></span>
 					<span class="public-screen-mini-label">{$screenshot.title|default:$screenshot.label|default:$LNG.siteTitleScreens}</span>
 				</a>
@@ -37,7 +37,7 @@
 	{if $screenshots|@count > 0}
 	<div class="public-screens-grid public-screens-grid-secondary">
 		{foreach $screenshots as $screenshot}
-			<a class="public-screen-card public-screen-switch" href="{$screenshot.path}" data-path="{$screenshot.path}" data-thumb="{$screenshot.thumbnail}" data-label="{$screenshot.title|default:$screenshot.label|default:$LNG.siteTitleScreens|escape:'html'}" data-description="{$screenshot.description|default:''|escape:'html'}">
+			<a class="public-screen-card public-screen-switch" href="{$screenshot.path}" data-path="{$screenshot.path}" data-thumb="{$screenshot.thumbnail}" data-label="{$screenshot.title|default:$screenshot.label|default:$LNG.siteTitleScreens|escape:'html'}" data-description-html="{$screenshot.description_html|default:''|escape:'html'}">
 				<span class="public-screen-thumb" style="background-image:url('{$screenshot.thumbnail}');"></span>
 				<span class="public-screen-label">{$screenshot.title|default:$screenshot.label|default:$LNG.siteTitleScreens}</span>
 			</a>
@@ -54,7 +54,7 @@ $(function() {
 	var slides = [];
 	var autoRotate = null;
 	var defaultTitle = "{$LNG.siteTitleScreens|escape:'javascript'}";
-	var defaultDescription = "Cliquez sur une vignette pour changer la vue principale, ou ouvrez la capture en grand pour observer les détails de l’interface.";
+	var defaultDescriptionHtml = "<p>Cliquez sur une vignette pour changer la vue principale, ou ouvrez la capture en grand pour observer les détails de l’interface.</p>";
 
 	$switches.each(function() {
 		var $item = $(this);
@@ -76,7 +76,7 @@ $(function() {
 			path: path,
 			thumb: String($item.data("thumb") || ""),
 			label: String($item.data("label") || ""),
-			description: String($item.data("description") || "")
+			descriptionHtml: String($item.attr("data-description-html") || "")
 		});
 	});
 
@@ -96,7 +96,7 @@ $(function() {
 		$("#publicScreenFeaturedLink").attr("href", slide.path);
 		$("#publicScreenFeaturedThumb").css("background-image", "url('" + slide.thumb + "')");
 		$("#publicScreenFeaturedTitle").text(slide.label || defaultTitle);
-		$("#publicScreenFeaturedCopy").text(slide.description || defaultDescription);
+		$("#publicScreenFeaturedCopy").html(slide.descriptionHtml || defaultDescriptionHtml);
 
 		$switches.removeClass("is-active");
 		$switches.filter(function() {

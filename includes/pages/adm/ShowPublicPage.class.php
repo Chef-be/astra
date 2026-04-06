@@ -75,17 +75,25 @@ class ShowPublicPage extends AbstractAdminPage
 		if (isset($_POST['public_rules_html'])) {
 			$publicRulesHtml = RichTextService::prepareForStorage((string) $_POST['public_rules_html']);
 		}
-		$existingScreenshots = PublicScreenshotService::normalizeStoredList((string) $config->public_screens_json);
+		$preparedScreenDescriptions = array();
+		foreach ((array) HTTP::_GP('public_screens_description', array()) as $index => $description) {
+			$preparedScreenDescriptions[$index] = RichTextService::prepareForStorage((string) $description);
+		}
+		$existingScreenshots = PublicScreenshotService::getScreenshotsFromConfig((string) $config->public_screens_json);
 		$existingScreenshots = PublicScreenshotService::applyMetadataFromRequest(
 			$existingScreenshots,
 			(array) HTTP::_GP('public_screens_path', array()),
 			(array) HTTP::_GP('public_screens_title', array()),
-			(array) HTTP::_GP('public_screens_description', array())
+			$preparedScreenDescriptions
 		);
 		$existingScreenshots = PublicScreenshotService::deleteSelected((array) HTTP::_GP('delete_public_screens', array()), $existingScreenshots);
 		if (!empty($_FILES['public_screens_upload'])) {
 			$existingScreenshots = PublicScreenshotService::uploadMany($_FILES['public_screens_upload'], $existingScreenshots);
 		}
+		$existingScreenshots = PublicScreenshotService::moveFeaturedFirst(
+			$existingScreenshots,
+			HTTP::_GP('public_screens_featured_path', '', true)
+		);
 
 		$configAfter = array(
 			'homepage_intro_html' => $homepageIntroHtml,

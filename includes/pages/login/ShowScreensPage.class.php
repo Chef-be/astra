@@ -31,6 +31,7 @@ class ShowScreensPage extends AbstractLoginPage
 	{
 		global $config;
 		require_once ROOT_PATH.'includes/classes/PublicContentService.class.php';
+		require_once ROOT_PATH.'includes/classes/RichTextService.class.php';
 		$publicContentService = new PublicContentService($config);
 		$screenshots = array();
 		foreach ($publicContentService->getPublicScreenshots() as $item) {
@@ -40,6 +41,7 @@ class ShowScreensPage extends AbstractLoginPage
 				'label' => !empty($item['title']) ? $item['title'] : $item['label'],
 				'title' => !empty($item['title']) ? $item['title'] : $item['label'],
 				'description' => !empty($item['description']) ? $item['description'] : '',
+				'description_html' => !empty($item['description']) ? RichTextService::render($item['description']) : '',
 			);
 		}
 

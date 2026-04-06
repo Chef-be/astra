@@ -8,8 +8,21 @@ class PublicScreenshotService
 
 	public static function ensureStorage()
 	{
-		if (!is_dir(self::STORAGE_DIR) && !@mkdir(self::STORAGE_DIR, 0775, true) && !is_dir(self::STORAGE_DIR)) {
-			throw new Exception('Impossible de créer le répertoire des captures publiques.');
+		$directories = array(
+			ROOT_PATH.'styles/resource/images/public/',
+			self::STORAGE_DIR,
+		);
+
+		foreach ($directories as $directory) {
+			if (!is_dir($directory) && !@mkdir($directory, 0775, true) && !is_dir($directory)) {
+				throw new Exception('Impossible de créer le répertoire des captures publiques : '.$directory);
+			}
+
+			@chmod($directory, 0775);
+
+			if (!is_writable($directory)) {
+				throw new Exception('Le répertoire des captures publiques n’est pas accessible en écriture : '.$directory);
+			}
 		}
 	}
 
@@ -169,14 +182,14 @@ class PublicScreenshotService
 
 			$item = $map[$path];
 			$title = isset($titles[$index]) ? trim((string) $titles[$index]) : '';
-			$description = isset($descriptions[$index]) ? trim((string) $descriptions[$index]) : '';
+			$description = isset($descriptions[$index]) ? (string) $descriptions[$index] : '';
 			if ($title === '') {
 				$title = !empty($item['title']) ? $item['title'] : self::buildDefaultLabel($path);
 			}
 
 			$item['title'] = $title;
 			$item['label'] = $title;
-			$item['description'] = $description;
+			$item['description'] = trim($description);
 			$rebuilt[] = $item;
 			unset($map[$path]);
 		}
@@ -186,6 +199,32 @@ class PublicScreenshotService
 		}
 
 		return array_values($rebuilt);
+	}
+
+	public static function moveFeaturedFirst(array $items, $featuredPath)
+	{
+		$featuredPath = (string) $featuredPath;
+		if ($featuredPath === '') {
+			return array_values($items);
+		}
+
+		$featuredItem = null;
+		$remaining = array();
+		foreach ($items as $item) {
+			if ($featuredItem === null && !empty($item['path']) && $item['path'] === $featuredPath) {
+				$featuredItem = $item;
+				continue;
+			}
+
+			$remaining[] = $item;
+		}
+
+		if ($featuredItem === null) {
+			return array_values($items);
+		}
+
+		array_unshift($remaining, $featuredItem);
+		return array_values($remaining);
 	}
 
 	protected static function getLegacyScreenshots()
