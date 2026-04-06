@@ -1,41 +1,54 @@
-Nginx does not support .htaccess files, which means that by using nginx you are exposed to data leakage from your server instance.
+# Protection Nginx recommandée
 
-Insert the content below into your nginx configuration file
+Nginx n'interprète pas les fichiers `.htaccess`. Sans règles dédiées, certains dossiers internes peuvent être exposés publiquement.
 
+Insérer les blocs suivants dans la configuration Nginx du site :
+
+```nginx
+location /cache/ {
+    deny all;
+}
+
+location /includes/ {
+    deny all;
+}
+
+location /includes/backups/ {
+    deny all;
+}
+
+location /styles/templates/ {
+    deny all;
+}
+
+location /tests/ {
+    deny all;
+}
+
+location /language/ {
+    deny all;
+}
+
+location /install/ {
+    deny all;
+}
+
+location /.git/ {
+    deny all;
+}
+
+location ~ /external/ {
+    deny all;
+}
 ```
-    location /cache/ {
-    deny all;
-    }
 
-    location /includes/ {
-    deny all;
-    }
+## Objectif
 
-    location /includes/backups/ {
-    deny all;
-    }
+Ces règles empêchent l'accès direct à :
 
-    location /styles/templates/ {
-    deny all;
-    }
-
-    location /tests/ {
-    deny all;
-    }
-
-    location /language/ {
-    deny all;
-    }
-
-    location /install/ {
-    deny all;
-    }
-
-    location /.git/ {
-    deny all;
-    }
-
-    location ~ /external/ {
-    deny all;
-    }
-```
+- des caches applicatifs ;
+- des fichiers d'installation ;
+- des templates ;
+- des fichiers de langue ;
+- le dépôt Git ;
+- certains répertoires techniques.
