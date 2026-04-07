@@ -1,5 +1,5 @@
 {block name="content"}
-<div class="container-fluid py-4 text-white admin-stack">
+<div class="container-fluid py-4 text-white admin-stack admin-chat-page">
 	<section class="admin-kpi-grid">
 		<article class="admin-kpi-card">
 			<span class="admin-kpi-card__label">Relais temps réel</span>
@@ -165,127 +165,139 @@
 				</div>
 			</details>
 
-			<div id="chat-mutes" class="admin-card">
-				<div class="card-body admin-stack">
+			<details class="admin-fold admin-fold--compact">
+				<summary class="admin-fold__summary">
 					<div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 						<div>
 							<h2 class="h5 mb-1">Restrictions actives</h2>
-							<p class="text-white-50 mb-0">Historique court des joueurs encore bridés avec levée manuelle immédiate.</p>
+							<p class="text-white-50 mb-0">Historique court des joueurs encore bridés, replié par défaut.</p>
 						</div>
 						<span class="admin-pill">{$muteCountTotal} active(s)</span>
 					</div>
-					{if $activeMutes|@count > 0}
-						<div class="admin-table-shell">
-							<div class="table-responsive admin-scroll-region">
-								<table class="table table-dark table-striped align-middle mb-0">
-									<thead>
-										<tr>
-											<th>Joueur</th>
-											<th>Motif</th>
-											<th>Début</th>
-											<th>Fin</th>
-											<th class="text-end">Action</th>
-										</tr>
-									</thead>
-									<tbody>
-										{foreach from=$activeMutes item=mute}
-											<tr>
-												<td>
-													<div class="fw-bold">{$mute.username|default:'Inconnu'}</div>
-													<div class="small text-white-50">Par {$mute.moderator_name|default:'Administration'}</div>
-												</td>
-												<td>{$mute.reason}</td>
-												<td>{$mute.created_at_formatted}</td>
-												<td>{$mute.expires_at_formatted}</td>
-												<td class="text-end">
-													<form action="?page=chat&mode=unmute" method="post">
-														<input type="hidden" name="mute_id" value="{$mute.id}">
-														<button class="btn btn-sm btn-outline-light" type="submit">Lever</button>
-													</form>
-												</td>
-											</tr>
+				</summary>
+				<div class="admin-fold__body">
+					<div id="chat-mutes" class="admin-card">
+						<div class="card-body admin-stack">
+							{if $activeMutes|@count > 0}
+								<div class="admin-table-shell">
+									<div class="table-responsive admin-scroll-region">
+										<table class="table table-dark table-striped align-middle mb-0">
+											<thead>
+												<tr>
+													<th>Joueur</th>
+													<th>Motif</th>
+													<th>Début</th>
+													<th>Fin</th>
+													<th class="text-end">Action</th>
+												</tr>
+											</thead>
+											<tbody>
+												{foreach from=$activeMutes item=mute}
+													<tr>
+														<td>
+															<div class="fw-bold">{$mute.username|default:'Inconnu'}</div>
+															<div class="small text-white-50">Par {$mute.moderator_name|default:'Administration'}</div>
+														</td>
+														<td>{$mute.reason}</td>
+														<td>{$mute.created_at_formatted}</td>
+														<td>{$mute.expires_at_formatted}</td>
+														<td class="text-end">
+															<form action="?page=chat&mode=unmute" method="post">
+																<input type="hidden" name="mute_id" value="{$mute.id}">
+																<button class="btn btn-sm btn-outline-light" type="submit">Lever</button>
+															</form>
+														</td>
+													</tr>
+												{/foreach}
+											</tbody>
+										</table>
+									</div>
+								</div>
+								{if $mutePagination.total_pages > 1}
+									<nav class="admin-pagination" aria-label="Pagination des restrictions">
+										{if $mutePagination.has_previous}<a class="admin-pagination__link" href="{$mutePagination.previous_url}">Précédent</a>{/if}
+										{foreach from=$mutePagination.pages item=item}
+											<a class="admin-pagination__link {if $item.active}is-active{/if}" href="{$item.url}">{$item.number}</a>
 										{/foreach}
-									</tbody>
-								</table>
-							</div>
+										{if $mutePagination.has_next}<a class="admin-pagination__link" href="{$mutePagination.next_url}">Suivant</a>{/if}
+									</nav>
+								{/if}
+							{else}
+								<div class="admin-empty-state">Aucune restriction active sur le chat.</div>
+							{/if}
 						</div>
-						{if $mutePagination.total_pages > 1}
-							<nav class="admin-pagination" aria-label="Pagination des restrictions">
-								{if $mutePagination.has_previous}<a class="admin-pagination__link" href="{$mutePagination.previous_url}">Précédent</a>{/if}
-								{foreach from=$mutePagination.pages item=item}
-									<a class="admin-pagination__link {if $item.active}is-active{/if}" href="{$item.url}">{$item.number}</a>
-								{/foreach}
-								{if $mutePagination.has_next}<a class="admin-pagination__link" href="{$mutePagination.next_url}">Suivant</a>{/if}
-							</nav>
-						{/if}
-					{else}
-						<div class="admin-empty-state">Aucune restriction active sur le chat.</div>
-					{/if}
+					</div>
 				</div>
-			</div>
+			</details>
 
-			<div id="chat-messages" class="admin-card">
-				<div class="card-body admin-stack">
+			<details class="admin-fold admin-fold--compact">
+				<summary class="admin-fold__summary">
 					<div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 						<div>
 							<h2 class="h5 mb-1">Messages récents</h2>
-							<p class="text-white-50 mb-0">Coupe courte de modération pour suppression rapide et lecture par canal.</p>
+							<p class="text-white-50 mb-0">Coupe de modération par canal, repliée par défaut pour réduire la longueur de page.</p>
 						</div>
 						<span class="admin-pill">{$messageCountTotal} message(s)</span>
 					</div>
-					<div class="admin-table-shell">
-						<div class="table-responsive admin-scroll-region">
-							<table class="table table-dark table-striped align-middle mb-0">
-								<thead>
-									<tr>
-										<th>Date</th>
-										<th>Canal</th>
-										<th>Joueur</th>
-										<th>Message</th>
-										<th>État</th>
-										<th class="text-end">Action</th>
-									</tr>
-								</thead>
-								<tbody>
-									{foreach from=$recentMessages item=message}
-										<tr>
-											<td>{$message.created_at_formatted}</td>
-											<td>{$message.channel_label}</td>
-											<td>
-												<div class="fw-bold">{$message.username}</div>
-												<div class="small text-white-50">ID {$message.user_id}</div>
-											</td>
-											<td style="white-space:pre-wrap;min-width:280px;">{$message.message_text|escape:'html'}</td>
-											<td><span class="badge {if $message.is_deleted}admin-badge-info{else}admin-badge-success{/if}">{$message.status_label}</span></td>
-											<td class="text-end">
-												{if !$message.is_deleted}
-													<form action="?page=chat&mode=deleteMessage" method="post">
-														<input type="hidden" name="message_id" value="{$message.id}">
-														<button class="btn btn-sm btn-outline-danger" type="submit">Supprimer</button>
-													</form>
-												{/if}
-											</td>
-										</tr>
-									{foreachelse}
-										<tr>
-											<td colspan="6"><div class="admin-empty">Aucun message récent disponible.</div></td>
-										</tr>
+				</summary>
+				<div class="admin-fold__body">
+					<div id="chat-messages" class="admin-card">
+						<div class="card-body admin-stack">
+							<div class="admin-table-shell">
+								<div class="table-responsive admin-scroll-region">
+									<table class="table table-dark table-striped align-middle mb-0">
+										<thead>
+											<tr>
+												<th>Date</th>
+												<th>Canal</th>
+												<th>Joueur</th>
+												<th>Message</th>
+												<th>État</th>
+												<th class="text-end">Action</th>
+											</tr>
+										</thead>
+										<tbody>
+											{foreach from=$recentMessages item=message}
+												<tr>
+													<td>{$message.created_at_formatted}</td>
+													<td>{$message.channel_label}</td>
+													<td>
+														<div class="fw-bold">{$message.username}</div>
+														<div class="small text-white-50">ID {$message.user_id}</div>
+													</td>
+													<td style="white-space:pre-wrap;min-width:280px;">{$message.message_text|escape:'html'}</td>
+													<td><span class="badge {if $message.is_deleted}admin-badge-info{else}admin-badge-success{/if}">{$message.status_label}</span></td>
+													<td class="text-end">
+														{if !$message.is_deleted}
+															<form action="?page=chat&mode=deleteMessage" method="post">
+																<input type="hidden" name="message_id" value="{$message.id}">
+																<button class="btn btn-sm btn-outline-danger" type="submit">Supprimer</button>
+															</form>
+														{/if}
+													</td>
+												</tr>
+											{foreachelse}
+												<tr>
+													<td colspan="6"><div class="admin-empty">Aucun message récent disponible.</div></td>
+												</tr>
+											{/foreach}
+										</tbody>
+									</table>
+								</div>
+							</div>
+							{if $messagePagination.total_pages > 1}
+								<nav class="admin-pagination" aria-label="Pagination des messages">
+									{if $messagePagination.has_previous}<a class="admin-pagination__link" href="{$messagePagination.previous_url}">Précédent</a>{/if}
+									{foreach from=$messagePagination.pages item=item}
+										<a class="admin-pagination__link {if $item.active}is-active{/if}" href="{$item.url}">{$item.number}</a>
 									{/foreach}
-								</tbody>
-							</table>
+									{if $messagePagination.has_next}<a class="admin-pagination__link" href="{$messagePagination.next_url}">Suivant</a>{/if}
+								</nav>
+							{/if}
 						</div>
 					</div>
-					{if $messagePagination.total_pages > 1}
-						<nav class="admin-pagination" aria-label="Pagination des messages">
-							{if $messagePagination.has_previous}<a class="admin-pagination__link" href="{$messagePagination.previous_url}">Précédent</a>{/if}
-							{foreach from=$messagePagination.pages item=item}
-								<a class="admin-pagination__link {if $item.active}is-active{/if}" href="{$item.url}">{$item.number}</a>
-							{/foreach}
-							{if $messagePagination.has_next}<a class="admin-pagination__link" href="{$messagePagination.next_url}">Suivant</a>{/if}
-						</nav>
-					{/if}
 				</div>
-			</div>
+			</details>
 		</div>
 	</section>
 

@@ -1,5 +1,5 @@
 {block name="content"}
-<div class="container-fluid py-4 text-white admin-stack">
+<div class="container-fluid py-4 text-white admin-stack admin-accounts-page">
 	<section class="admin-card">
 		<div class="card-body admin-stack">
 			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
@@ -48,17 +48,30 @@
 		</div>
 	</section>
 
-	<section class="admin-feature-grid">
-		{foreach from=$accountEditorModules item=module}
-			<a class="admin-feature-card" href="{$module.url}">
-				<div class="admin-feature-card__media">
-					<img src="{$module.image}" alt="{$module.label|escape:'html'}">
+	<details class="admin-fold admin-fold--compact">
+		<summary class="admin-fold__summary">
+			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+				<div>
+					<h2 class="h5 mb-1">Modules d’édition</h2>
+					<p class="text-white-50 mb-0">Liste complète des domaines éditables, repliée par défaut pour accélérer l’arrivée sur mobile.</p>
 				</div>
-				<div class="admin-feature-card__title">{$module.label}</div>
-				<div class="admin-feature-card__description">{$module.description}</div>
-				<div class="admin-feature-card__foot">Ouvrir le module</div>
-			</a>
-		{/foreach}
-	</section>
+				<span class="admin-pill">{$accountEditorModules|@count} module(s)</span>
+			</div>
+		</summary>
+		<div class="admin-fold__body">
+			<section class="admin-feature-grid">
+				{foreach from=$accountEditorModules item=module}
+					<a class="admin-feature-card" href="{$module.url}">
+						<div class="admin-feature-card__media">
+							<img src="{$module.image}" alt="{$module.label|escape:'html'}">
+						</div>
+						<div class="admin-feature-card__title">{$module.label}</div>
+						<div class="admin-feature-card__description">{$module.description}</div>
+						<div class="admin-feature-card__foot">Ouvrir le module</div>
+					</a>
+				{/foreach}
+			</section>
+		</div>
+	</details>
 </div>
 {/block}

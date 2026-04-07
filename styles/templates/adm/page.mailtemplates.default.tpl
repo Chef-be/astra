@@ -1,28 +1,41 @@
 {block name="content"}
-<div class="container-fluid py-3 text-white">
+<div class="container-fluid py-3 text-white admin-mailtemplates-page">
 	<div class="row g-4">
 		<div class="col-12 col-xl-3">
-			<div class="admin-card h-100">
-				<div class="admin-card__body">
-					<h2 class="h5 mb-3">Modèles disponibles</h2>
-					<div class="d-flex flex-column gap-2">
-						{foreach from=$mailTemplates key=templateKey item=templateMeta}
-							<a class="admin-template-link {if $mailTemplateName == $templateKey}is-active{/if}" href="?page=mailtemplates&template={$templateKey|escape:'url'}">
-								<span class="fw-semibold">{$templateMeta.label}</span>
-								<span class="small text-white-50">{$templateMeta.description}</span>
-							</a>
-						{/foreach}
+			<details class="admin-fold admin-fold--compact">
+				<summary class="admin-fold__summary">
+					<div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+						<div>
+							<h2 class="h5 mb-1">Modèles et variables</h2>
+							<p class="text-white-50 mb-0">Catalogue des courriels disponibles, replié par défaut sur mobile.</p>
+						</div>
+						<span class="admin-pill">{$mailTemplates|@count} modèle(s)</span>
 					</div>
-					<div class="mt-4">
-						<h3 class="h6 mb-2">Variables disponibles</h3>
-						<div class="d-flex flex-wrap gap-2">
-							{foreach from=$mailTemplateVariables item=placeholder}
-								<span class="badge bg-secondary">{$placeholder}</span>
-							{/foreach}
+				</summary>
+				<div class="admin-fold__body">
+					<div class="admin-card h-100">
+						<div class="admin-card__body">
+							<h2 class="h5 mb-3">Modèles disponibles</h2>
+							<div class="d-flex flex-column gap-2">
+								{foreach from=$mailTemplates key=templateKey item=templateMeta}
+									<a class="admin-template-link {if $mailTemplateName == $templateKey}is-active{/if}" href="?page=mailtemplates&template={$templateKey|escape:'url'}">
+										<span class="fw-semibold">{$templateMeta.label}</span>
+										<span class="small text-white-50">{$templateMeta.description}</span>
+									</a>
+								{/foreach}
+							</div>
+							<div class="mt-4">
+								<h3 class="h6 mb-2">Variables disponibles</h3>
+								<div class="d-flex flex-wrap gap-2">
+									{foreach from=$mailTemplateVariables item=placeholder}
+										<span class="badge bg-secondary">{$placeholder}</span>
+									{/foreach}
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
+			</details>
 		</div>
 		<div class="col-12 col-xl-5">
 			<div class="admin-card h-100">
@@ -40,12 +53,25 @@
 			</div>
 		</div>
 		<div class="col-12 col-xl-4">
-			<div class="admin-card h-100">
-				<div class="admin-card__body">
-					<h2 class="h4 mb-3">Aperçu</h2>
-					<pre class="admin-mail-preview">{$mailTemplatePreview|escape:'html'}</pre>
+			<details class="admin-fold admin-fold--compact">
+				<summary class="admin-fold__summary">
+					<div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+						<div>
+							<h2 class="h5 mb-1">Aperçu</h2>
+							<p class="text-white-50 mb-0">Rendu du modèle courant, replié par défaut pour privilégier l’édition.</p>
+						</div>
+						<span class="admin-pill">Prévisualisation</span>
+					</div>
+				</summary>
+				<div class="admin-fold__body">
+					<div class="admin-card h-100">
+						<div class="admin-card__body">
+							<h2 class="h4 mb-3">Aperçu</h2>
+							<pre class="admin-mail-preview">{$mailTemplatePreview|escape:'html'}</pre>
+						</div>
+					</div>
 				</div>
-			</div>
+			</details>
 		</div>
 	</div>
 </div>

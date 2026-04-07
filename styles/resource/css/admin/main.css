@@ -2563,12 +2563,55 @@ a {
 	#serverSettings .form-gorup,
 	#universeSettings .form-gorup {
 		grid-column: 1 / -1;
-		margin-bottom: 1rem !important;
+		margin-bottom: 0.7rem !important;
+		padding: 0.75rem 0.8rem !important;
+		border-radius: 16px;
 	}
 
 	.admin-section-nav,
 	.admin-settings-toolbar {
 		position: static;
+	}
+
+	.admin-settings-shell {
+		gap: 0.75rem;
+		margin-top: 0.75rem;
+	}
+
+	.admin-section-nav {
+		gap: 0.45rem;
+		padding: 0.75rem 0.8rem;
+		border-radius: 18px;
+	}
+
+	.admin-section-link {
+		padding: 0.52rem 0.75rem;
+		font-size: 0.86rem;
+	}
+
+	.admin-settings-toolbar {
+		padding: 0.8rem 0.85rem !important;
+	}
+
+	.admin-section-title {
+		min-height: 0;
+		padding-top: 0.7rem !important;
+		padding-bottom: 0.7rem !important;
+	}
+
+	.admin-section-title span,
+	.admin-section-title .text-yellow {
+		font-size: 0.92rem !important;
+	}
+
+	.admin-section-title small {
+		font-size: 0.8rem;
+	}
+
+	#serverSettings .form-gorup > label,
+	#universeSettings .form-gorup > label {
+		margin-bottom: 0.35rem !important;
+		font-size: 0.92rem;
 	}
 
 	.admin-section-hidden {
@@ -2644,8 +2687,44 @@ a {
 	.admin-overview-page .admin-fold__summary,
 	.admin-missions-page .admin-fold__summary,
 	.admin-public-page .admin-fold__summary,
-	.admin-supervision-page .admin-fold__summary {
+	.admin-supervision-page .admin-fold__summary,
+	.admin-accounts-page .admin-fold__summary,
+	.admin-chat-page .admin-fold__summary,
+	.admin-banned-page .admin-fold__summary,
+	.admin-mailtemplates-page .admin-fold__summary {
 		padding: 0.9rem 0.95rem;
+	}
+
+	.admin-accounts-page .admin-feature-card__media {
+		display: none;
+	}
+
+	.admin-accounts-page .admin-feature-grid {
+		gap: 0.75rem;
+	}
+
+	.admin-accounts-page .admin-feature-card__title {
+		font-size: 1rem;
+	}
+
+	.admin-banned-page .admin-select-list {
+		min-height: 180px;
+	}
+
+	.admin-banned-page .admin-filter-letters {
+		gap: 0.3rem;
+	}
+
+	.admin-banned-page .admin-filter-letters a {
+		width: 1.7rem;
+		height: 1.7rem;
+		font-size: 0.78rem;
+	}
+
+	.admin-mail-preview {
+		min-height: 280px;
+		max-height: 48vh;
+		overflow: auto;
 	}
 
 	.admin-topbar__select {
