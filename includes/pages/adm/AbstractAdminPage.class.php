@@ -127,6 +127,7 @@ abstract class AbstractAdminPage
 			'currentPage' => $currentPage,
 			'search' => $currentSearch,
 			'adminNavigation'		=> AdminUiService::getNavigation(),
+			'adminNavigationFlat'	=> AdminUiService::getFlatNavigation(),
 			'adminTabs'				=> AdminUiService::getTabs($currentPage),
 			'currentPageMeta'		=> $pageMeta,
 			'brandLogoUrl'			=> BrandingService::getActiveLogoUrl(),

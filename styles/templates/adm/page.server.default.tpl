@@ -16,21 +16,41 @@ $(document).ready(function(){
 </script>
 
 <div class="admin-settings-shell">
-<div class="admin-section-nav">
-	<a class="admin-section-link" href="#server-general">Général</a>
-	<a class="admin-section-link" href="#server-links">Liens publics</a>
-	<a class="admin-section-link" href="#server-players">Joueurs</a>
-	<a class="admin-section-link" href="#server-recaptcha">Protection</a>
-	<a class="admin-section-link" href="#server-smtp">Courriels</a>
-	<a class="admin-section-link" href="#server-messages">Messagerie</a>
-	<a class="admin-section-link" href="#server-analytics">Mesure</a>
-</div>
-<form id="serverSettings" class="bg-black w-75 text-white p-3 my-3 mx-auto fs-12" action="?page=server&mode=saveSettings" method="post">
+	<div class="admin-card">
+		<div class="card-body">
+			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+				<div>
+					<h2 class="h4 mb-1">Organisation des paramètres</h2>
+					<p class="text-white-50 mb-0">Les réglages sont regroupés par usage réel : identité, exposition publique, protection, diffusion et maintenance.</p>
+				</div>
+				<div class="admin-hero__meta">
+					<div class="admin-hero__chip">Thème <strong>{$server_default_theme|default:'nextgen'}</strong></div>
+					<div class="admin-hero__chip">Fuseau <strong>{$timezone}</strong></div>
+					<div class="admin-hero__chip">SMTP <strong>{if $mail_active}actif{else}inactif{/if}</strong></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="admin-section-nav">
+		<a class="admin-section-link" href="#server-general">Général</a>
+		<a class="admin-section-link" href="#server-links">Liens publics</a>
+		<a class="admin-section-link" href="#server-players">Joueurs</a>
+		<a class="admin-section-link" href="#server-recaptcha">Protection</a>
+		<a class="admin-section-link" href="#server-smtp">Courriels</a>
+		<a class="admin-section-link" href="#server-messages">Messagerie</a>
+		<a class="admin-section-link" href="#server-analytics">Mesure</a>
+	</div>
+
+<form id="serverSettings" class="text-white fs-12" action="?page=server&mode=saveSettings" method="post">
 <input type="hidden" name="opt_save" value="1">
 
 <div class="form-group d-flex justify-content-between admin-settings-toolbar admin-field--full">
-	<span class="text-yellow text-center fw-bold fs-14">{$LNG.se_server_parameters}</span>
-	<input style="max-width:250px;" class="form-control bg-dark text-white border-secondary" id="searchInServerSettings" type="text" name="" placeholder="Rechercher un paramètre…">
+	<div class="admin-form-submitbar__copy">
+		<strong>{$LNG.se_server_parameters}</strong>
+		<span>Recherche rapide, modifications guidées et sauvegarde globale des paramètres serveur.</span>
+	</div>
+	<input style="max-width:320px;" class="form-control bg-dark text-white border-secondary" id="searchInServerSettings" type="text" name="" placeholder="Rechercher un paramètre…">
 </div>
 
 <div id="server-general" class="form-gorup d-flex flex-column my-1 p-2 admin-section-title">
@@ -233,8 +253,16 @@ $(document).ready(function(){
 	<label for="ga_key" class="text-start my-1 cursor-pointer hover-underline">{$LNG.se_google_key}</label>
 	<input id="ga_key" class="form-control bg-dark text-white border-secondary" name="ga_key" size="20" maxlength="15" value="{$ga_key}" type="text">
 </div>
-<div class="form-gorup d-flex flex-column my-1 p-2 ">
-<input class="btn btn-primary text-white" value="{$LNG.se_save_parameters}" type="submit">
+<div class="form-gorup admin-form-submitbar">
+	<div class="admin-form-submitbar__copy">
+		<strong>Enregistrer la configuration serveur</strong>
+		<span>La sauvegarde applique l’ensemble des modifications visibles sur cette page.</span>
+	</div>
+	<div class="d-flex flex-wrap gap-2">
+		<a class="admin-shell-action" href="admin.php?page=overview">Retour au tableau de bord</a>
+		<a class="admin-shell-action admin-shell-action--warning" href="admin.php?page=clearCache">Ouvrir le cache</a>
+		<input class="btn btn-primary text-white" value="{$LNG.se_save_parameters}" type="submit">
+	</div>
 </div>
 
 </form>

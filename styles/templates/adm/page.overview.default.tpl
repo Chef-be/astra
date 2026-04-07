@@ -1,218 +1,209 @@
 {block name="content"}
 
-<div class="container-fluid py-4 text-white">
-	<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-		<div>
-			<h1 class="h3 mb-1">Tableau de bord</h1>
-			<p class="text-white-50 mb-0">Supervision de l’univers {$dashboard.game.universe} et état technique de l’instance.</p>
-		</div>
-		<div class="d-flex flex-wrap gap-2">
-			<a class="btn btn-outline-light btn-sm" href="?page=server">Configuration serveur</a>
-			<a class="btn btn-outline-light btn-sm" href="?page=universe">Configuration de l’univers</a>
-			<a class="btn btn-outline-light btn-sm" href="?page=supervision">Supervision détaillée</a>
-			<a class="btn btn-outline-light btn-sm" href="?page=public">Contenu public</a>
-			<a class="btn btn-outline-light btn-sm" href="?page=bots">Gestion des bots</a>
-			<a class="btn btn-warning btn-sm" href="?page=clearCache">Pilotage du cache</a>
-		</div>
-	</div>
+<div class="container-fluid py-4 text-white admin-stack">
+	<section class="admin-kpi-grid">
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Joueurs humains</span>
+			<strong class="admin-kpi-card__value">{$dashboard.game.humanUsers}</strong>
+			<span class="admin-kpi-card__meta">Bots : {$dashboard.game.botsTotal}</span>
+		</article>
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Joueurs actifs</span>
+			<strong class="admin-kpi-card__value">{$dashboard.game.activePlayers}</strong>
+			<span class="admin-kpi-card__meta">{$dashboard.game.activePlayersPercent}% des joueurs humains</span>
+		</article>
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Bots connectés</span>
+			<strong class="admin-kpi-card__value">{$dashboard.game.activeBots}</strong>
+			<span class="admin-kpi-card__meta">{$dashboard.game.activeBotsPercent}% du parc bots</span>
+		</article>
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Sessions actives</span>
+			<strong class="admin-kpi-card__value">{$dashboard.game.sessionsActive}</strong>
+			<span class="admin-kpi-card__meta">Fenêtre des 15 dernières minutes</span>
+		</article>
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Flottes en vol</span>
+			<strong class="admin-kpi-card__value">{$dashboard.game.fleetsFlying}</strong>
+			<span class="admin-kpi-card__meta">Planètes : {$dashboard.game.planetsTotal}</span>
+		</article>
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Tickets ouverts</span>
+			<strong class="admin-kpi-card__value">{$dashboard.game.ticketsOpen}</strong>
+			<span class="admin-kpi-card__meta">Inscriptions 24h : {$dashboard.game.registrations24}</span>
+		</article>
+	</section>
 
-	<div class="row g-3 mb-4">
-		<div class="col-12 col-xl-8">
-			<div class="card bg-dark border-secondary h-100">
-				<div class="card-body">
-					<div class="d-flex justify-content-between align-items-center mb-3">
-						<h2 class="h5 mb-0">Indicateurs de jeu</h2>
-						<span class="badge bg-primary">Mis à jour {$dashboard.generatedAt}</span>
+	<section class="admin-overview-grid">
+		<div class="admin-card">
+			<div class="card-body admin-stack">
+				<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+					<div>
+						<h2 class="h4 mb-1">Exploitation en cours</h2>
+						<p class="text-white-50 mb-0">Vue synthétique pour décider vite sans ouvrir cinq pages différentes.</p>
 					</div>
-					<div class="row g-3">
-						<div class="col-6 col-md-3">
-							<div class="border border-secondary rounded p-3 h-100">
-								<div class="text-white-50 small">Joueurs humains</div>
-								<div class="fs-4 fw-bold">{$dashboard.game.humanUsers}</div>
-								<div class="small text-white-50">Bots: {$dashboard.game.botsTotal}</div>
-							</div>
-						</div>
-						<div class="col-6 col-md-3">
-							<div class="border border-secondary rounded p-3 h-100">
-								<div class="text-white-50 small">Joueurs actifs</div>
-								<div class="fs-4 fw-bold">{$dashboard.game.activePlayers}</div>
-								<div class="progress mt-2" style="height:8px;">
-									<div class="progress-bar bg-success" role="progressbar" style="width: {$dashboard.game.activePlayersPercent}%"></div>
+					<span class="admin-pill">Mis à jour {$dashboard.generatedAt}</span>
+				</div>
+
+				<div class="admin-fact-grid">
+					<div class="admin-fact-card">
+						<span class="admin-fact-card__label">Univers</span>
+						<strong class="admin-fact-card__value">{$dashboard.game.universe}</strong>
+					</div>
+					<div class="admin-fact-card">
+						<span class="admin-fact-card__label">Univers disponibles</span>
+						<strong class="admin-fact-card__value">{$dashboard.game.universesTotal}</strong>
+					</div>
+					<div class="admin-fact-card">
+						<span class="admin-fact-card__label">Actualités publiées</span>
+						<strong class="admin-fact-card__value">{$dashboard.game.newsTotal}</strong>
+					</div>
+					<div class="admin-fact-card">
+						<span class="admin-fact-card__label">Cache applicatif</span>
+						<strong class="admin-fact-card__value">{$dashboard.system.cacheSizeHuman}</strong>
+					</div>
+				</div>
+
+				<div class="admin-panel-grid">
+					<div class="admin-panel-grid__wide">
+						<div class="admin-card h-100">
+							<div class="card-body">
+								<h3 class="h5 mb-3">Raccourcis d’exploitation</h3>
+								<div class="admin-quick-links">
+									<a class="admin-shortcut" href="?page=server">
+										<span class="admin-shortcut__icon"><i class="bi bi-hdd-network"></i></span>
+										<span class="admin-shortcut__content">
+											<strong>Configuration serveur</strong>
+											<span>Réglages globaux, identité, SMTP, sécurité, analytics.</span>
+										</span>
+									</a>
+									<a class="admin-shortcut" href="?page=universe">
+										<span class="admin-shortcut__icon"><i class="bi bi-globe2"></i></span>
+										<span class="admin-shortcut__content">
+											<strong>Configuration d’univers</strong>
+											<span>Équilibrage, paramètres gameplay et règles structurelles.</span>
+										</span>
+									</a>
+									<a class="admin-shortcut" href="?page=supervision">
+										<span class="admin-shortcut__icon"><i class="bi bi-activity"></i></span>
+										<span class="admin-shortcut__content">
+											<strong>Supervision détaillée</strong>
+											<span>Ressources hôte, Docker, Redis, cache et visibilité technique.</span>
+										</span>
+									</a>
+									<a class="admin-shortcut" href="?page=bots">
+										<span class="admin-shortcut__icon"><i class="bi bi-robot"></i></span>
+										<span class="admin-shortcut__content">
+											<strong>Pilotage des bots</strong>
+											<span>Présence continue, campagnes, hiérarchie et conformité bots.</span>
+										</span>
+									</a>
 								</div>
 							</div>
 						</div>
-						<div class="col-6 col-md-3">
-							<div class="border border-secondary rounded p-3 h-100">
-								<div class="text-white-50 small">Bots connectés</div>
-								<div class="fs-4 fw-bold">{$dashboard.game.activeBots}</div>
-								<div class="progress mt-2" style="height:8px;">
-									<div class="progress-bar bg-info" role="progressbar" style="width: {$dashboard.game.activeBotsPercent}%"></div>
+					</div>
+
+					<div class="admin-panel-grid__side">
+						<div class="admin-card h-100">
+							<div class="card-body">
+								<h3 class="h5 mb-3">Alertes immédiates</h3>
+								<div class="admin-flag-list">
+									{foreach from=$dashboard.alerts item=alert}
+										<div class="admin-flag admin-flag--{$alert.level}">{$alert.message}</div>
+									{/foreach}
 								</div>
 							</div>
 						</div>
-						<div class="col-6 col-md-3">
-							<div class="border border-secondary rounded p-3 h-100">
-								<div class="text-white-50 small">Sessions actives</div>
-								<div class="fs-4 fw-bold">{$dashboard.game.sessionsActive}</div>
-								<div class="small text-white-50">15 dernières minutes</div>
-							</div>
-						</div>
-						<div class="col-6 col-md-3">
-							<div class="border border-secondary rounded p-3 h-100">
-								<div class="text-white-50 small">Planètes</div>
-								<div class="fs-4 fw-bold">{$dashboard.game.planetsTotal}</div>
-								<div class="small text-white-50">Tous comptes confondus</div>
-							</div>
-						</div>
-						<div class="col-6 col-md-3">
-							<div class="border border-secondary rounded p-3 h-100">
-								<div class="text-white-50 small">Flottes en vol</div>
-								<div class="fs-4 fw-bold">{$dashboard.game.fleetsFlying}</div>
-								<div class="small text-white-50">Missions en cours</div>
-							</div>
-						</div>
-						<div class="col-6 col-md-3">
-							<div class="border border-secondary rounded p-3 h-100">
-								<div class="text-white-50 small">Tickets ouverts</div>
-								<div class="fs-4 fw-bold">{$dashboard.game.ticketsOpen}</div>
-								<div class="small text-white-50">Support à traiter</div>
-							</div>
-						</div>
-						<div class="col-6 col-md-3">
-							<div class="border border-secondary rounded p-3 h-100">
-								<div class="text-white-50 small">Inscriptions 24h</div>
-								<div class="fs-4 fw-bold">{$dashboard.game.registrations24}</div>
-								<div class="small text-white-50">Actualités: {$dashboard.game.newsTotal}</div>
-							</div>
-						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<div class="col-12 col-xl-4">
-			<div class="card bg-dark border-secondary h-100">
-				<div class="card-body">
-					<h2 class="h5 mb-3">Alertes techniques</h2>
-					<div class="d-flex flex-column gap-2">
-						{foreach from=$dashboard.alerts item=alert}
-							<div class="alert alert-{$alert.level} mb-0 py-2 px-3">{$alert.message}</div>
-						{/foreach}
+		<div class="admin-card">
+			<div class="card-body admin-stack">
+				<div>
+					<h2 class="h4 mb-1">Santé de la plateforme</h2>
+					<p class="text-white-50 mb-0">Les signaux clés à garder sous les yeux pendant l’exploitation.</p>
+				</div>
+				<div class="admin-status-list">
+					<div class="admin-status-row">
+						<span>Charge système</span>
+						<strong>{$dashboard.system.loadAverage.one} / {$dashboard.system.loadAverage.five} / {$dashboard.system.loadAverage.fifteen}</strong>
+					</div>
+					<div class="admin-status-row">
+						<span>Mémoire hôte</span>
+						<strong>{$dashboard.system.memory.usedHuman} / {$dashboard.system.memory.totalHuman}</strong>
+					</div>
+					<div class="admin-status-row">
+						<span>Espace disque</span>
+						<strong>{$dashboard.system.disk.usedHuman} / {$dashboard.system.disk.totalHuman}</strong>
+					</div>
+					<div class="admin-status-row">
+						<span>Redis</span>
+						<strong>{if $dashboard.system.redis.available}{$dashboard.system.redis.usedMemoryHuman}{else}Indisponible{/if}</strong>
+					</div>
+					<div class="admin-status-row">
+						<span>Docker Astra</span>
+						<strong>{if $dashboard.docker.available && $dashboard.docker.astraDetected}{$dashboard.docker.servicesTotal} service(s){elseif $dashboard.docker.available}Aucun service Astra détecté{else}Indisponible{/if}</strong>
+					</div>
+				</div>
+				<div class="admin-summary-list">
+					<div class="admin-summary-row">
+						<span>Hôte</span>
+						<strong>{$dashboard.system.hostName}</strong>
+					</div>
+					<div class="admin-summary-row">
+						<span>PHP</span>
+						<strong>{$dashboard.system.phpVersion}</strong>
+					</div>
+					<div class="admin-summary-row">
+						<span>Version jeu</span>
+						<strong>{$dashboard.system.appVersion}</strong>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+	</section>
 
-	<div class="row g-3 mb-4">
-		<div class="col-12 col-lg-4">
-			<div class="card bg-dark border-secondary h-100">
-				<div class="card-body">
-					<h2 class="h5 mb-3">Ressources système</h2>
-					<div class="mb-3">
-						<div class="d-flex justify-content-between small text-white-50">
-							<span>Charge système</span>
-							<span>{$dashboard.system.loadAverage.one} / {$dashboard.system.loadAverage.five} / {$dashboard.system.loadAverage.fifteen}</span>
-						</div>
-					</div>
-					<div class="mb-3">
-						<div class="d-flex justify-content-between small">
-							<span>Mémoire hôte</span>
-							<span>{$dashboard.system.memory.usedHuman} / {$dashboard.system.memory.totalHuman}</span>
-						</div>
-						<div class="progress mt-2" style="height:8px;">
-							<div class="progress-bar bg-danger" role="progressbar" style="width: {$dashboard.system.memory.percent}%"></div>
-						</div>
-						<div class="small text-white-50 mt-1">Disponible: {$dashboard.system.memory.availableHuman}</div>
-					</div>
-					<div class="mb-0">
-						<div class="d-flex justify-content-between small">
-							<span>Espace disque</span>
-							<span>{$dashboard.system.disk.usedHuman} / {$dashboard.system.disk.totalHuman}</span>
-						</div>
-						<div class="progress mt-2" style="height:8px;">
-							<div class="progress-bar bg-warning" role="progressbar" style="width: {$dashboard.system.disk.percent}%"></div>
-						</div>
-						<div class="small text-white-50 mt-1">Libre: {$dashboard.system.disk.freeHuman}</div>
-					</div>
+	<section class="admin-card">
+		<div class="card-body admin-stack">
+			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+				<div>
+					<h2 class="h4 mb-1">Organisation de l’administration</h2>
+					<p class="text-white-50 mb-0">Chaque bloc regroupe les pages par logique d’exploitation réelle pour éviter les allers-retours inutiles.</p>
 				</div>
+				<span class="admin-pill">{$adminNavigation|@count} espaces disponibles</span>
 			</div>
-		</div>
 
-		<div class="col-12 col-lg-4">
-			<div class="card bg-dark border-secondary h-100">
-				<div class="card-body">
-					<h2 class="h5 mb-3">Application</h2>
-					<ul class="list-group list-group-flush">
-						<li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between">
-							<span>Hôte</span>
-							<span>{$dashboard.system.hostName}</span>
-						</li>
-						<li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between">
-							<span>Version PHP</span>
-							<span>{$dashboard.system.phpVersion}</span>
-						</li>
-						<li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between">
-							<span>Version du jeu</span>
-							<span>{$dashboard.system.appVersion}</span>
-						</li>
-						<li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between">
-							<span>Univers disponibles</span>
-							<span>{$dashboard.game.universesTotal}</span>
-						</li>
-						<li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between">
-							<span>Fichiers de cache</span>
-							<span>{$dashboard.system.cacheFiles}</span>
-						</li>
-						<li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between">
-							<span>Taille du cache</span>
-							<span>{$dashboard.system.cacheSizeHuman}</span>
-						</li>
-						<li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between">
-							<span>Redis</span>
-							<span>{if $dashboard.system.redis.available}{$dashboard.system.redis.usedMemoryHuman}{else}indisponible{/if}</span>
-						</li>
-					</ul>
-					<div class="mt-3 d-grid gap-2">
-						<a class="btn btn-outline-warning btn-sm" href="?page=clearCache">Ouvrir le pilotage du cache</a>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="col-12 col-lg-4">
-			<div class="card bg-dark border-secondary h-100">
-				<div class="card-body">
-					<h2 class="h5 mb-3">Docker</h2>
-					<p class="text-white-50 mb-3">{$dashboard.docker.statusMessage}</p>
-					<div class="border border-secondary rounded p-3 mb-3">
-						<div class="text-white-50 small">Conteneurs du stack Astra</div>
-						<div class="fs-4 fw-bold">{$dashboard.docker.servicesTotal}</div>
-					</div>
-					{if $dashboard.docker.available}
-						{if $dashboard.docker.astraDetected}
-							<div class="small text-uppercase text-white-50 mb-2">Services Astra</div>
-							<div class="d-flex flex-column gap-2">
-								{foreach from=$dashboard.docker.astraServices item=service}
-									<div class="border border-secondary rounded px-3 py-2 d-flex justify-content-between align-items-center">
-										<div>
-											<div class="fw-bold">{$service.name}</div>
-											<div class="small text-white-50">{$service.image}</div>
-										</div>
-										<span class="badge {if $service.healthy}bg-success{elseif $service.running}bg-warning text-dark{else}bg-secondary{/if}">{$service.status}</span>
+			<div class="admin-overview-grid admin-overview-grid--sections">
+				{foreach from=$adminNavigation item=section}
+					<a class="admin-section-card" href="{$section.items[0].url|default:'admin.php?page=overview'}">
+						<div class="admin-section-card__top">
+							<div>
+								<div class="admin-section-card__label">{$section.label}</div>
+								<div class="admin-section-card__description">{$section.description}</div>
+							</div>
+							<span class="admin-section-card__icon"><i class="bi {$section.icon}"></i></span>
+						</div>
+						<div class="admin-section-card__links">
+							{foreach from=$section.items item=sectionItem name=sectionPreview}
+								{if $smarty.foreach.sectionPreview.iteration <= 3}
+									<div class="admin-section-card__link">
+										<i class="bi {$sectionItem.icon|default:'bi-dot'}"></i>
+										<span>{$sectionItem.label}</span>
 									</div>
-								{/foreach}
-							</div>
-						{else}
-							<div class="alert alert-secondary mb-0">Aucun conteneur Astra n’a été trouvé. Les autres conteneurs de l’hôte ne sont pas affichés ici.</div>
-						{/if}
-					{else}
-						<div class="alert alert-secondary mb-0">La supervision Docker sera disponible dès que le relais Docker sera accessible depuis l’application.</div>
-					{/if}
-				</div>
+								{/if}
+							{/foreach}
+						</div>
+						<div class="admin-section-card__foot">
+							<span>{$section.count} page(s)</span>
+							<span>Ouvrir</span>
+						</div>
+					</a>
+				{/foreach}
 			</div>
 		</div>
-	</div>
+	</section>
 </div>
 
 {/block}

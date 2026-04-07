@@ -1,11 +1,41 @@
 {block name="content"}
-<div class="container-fluid py-3 text-white">
-	<div class="admin-mini-hero mb-4">
-		<h2 class="h3">Éditeur de comptes</h2>
-		<p>Accédez aux outils de modification par domaine fonctionnel. Les raccourcis utilisent des visuels du jeu pour rendre l’action plus lisible.</p>
-	</div>
+<div class="container-fluid py-4 text-white admin-stack">
+	<section class="admin-card">
+		<div class="card-body admin-stack">
+			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+				<div>
+					<h2 class="h4 mb-1">Éditeur de comptes</h2>
+					<p class="text-white-50 mb-0">Chaque module cible une zone précise du compte pour éviter les erreurs et limiter le bruit visuel.</p>
+				</div>
+				<div class="admin-cluster">
+					<span class="admin-pill">{$accountEditorModules|@count} modules</span>
+					<a class="admin-shell-action admin-shell-action--light" href="admin.php?page=search">Trouver un joueur</a>
+					<a class="admin-shell-action admin-shell-action--accent" href="admin.php?page=create">Créer un compte</a>
+				</div>
+			</div>
 
-	<div class="admin-feature-grid">
+			<div class="admin-fact-grid">
+				<div class="admin-fact-card">
+					<span class="admin-fact-card__label">Parcours conseillé</span>
+					<strong class="admin-fact-card__value">Recherche → compte → module</strong>
+				</div>
+				<div class="admin-fact-card">
+					<span class="admin-fact-card__label">Usage</span>
+					<strong class="admin-fact-card__value">Intervention ciblée</strong>
+				</div>
+				<div class="admin-fact-card">
+					<span class="admin-fact-card__label">Sécurité</span>
+					<strong class="admin-fact-card__value">Édition par domaine</strong>
+				</div>
+				<div class="admin-fact-card">
+					<span class="admin-fact-card__label">Objectif</span>
+					<strong class="admin-fact-card__value">Moins d’erreurs, plus vite</strong>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="admin-feature-grid">
 		{foreach from=$accountEditorModules item=module}
 			<a class="admin-feature-card" href="{$module.url}">
 				<div class="admin-feature-card__media">
@@ -16,6 +46,6 @@
 				<div class="admin-feature-card__foot">Ouvrir le module</div>
 			</a>
 		{/foreach}
-	</div>
+	</section>
 </div>
 {/block}

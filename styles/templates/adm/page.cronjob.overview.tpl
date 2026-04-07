@@ -1,16 +1,47 @@
 {block name="content"}
-<div class="container-fluid py-3 text-white">
-	<div class="admin-toolbar mb-4">
-		<div class="admin-mini-hero flex-grow-1">
-			<h2 class="h3">Tâches planifiées</h2>
-			<p>Pilotez les cronjobs du jeu, leur état, leur verrouillage et leur prochaine exécution.</p>
-		</div>
-		<div class="admin-actions">
-			<a class="btn btn-primary" href="admin.php?page=cronjob&mode=showCronjobCreate">{$LNG.cronjob_new}</a>
-		</div>
-	</div>
+<div class="container-fluid py-4 text-white admin-stack">
+	{assign var="cronTotal" value=$CronjobArray|@count}
+	{assign var="cronActive" value=0}
+	{assign var="cronLocked" value=0}
+	{foreach item=CronjobInfo from=$CronjobArray}
+		{if $CronjobInfo.isActive}{assign var="cronActive" value=$cronActive+1}{/if}
+		{if $CronjobInfo.lock}{assign var="cronLocked" value=$cronLocked+1}{/if}
+	{/foreach}
 
-	<div class="admin-table-shell">
+	<section class="admin-kpi-grid">
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Cronjobs</span>
+			<strong class="admin-kpi-card__value">{$cronTotal}</strong>
+			<span class="admin-kpi-card__meta">ensemble configuré</span>
+		</article>
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Actifs</span>
+			<strong class="admin-kpi-card__value">{$cronActive}</strong>
+			<span class="admin-kpi-card__meta">désactivés : {$cronTotal-$cronActive}</span>
+		</article>
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Verrous</span>
+			<strong class="admin-kpi-card__value">{$cronLocked}</strong>
+			<span class="admin-kpi-card__meta">libres : {$cronTotal-$cronLocked}</span>
+		</article>
+	</section>
+
+	<section class="admin-card">
+		<div class="card-body admin-stack">
+			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+				<div>
+					<h2 class="h4 mb-1">Tâches planifiées</h2>
+					<p class="text-white-50 mb-0">Le pilotage distingue l’état métier, le verrou technique et la prochaine exécution pour éviter les ambiguïtés.</p>
+				</div>
+				<div class="admin-cluster">
+					<a class="admin-shell-action admin-shell-action--accent" href="admin.php?page=cronjob&mode=showCronjobCreate">{$LNG.cronjob_new}</a>
+					<a class="admin-shell-action admin-shell-action--light" href="admin.php?page=supervision">Supervision</a>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="admin-table-shell">
 		<div class="table-responsive">
 			<table class="table table-dark table-striped align-middle mb-0">
 				<thead>
@@ -66,6 +97,6 @@
 				</tbody>
 			</table>
 		</div>
-	</div>
+	</section>
 </div>
 {/block}

@@ -1,14 +1,39 @@
 {block name="content"}
-<div class="container-fluid py-4 text-white">
-	<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-		<div>
-			<h1 class="h3 mb-1">Pilotage du cache</h1>
-			<p class="text-white-50 mb-0">Purge du cache applicatif fichier, du cache Redis et contrôle rapide de l’état courant.</p>
-		</div>
-		<a class="btn btn-outline-light btn-sm" href="?page=supervision">Retour à la supervision</a>
-	</div>
+<div class="container-fluid py-4 text-white admin-stack">
+	<section class="admin-kpi-grid">
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Fichiers de cache</span>
+			<strong class="admin-kpi-card__value">{$cacheSnapshot.filesystem.files}</strong>
+			<span class="admin-kpi-card__meta">Volume : {$cacheSnapshot.filesystem.sizeHuman}</span>
+		</article>
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Écriture</span>
+			<strong class="admin-kpi-card__value">{if $cacheSnapshot.filesystem.cacheWritable}Oui{else}Non{/if}</strong>
+			<span class="admin-kpi-card__meta">Accès au dossier applicatif</span>
+		</article>
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Clés Redis</span>
+			<strong class="admin-kpi-card__value">{if $cacheSnapshot.redis.available}{$cacheSnapshot.redis.dbSize}{else}0{/if}</strong>
+			<span class="admin-kpi-card__meta">{if $cacheSnapshot.redis.available}{$cacheSnapshot.redis.usedMemoryHuman}{else}Redis indisponible{/if}</span>
+		</article>
+	</section>
 
-	<div class="row g-3 mb-4">
+	<section class="admin-card">
+		<div class="card-body admin-stack">
+			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+				<div>
+					<h2 class="h4 mb-1">Pilotage du cache</h2>
+					<p class="text-white-50 mb-0">Toutes les purges critiques sont regroupées ici avec leur impact immédiat pour éviter les erreurs d’exploitation.</p>
+				</div>
+				<div class="admin-cluster">
+					<a class="admin-shell-action admin-shell-action--light" href="?page=supervision">Supervision</a>
+					<a class="admin-shell-action admin-shell-action--light" href="?page=overview">Tableau de bord</a>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="row g-3">
 		<div class="col-12 col-lg-6">
 			<div class="card bg-dark border-secondary h-100">
 				<div class="card-body">
@@ -55,9 +80,9 @@
 				</div>
 			</div>
 		</div>
-	</div>
+	</section>
 
-	<div class="card bg-dark border-secondary">
+	<section class="card bg-dark border-secondary">
 		<div class="card-body">
 			<h2 class="h5 mb-3">Purge complète</h2>
 			<p class="text-white-50">Cette action vide le cache applicatif, les templates compilés et Redis.</p>
@@ -66,6 +91,6 @@
 				<button class="btn btn-danger" type="submit" onclick="return confirm('Confirmer la purge complète du cache applicatif et de Redis ?');">Purger tous les caches</button>
 			</form>
 		</div>
-	</div>
+	</section>
 </div>
 {/block}
