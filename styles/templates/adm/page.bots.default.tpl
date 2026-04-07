@@ -876,8 +876,8 @@
                   <tbody>
                     {foreach from=$botSnapshot.command_catalog item=item}
                       <tr>
-                        <td>{$item.family_key}</td>
-                        <td><span class="bots-pill">{$item.command_key}</span></td>
+                        <td>{$item.family_label|default:$item.family_key}</td>
+                        <td><span class="bots-pill">{$item.command_label|default:$item.command_key}</span></td>
                         <td><code>{$item.syntax_example|escape}</code></td>
                       </tr>
                     {foreachelse}

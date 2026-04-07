@@ -160,8 +160,8 @@ class BotAdminService
 				WHERE campaign_id = :campaignId;', array(
 					':campaignId' => (int) $campaign['id'],
 				), 'count');
-			$campaign['phase_label'] = !empty($campaign['payload']['phase']) ? ucfirst(str_replace('_', ' ', $campaign['payload']['phase'])) : 'Observation';
-			$campaign['mode_label'] = !empty($campaign['payload']['mode']) ? ucfirst(str_replace('_', ' ', $campaign['payload']['mode'])) : ucfirst($campaign['campaign_type']);
+			$campaign['phase_label'] = !empty($campaign['payload']['phase']) ? $this->labelCampaignPhase($campaign['payload']['phase']) : 'Observation';
+			$campaign['mode_label'] = !empty($campaign['payload']['mode']) ? $this->labelCampaignMode($campaign['payload']['mode']) : $this->labelCampaignType($campaign['campaign_type']);
 			$campaign['narrative'] = !empty($campaign['payload']['narrative']) ? $campaign['payload']['narrative'] : 'Campagne active sans narration détaillée.';
 			$campaign['visibility_strategy'] = !empty($campaign['payload']['visibility_strategy']) ? $campaign['payload']['visibility_strategy'] : 'visible';
 			$campaign['relay_strategy'] = !empty($campaign['payload']['relay_strategy']) ? $campaign['payload']['relay_strategy'] : 'rotation_continue';
@@ -262,14 +262,21 @@ class BotAdminService
 
 		foreach ($botFocus as &$focus) {
 			$focus['campaign_payload'] = $this->decodeJson(isset($focus['campaign_payload_json']) ? $focus['campaign_payload_json'] : null);
-			$focus['campaign_phase_label'] = !empty($focus['campaign_payload']['phase']) ? ucfirst(str_replace('_', ' ', $focus['campaign_payload']['phase'])) : 'Hors campagne';
-			$focus['campaign_mode_label'] = !empty($focus['campaign_payload']['mode']) ? ucfirst(str_replace('_', ' ', $focus['campaign_payload']['mode'])) : '';
+			$focus['campaign_phase_label'] = !empty($focus['campaign_payload']['phase']) ? $this->labelCampaignPhase($focus['campaign_payload']['phase']) : 'Hors campagne';
+			$focus['campaign_mode_label'] = !empty($focus['campaign_payload']['mode']) ? $this->labelCampaignMode($focus['campaign_payload']['mode']) : '';
 			$focus['presence_logical_label'] = $this->labelPresenceLogical(isset($focus['presence_logical']) ? $focus['presence_logical'] : '');
 			$focus['presence_social_label'] = $this->labelPresenceSocial(isset($focus['presence_social']) ? $focus['presence_social'] : '');
 			$focus['hierarchy_status_label'] = $this->labelHierarchyStatus(isset($focus['hierarchy_status']) ? $focus['hierarchy_status'] : '');
 			$focus['next_action_type_label'] = $this->labelActionType(isset($focus['next_action_type']) ? $focus['next_action_type'] : '');
 		}
 		unset($focus);
+
+		$commandCatalog = $this->commandDispatcher->getCatalog();
+		foreach ($commandCatalog as &$commandDefinition) {
+			$commandDefinition['family_label'] = $this->labelCommandFamily(isset($commandDefinition['family_key']) ? $commandDefinition['family_key'] : '');
+			$commandDefinition['command_label'] = $this->labelCommandName(isset($commandDefinition['command_key']) ? $commandDefinition['command_key'] : '');
+		}
+		unset($commandDefinition);
 
 		foreach ($botRoster as &$bot) {
 			$bot['presence_logical_label'] = $this->labelPresenceLogical(isset($bot['presence_logical']) ? $bot['presence_logical'] : '');
@@ -345,7 +352,7 @@ class BotAdminService
 			'profile_distribution' => $profileDistribution,
 			'alliance_distribution' => $allianceDistribution,
 			'galaxy_distribution' => $galaxyDistribution,
-			'command_catalog' => $this->commandDispatcher->getCatalog(),
+			'command_catalog' => $commandCatalog,
 		);
 	}
 
@@ -669,6 +676,41 @@ class BotAdminService
 		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('-', ' ', $value)) : 'Commande');
 	}
 
+	protected function labelCommandFamily($value)
+	{
+		$map = array(
+			'bots' => 'Pilotage global',
+			'bot' => 'Pilotage individuel',
+			'chef' => 'Commandement',
+			'alliance-bots' => 'Alliance bots',
+			'escouade' => 'Escouade',
+			'system-bots' => 'Système',
+			'galaxy-bots' => 'Galaxie',
+			'profil-bots' => 'Profil',
+			'presence' => 'Présence',
+			'strategie' => 'Stratégie',
+			'bonus' => 'Bonus',
+			'journal' => 'Journal',
+			'pause' => 'Pause',
+			'reprendre' => 'Reprise',
+			'surveillance' => 'Surveillance',
+			'recon' => 'Reconnaissance',
+			'raid' => 'Raid',
+			'defense' => 'Défense',
+			'colonisation' => 'Colonisation',
+			'message-prive' => 'Message privé',
+			'message-chat' => 'Message de chat',
+			'campagne' => 'Campagne',
+			'harcelement' => 'Harcèlement',
+			'rotation-attaque' => 'Rotation d’attaque',
+			'vague' => 'Vague offensive',
+			'siege' => 'Siège',
+			'communication' => 'Communication',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('-', ' ', $value)) : 'Famille');
+	}
+
 	protected function labelTargetType($value)
 	{
 		$map = array(
@@ -697,6 +739,41 @@ class BotAdminService
 		);
 
 		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('-', ' ', $value)) : 'Campagne');
+	}
+
+	protected function labelCampaignPhase($value)
+	{
+		$map = array(
+			'observation' => 'Observation',
+			'preparation' => 'Préparation',
+			'pression' => 'Pression',
+			'exploitation' => 'Exploitation',
+			'releve' => 'Relève',
+			'relache' => 'Relâchement',
+			'pause' => 'Pause tactique',
+			'cloture' => 'Clôture',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('_', ' ', $value)) : 'Observation');
+	}
+
+	protected function labelCampaignMode($value)
+	{
+		$map = array(
+			'test' => 'Mode test',
+			'usure' => 'Mode usure',
+			'intimidation' => 'Mode intimidation',
+			'siege' => 'Mode siège',
+			'demonstration' => 'Mode démonstration',
+			'saturation_alternee' => 'Mode saturation alternée',
+			'chasse_ciblee' => 'Mode chasse ciblée',
+			'pression_silencieuse' => 'Mode pression silencieuse',
+			'pression' => 'Mode pression',
+			'rotation' => 'Mode rotation',
+			'harcelement' => 'Mode harcèlement',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('_', ' ', $value)) : 'Mode campagne');
 	}
 
 	protected function labelRelayStrategy($value)
