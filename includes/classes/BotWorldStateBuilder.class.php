@@ -5,8 +5,14 @@ class BotWorldStateBuilder
 	public function build($botUserId)
 	{
 		require_once ROOT_PATH.'includes/classes/BotInferenceService.class.php';
+		require_once ROOT_PATH.'includes/classes/BotGlobalStrategyService.class.php';
+		require_once ROOT_PATH.'includes/classes/BotTerritorialMapService.class.php';
+		require_once ROOT_PATH.'includes/classes/BotLearningService.class.php';
 		$db = Database::get();
 		$inferenceService = new BotInferenceService();
+		$globalStrategyService = new BotGlobalStrategyService();
+		$territorialMapService = new BotTerritorialMapService();
+		$learningService = new BotLearningService();
 		$bot = $db->selectSingle('SELECT u.*, p.*
 			FROM %%USERS%% u
 			LEFT JOIN %%BOT_PROFILES%% p ON p.id = u.bot_profile_id
@@ -221,6 +227,9 @@ class BotWorldStateBuilder
 			$activeCampaigns,
 			isset($bot['ally_id']) ? (int) $bot['ally_id'] : 0
 		);
+		$territorialZone = $territorialMapService->getZone($planet['galaxy'].':'.$planet['system']);
+		$globalStrategy = $globalStrategyService->getCurrentStrategy();
+		$learning = $learningService->getSnapshotInsights((int) $botUserId, $bot, empty($state) ? array() : $state, $bestTarget, $zoneContext['current_zone']);
 
 		return array(
 			'bot' => $bot,
@@ -239,6 +248,9 @@ class BotWorldStateBuilder
 			'inferred_targets' => $inferredTargets,
 			'best_target' => $bestTarget,
 			'zone_context' => $zoneContext,
+			'territorial_zone' => $territorialZone,
+			'global_strategy' => $globalStrategy,
+			'learning' => $learning,
 			'incoming_hostiles' => $incomingHostiles,
 			'own_fleets' => $ownFleets,
 			'planet_count' => count($botPlanets),

@@ -877,6 +877,9 @@ class BotAdminService
 			'presence' => 'Présence',
 			'campaign' => 'Campagne',
 			'message' => 'Messagerie',
+			'strategie' => 'Stratégie',
+			'territoire' => 'Territoire',
+			'apprentissage' => 'Apprentissage',
 			'maintenance' => 'Maintenance',
 		);
 
@@ -914,6 +917,8 @@ class BotAdminService
 			'cycle' => 'Cycle complet',
 			'presence' => 'Présence',
 			'planning' => 'Planification',
+			'strategic' => 'Stratégie',
+			'long' => 'Cycle long',
 			'execution' => 'Exécution',
 			'messaging' => 'Messagerie',
 			'campaigns' => 'Campagnes',

@@ -213,11 +213,33 @@ class BotActionExecutor
 			case 'queue_social_message':
 				return $this->queueSocialMessageAction((int) $action['bot_user_id'], $payload);
 			case 'presence_ping':
-				$this->presenceService->applyPresence((int) $action['bot_user_id'], 'connecte', 'visible', 'presence_ping');
-				return array('success' => true, 'summary' => 'Présence logique et sociale maintenue.', 'cooldown' => 90);
+				return $this->applyPresencePing((int) $action['bot_user_id'], $payload);
 			default:
 				return array('success' => false, 'summary' => 'Type d’action inconnu.', 'cooldown' => 60);
 		}
+	}
+
+	protected function applyPresencePing($botUserId, array $payload)
+	{
+		$targetLogical = !empty($payload['target_logical']) ? (string) $payload['target_logical'] : 'connecte';
+		$targetSocial = !empty($payload['target_social']) ? (string) $payload['target_social'] : (!empty($payload['force_discretion']) ? 'discret' : 'visible');
+		$isOnline = in_array($targetLogical, array('connecte', 'engage', 'alerte', 'coordination', 'campagne', 'harcelement'), true);
+		$cooldown = $isOnline ? 90 : 45;
+
+		$this->presenceService->applyPresence($botUserId, $targetLogical, $targetSocial, 'presence_ping', $isOnline, array(
+			'force_snapshot' => !empty($payload['relay_value']) || !empty($payload['coverage_sociale']) || !empty($payload['prepare_hidden']),
+		));
+
+		return array(
+			'success' => true,
+			'summary' => sprintf('Présence ajustée en %s / %s.', $targetLogical, $targetSocial),
+			'cooldown' => $cooldown,
+			'dynamic_delta' => array(
+				'fatigue' => $isOnline ? 1 : -2,
+				'disponibilite_sociale' => $targetSocial === 'visible' ? 2 : -2,
+				'stabilite_operationnelle' => !empty($payload['relay_value']) ? 2 : 1,
+			),
+		);
 	}
 
 	protected function enqueueBuilding($botUserId, $elementId)

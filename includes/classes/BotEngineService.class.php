@@ -19,6 +19,9 @@ class BotEngineService
 	protected $multiAccountService;
 	protected $allianceService;
 	protected $commanderService;
+	protected $territorialMapService;
+	protected $globalStrategyService;
+	protected $learningService;
 
 	public function __construct()
 	{
@@ -39,6 +42,9 @@ class BotEngineService
 		require_once ROOT_PATH.'includes/classes/BotMultiAccountService.class.php';
 		require_once ROOT_PATH.'includes/classes/BotAllianceService.class.php';
 		require_once ROOT_PATH.'includes/classes/BotCommanderService.class.php';
+		require_once ROOT_PATH.'includes/classes/BotTerritorialMapService.class.php';
+		require_once ROOT_PATH.'includes/classes/BotGlobalStrategyService.class.php';
+		require_once ROOT_PATH.'includes/classes/BotLearningService.class.php';
 
 		$this->configService = new BotEngineConfigService();
 		$this->traitService = new BotTraitService();
@@ -57,6 +63,9 @@ class BotEngineService
 		$this->multiAccountService = new BotMultiAccountService();
 		$this->allianceService = new BotAllianceService();
 		$this->commanderService = new BotCommanderService();
+		$this->territorialMapService = new BotTerritorialMapService();
+		$this->globalStrategyService = new BotGlobalStrategyService();
+		$this->learningService = new BotLearningService();
 	}
 
 	public function runCycle($phase = 'cycle', $limit = null)
@@ -87,8 +96,16 @@ class BotEngineService
 
 		try {
 			$this->ensureBotFoundation($config);
-			if (in_array($phase, array('cycle', 'planning', 'campaigns', 'maintenance'), true)) {
+			if (in_array($phase, array('cycle', 'planning', 'campaigns', 'maintenance', 'strategic', 'long'), true)) {
 				$summary['alliances'] = $this->allianceService->refreshAllianceGovernance(10);
+			}
+
+			if (in_array($phase, array('cycle', 'strategic', 'long'), true)) {
+				$summary['territorial_map'] = $this->territorialMapService->rebuildMap(400);
+			}
+
+			if (in_array($phase, array('cycle', 'strategic'), true)) {
+				$summary['strategic_state'] = $this->globalStrategyService->refreshStrategicState($config);
 			}
 
 			if (in_array($phase, array('cycle', 'presence'), true)) {
@@ -120,6 +137,11 @@ class BotEngineService
 
 			if (in_array($phase, array('cycle', 'maintenance'), true)) {
 				$summary['maintenance'] = $this->runMaintenance($config);
+			}
+
+			if (in_array($phase, array('cycle', 'long'), true)) {
+				$summary['learning_metrics'] = $this->learningService->rebuildMetrics(7);
+				$summary['long_state'] = $this->globalStrategyService->refreshLongState($config);
 			}
 
 			$this->journalService->closeRun((int) $run['id'], 'done', $summary, $selectedBots, $executedActions);
@@ -210,6 +232,8 @@ class BotEngineService
 				'confidence' => isset($bestAction['confidence']) ? (int) $bestAction['confidence'] : 0,
 				'risk' => isset($bestAction['estimated_risk']) ? (int) round($bestAction['estimated_risk']) : 0,
 				'next_step' => isset($bestAction['next_step']) ? $bestAction['next_step'] : (isset($bestAction['justification']) ? $bestAction['justification'] : 'veille'),
+				'intention' => isset($decision['intention']) ? $decision['intention'] : 'observer',
+				'posture_globale' => isset($decision['global_posture']) ? $decision['global_posture'] : 'equilibree',
 			));
 
 			$this->memoryService->remember((int) $bot['id'], 'decision', 'dernier_objectif', array(
@@ -247,6 +271,7 @@ class BotEngineService
 		$maintenance['completed_campaigns'] = $this->campaignService->recoverCampaigns();
 		$maintenance['expired_memory'] = $this->memoryService->purgeExpired();
 		$maintenance['multiaccount_sync'] = $this->multiAccountService->syncAllBots();
+		$maintenance['territorial_map'] = $this->territorialMapService->rebuildMap(240);
 
 		return $maintenance;
 	}

@@ -35,6 +35,18 @@ class BotTraitService
 			'aptitude_communication' => 45,
 			'gout_harcelement' => 30,
 			'persistance_tactique' => 55,
+			'patience_strategique' => 55,
+			'discipline_execution' => 60,
+			'volonte_domination' => !empty($profile['is_commander_profile']) ? 62 : 45,
+			'gout_usure' => 35,
+			'tendance_bluff' => !empty($profile['is_visible_socially']) ? 42 : 28,
+			'sens_opportunite' => 58,
+			'agressivite_verbale' => !empty($profile['is_visible_socially']) ? 40 : 24,
+			'discretion_sociale' => !empty($profile['is_visible_socially']) ? 28 : 52,
+			'fidelite_plan' => !empty($profile['is_commander_profile']) ? 68 : 55,
+			'capacite_relai' => 58,
+			'aptitude_intimidation' => isset($profile['aggression']) ? max(20, (int) round(((int) $profile['aggression']) * 0.7)) : 40,
+			'gout_chasse_ciblee' => isset($profile['aggression']) ? max(25, (int) round(((int) $profile['aggression']) * 0.75)) : 40,
 		);
 
 		if (!empty($profile['traits_json'])) {

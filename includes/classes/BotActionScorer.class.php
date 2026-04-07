@@ -7,14 +7,19 @@ class BotActionScorer
 		$profileDoctrine = isset($snapshot['bot']['doctrine']) ? $snapshot['bot']['doctrine'] : '';
 		$role = isset($snapshot['state']['role_primary']) ? $snapshot['state']['role_primary'] : 'economiste';
 		$campaignBoost = empty($snapshot['campaigns']) ? 0 : 10;
+		$bestTarget = !empty($snapshot['best_target']) ? $snapshot['best_target'] : array();
+		$zoneContext = isset($snapshot['zone_context']['current_zone']) ? $snapshot['zone_context']['current_zone'] : array();
+		$territorialZone = isset($snapshot['territorial_zone']) ? $snapshot['territorial_zone'] : array();
+		$learning = isset($snapshot['learning']) ? $snapshot['learning'] : array();
+		$globalStrategy = isset($snapshot['global_strategy']['strategic_state']) ? $snapshot['global_strategy']['strategic_state'] : array();
+		$actionMetrics = !empty($learning['action_metrics']) && is_array($learning['action_metrics']) ? $learning['action_metrics'] : array();
+		$targetSignal = !empty($learning['target_signal']) ? $learning['target_signal'] : array();
 		$results = array();
 
 		foreach ($actions as $action) {
 			$coherenceProfile = $this->profileCoherence($action['action_type'], $profileDoctrine, $role);
 			$coherenceDoctrine = $this->doctrineCoherence($action['action_type'], $profileDoctrine);
 			$coherenceRole = $this->roleCoherence($action['action_type'], $role);
-			$bestTarget = !empty($snapshot['best_target']) ? $snapshot['best_target'] : array();
-			$zoneContext = isset($snapshot['zone_context']['current_zone']) ? $snapshot['zone_context']['current_zone'] : array();
 			$opportunity = empty($bestTarget) ? 0 : min(18, max(0, (float) $bestTarget['opportunity_score'] / 6));
 			$cost = $this->estimateCostPenalty($action['action_type'], isset($action['payload']) ? $action['payload'] : array());
 			$queuePenalty = min(15, ((int) $snapshot['queue_state']['building'] + (int) $snapshot['queue_state']['shipyard'] + (int) $snapshot['queue_state']['research']) * 2);
@@ -26,11 +31,23 @@ class BotActionScorer
 			$cooldownPenalty = !empty($snapshot['state']['cooldown_until']) && (int) $snapshot['state']['cooldown_until'] > TIMESTAMP ? 8 : 0;
 			$tacticalPenalty = $this->tacticalIncoherencePenalty($action['action_type'], $snapshot, $decision);
 			$territorialValue = min(14, isset($zoneContext['strategic_value']) ? (int) round($zoneContext['strategic_value'] / 8) : 0);
+			$territorialValue += min(10, isset($territorialZone['strategic_importance']) ? (int) round($territorialZone['strategic_importance'] / 12) : 0);
 			$psychologicalValue = min(12, isset($bestTarget['psychological_score']) ? (int) round($bestTarget['psychological_score'] / 10) : 0);
 			$continuityValue = $this->continuityValue($action, $decision, $snapshot);
 			$informationValue = $this->informationValue($action, $bestTarget);
+			$directBenefit = (float) $action['benefit'];
+			$deferredBenefit = $this->deferredBenefit($action, $snapshot, $decision, $territorialZone, $targetSignal);
+			$relayValue = $this->relayValue($action, $decision, $snapshot, $globalStrategy);
+			$learningBoost = $this->learningBoost($action, $actionMetrics, $learning);
+			$psychologicalMomentum = min(10, max(0, isset($targetSignal['pressure_memory']) ? (int) round($targetSignal['pressure_memory'] / 12) : 0));
+			$successProbability = min(10, max(0, (float) $action['confidence'] / 10));
+			$redundancyPenalty = $this->redundancyPenalty($action, $snapshot);
+			$timingPenalty = $this->timingIncoherencePenalty($action, $decision, $snapshot);
+			$exposurePenalty = $this->exposurePenalty($action, $snapshot, $decision);
+			$opportunityCost = $queuePenalty + (int) min(8, max(0, count(isset($snapshot['own_fleets']) ? $snapshot['own_fleets'] : array()) * 2));
 
-			$utility = (float) $action['benefit']
+			$utility = $directBenefit
+				+ $deferredBenefit
 				+ $coherenceProfile
 				+ $coherenceDoctrine
 				+ $coherenceRole
@@ -42,17 +59,25 @@ class BotActionScorer
 				+ $territorialValue
 				+ $psychologicalValue
 				+ $continuityValue
+				+ $relayValue
+				+ $learningBoost
+				+ $psychologicalMomentum
 				+ $informationValue
 				+ $faisabilite
-				+ min(10, (float) $action['confidence'] / 10)
+				+ $successProbability
 				- (float) $cost
 				- (float) $action['risk']
 				- $chargeLogistique
-				- $queuePenalty;
+				- $opportunityCost;
 			$utility -= $cooldownPenalty;
 			$utility -= $tacticalPenalty;
+			$utility -= $redundancyPenalty;
+			$utility -= $timingPenalty;
+			$utility -= $exposurePenalty;
 
 			$action['utility'] = round($utility, 2);
+			$action['benefice_direct'] = round($directBenefit, 2);
+			$action['benefice_differe'] = round($deferredBenefit, 2);
 			$action['estimated_cost'] = $cost;
 			$action['estimated_risk'] = (float) $action['risk'];
 			$action['estimated_delay'] = !empty($action['due_delay']) ? (int) $action['due_delay'] : 0;
@@ -257,5 +282,131 @@ class BotActionScorer
 		}
 
 		return $value;
+	}
+
+	protected function deferredBenefit(array $action, array $snapshot, array $decision, array $territorialZone, array $targetSignal)
+	{
+		$value = 0;
+		if (!empty($action['payload']['prepare_hidden'])) {
+			$value += 6;
+		}
+
+		if ($action['action_type'] === 'send_spy') {
+			$value += 5;
+		}
+
+		if ($action['action_type'] === 'presence_ping' && isset($decision['primary_need']) && in_array($decision['primary_need'], array('besoin_presence_continue', 'besoin_releve'), true)) {
+			$value += 7;
+		}
+
+		if (!empty($territorialZone['pressure_need'])) {
+			$value += min(8, (int) round($territorialZone['pressure_need'] / 18));
+		}
+
+		if (!empty($targetSignal['territorial_window'])) {
+			$value += min(6, (int) round($targetSignal['territorial_window'] / 18));
+		}
+
+		return $value;
+	}
+
+	protected function relayValue(array $action, array $decision, array $snapshot, array $globalStrategy)
+	{
+		$value = 0;
+		if (!empty($action['payload']['relay_value'])) {
+			$value += 8;
+		}
+
+		if (!empty($action['payload']['coverage_sociale'])) {
+			$value += 5;
+		}
+
+		if (!empty($action['payload']['continuity_value'])) {
+			$value += 5;
+		}
+
+		if (isset($decision['intention']) && in_array($decision['intention'], array('relayer_offensive', 'preparer_releve', 'rester_visible'), true)) {
+			$value += 4;
+		}
+
+		$currentZone = !empty($snapshot['zone_context']['current_zone']['zone_reference']) ? $snapshot['zone_context']['current_zone']['zone_reference'] : '';
+		if ($currentZone !== '' && !empty($globalStrategy['coverage_zones'])) {
+			foreach ($globalStrategy['coverage_zones'] as $zone) {
+				if (!empty($zone['zone_reference']) && $zone['zone_reference'] === $currentZone) {
+					$value += min(8, (int) round($zone['coverage_need'] / 15));
+					break;
+				}
+			}
+		}
+
+		return $value;
+	}
+
+	protected function learningBoost(array $action, array $actionMetrics, array $learning)
+	{
+		$value = 0;
+		if (!empty($actionMetrics[$action['action_type']]['score_value'])) {
+			$value += min(10, max(-6, (((float) $actionMetrics[$action['action_type']]['score_value']) - 50) / 8));
+		}
+
+		if (!empty($learning['profile_metric']['score_value'])) {
+			$value += min(6, max(-4, (((float) $learning['profile_metric']['score_value']) - 50) / 12));
+		}
+
+		if (!empty($learning['commander_metric']['score_value'])) {
+			$value += min(5, max(-4, (((float) $learning['commander_metric']['score_value']) - 50) / 14));
+		}
+
+		return $value;
+	}
+
+	protected function redundancyPenalty(array $action, array $snapshot)
+	{
+		$penalty = 0;
+		if ($action['action_type'] === 'presence_ping' && !empty($snapshot['state']['action_queue_size']) && (int) $snapshot['state']['action_queue_size'] >= 3) {
+			$penalty += 4;
+		}
+
+		if (in_array($action['action_type'], array('send_spy', 'send_raid'), true) && !empty($snapshot['own_fleets'])) {
+			$penalty += min(10, count($snapshot['own_fleets']) * 2);
+		}
+
+		return $penalty;
+	}
+
+	protected function timingIncoherencePenalty(array $action, array $decision, array $snapshot)
+	{
+		$penalty = 0;
+		if (!empty($snapshot['state']['paused_until']) && (int) $snapshot['state']['paused_until'] > TIMESTAMP) {
+			$penalty += 20;
+		}
+
+		if (!empty($action['payload']['target_logical']) && $action['payload']['target_logical'] === 'latent' && in_array($action['action_type'], array('send_spy', 'send_raid'), true)) {
+			$penalty += 12;
+		}
+
+		if (isset($decision['primary_need']) && $decision['primary_need'] === 'besoin_discretion' && !empty($action['payload']['target_social']) && $action['payload']['target_social'] === 'visible') {
+			$penalty += 10;
+		}
+
+		return $penalty;
+	}
+
+	protected function exposurePenalty(array $action, array $snapshot, array $decision)
+	{
+		$fatigue = isset($snapshot['dynamic']['fatigue']) ? (int) $snapshot['dynamic']['fatigue'] : 0;
+		$saturation = isset($snapshot['dynamic']['saturation_tactique']) ? (int) $snapshot['dynamic']['saturation_tactique'] : 0;
+		$pressure = isset($decision['threat_level']) ? (int) $decision['threat_level'] : 0;
+		$penalty = 0;
+
+		if ($action['action_type'] === 'queue_social_message' && $pressure >= 65 && $fatigue >= 55) {
+			$penalty += 6;
+		}
+
+		if ($action['action_type'] === 'send_raid') {
+			$penalty += min(12, (int) round(($fatigue + $saturation + $pressure) / 25));
+		}
+
+		return $penalty;
 	}
 }

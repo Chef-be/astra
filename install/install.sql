@@ -377,6 +377,18 @@ CREATE TABLE `%PREFIX%bot_traits` (
   `aptitude_communication` tinyint(3) unsigned NOT NULL DEFAULT '50',
   `gout_harcelement` tinyint(3) unsigned NOT NULL DEFAULT '30',
   `persistance_tactique` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `patience_strategique` tinyint(3) unsigned NOT NULL DEFAULT '55',
+  `discipline_execution` tinyint(3) unsigned NOT NULL DEFAULT '60',
+  `volonte_domination` tinyint(3) unsigned NOT NULL DEFAULT '45',
+  `gout_usure` tinyint(3) unsigned NOT NULL DEFAULT '35',
+  `tendance_bluff` tinyint(3) unsigned NOT NULL DEFAULT '30',
+  `sens_opportunite` tinyint(3) unsigned NOT NULL DEFAULT '55',
+  `agressivite_verbale` tinyint(3) unsigned NOT NULL DEFAULT '35',
+  `discretion_sociale` tinyint(3) unsigned NOT NULL DEFAULT '45',
+  `fidelite_plan` tinyint(3) unsigned NOT NULL DEFAULT '55',
+  `capacite_relai` tinyint(3) unsigned NOT NULL DEFAULT '55',
+  `aptitude_intimidation` tinyint(3) unsigned NOT NULL DEFAULT '40',
+  `gout_chasse_ciblee` tinyint(3) unsigned NOT NULL DEFAULT '40',
   `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`bot_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -399,6 +411,14 @@ CREATE TABLE `%PREFIX%bot_dynamic_state` (
   `envie_vengeance` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `disponibilite_sociale` tinyint(3) unsigned NOT NULL DEFAULT '40',
   `excitation_offensive` tinyint(3) unsigned NOT NULL DEFAULT '25',
+  `niveau_frustration` tinyint(3) unsigned NOT NULL DEFAULT '15',
+  `pression_performance` tinyint(3) unsigned NOT NULL DEFAULT '20',
+  `desir_revanche` tinyint(3) unsigned NOT NULL DEFAULT '10',
+  `confiance_chef` tinyint(3) unsigned NOT NULL DEFAULT '55',
+  `saturation_tactique` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `disponibilite_mentale` tinyint(3) unsigned NOT NULL DEFAULT '60',
+  `stabilite_operationnelle` tinyint(3) unsigned NOT NULL DEFAULT '55',
+  `intensite_engagement` tinyint(3) unsigned NOT NULL DEFAULT '25',
   `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`bot_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -563,6 +583,64 @@ CREATE TABLE `%PREFIX%bot_engine_runs` (
   `error_summary` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `run_lookup` (`universe`,`phase`,`status`,`started_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_global_strategy` (
+  `universe` int(11) unsigned NOT NULL,
+  `strategic_state_json` mediumtext,
+  `long_state_json` mediumtext,
+  `strategic_cycle_at` int(11) unsigned DEFAULT NULL,
+  `long_cycle_at` int(11) unsigned DEFAULT NULL,
+  `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`universe`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_territorial_zones` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) unsigned NOT NULL,
+  `zone_reference` varchar(16) NOT NULL,
+  `galaxy` int(11) unsigned NOT NULL,
+  `system` int(11) unsigned NOT NULL,
+  `activity_density` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `richness_score` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `hostility_score` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `raid_potential` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `expansion_interest` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `strategic_importance` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `bot_presence` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `campaign_count` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `coverage_need` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `pressure_need` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `dissuasion_need` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `tension_score` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `control_score` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `profitability_score` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `tension_state` varchar(16) NOT NULL DEFAULT 'faible',
+  `control_state` varchar(16) NOT NULL DEFAULT 'faible',
+  `rentability_state` varchar(16) NOT NULL DEFAULT 'faible',
+  `social_visibility_state` varchar(16) NOT NULL DEFAULT 'faible',
+  `campaign_state` varchar(16) NOT NULL DEFAULT 'idle',
+  `payload_json` mediumtext,
+  `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `zone_lookup` (`universe`,`zone_reference`),
+  KEY `priority_lookup` (`universe`,`strategic_importance`,`pressure_need`,`coverage_need`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_learning_metrics` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) unsigned NOT NULL,
+  `scope_type` varchar(32) NOT NULL,
+  `scope_reference` varchar(190) NOT NULL,
+  `metric_type` varchar(32) NOT NULL,
+  `sample_count` int(11) unsigned NOT NULL DEFAULT '0',
+  `success_count` int(11) unsigned NOT NULL DEFAULT '0',
+  `failure_count` int(11) unsigned NOT NULL DEFAULT '0',
+  `score_value` decimal(8,2) NOT NULL DEFAULT '0.00',
+  `payload_json` mediumtext,
+  `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `metric_lookup` (`universe`,`scope_type`,`scope_reference`,`metric_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `%PREFIX%bot_presence_snapshots` (
@@ -1730,6 +1808,8 @@ INSERT INTO `%PREFIX%cronjobs` (`cronjobID`, `name`, `isActive`, `min`, `hours`,
 (NULL, 'botcampaigns', 1, '*/10', '*', '*', '*', '*', 'BotCampaignCronjob', 0, NULL),
 (NULL, 'botcompliance', 1, '15', '*/2', '*', '*', '*', 'BotComplianceCronjob', 0, NULL),
 (NULL, 'botmaintenance', 1, '20,50', '*', '*', '*', '*', 'BotMaintenanceCronjob', 0, NULL),
+(NULL, 'botstrategic', 1, '*/30', '*', '*', '*', '*', 'BotStrategicCronjob', 0, NULL),
+(NULL, 'botlongcycle', 1, '12', '*/6', '*', '*', '*', 'BotLongCycleCronjob', 0, NULL),
 (NULL, 'missionprogress', 1, '*/15', '*', '*', '*', '*', 'MissionProgressCronjob', 0, NULL),
 (NULL, 'livechatretention', 1, '15', '3', '*', '*', '*', 'LiveChatRetentionCronjob', 0, NULL),
 (NULL, 'databasedump', 1, '30', '1', '*', '*', '1', 'DumpCronjob', 0, NULL),

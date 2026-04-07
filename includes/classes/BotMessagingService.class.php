@@ -108,6 +108,25 @@ class BotMessagingService
 			));
 
 		foreach ($socialMessages as $row) {
+			$payload = !empty($row['payload_json']) ? json_decode($row['payload_json'], true) : array();
+			if (!is_array($payload)) {
+				$payload = array();
+			}
+
+			if (!$this->shouldSendSocialMessage($row, $payload)) {
+				$db->update('UPDATE %%BOT_SOCIAL_MESSAGES%% SET status = :status, sent_at = :sentAt WHERE id = :id;', array(
+					':status' => 'failed',
+					':sentAt' => TIMESTAMP,
+					':id' => (int) $row['id'],
+				));
+
+				$journal->logActivity((int) $row['bot_user_id'], 'message_chat', sprintf('%s annule un message social redondant sur %s.', $row['bot_name'], $row['channel_key']), array(
+					'message' => $row['message_text'],
+					'payload' => $payload,
+				));
+				continue;
+			}
+
 			LiveChatService::createChannelMessage(
 				$row['channel_key'],
 				$row['bot_name'],
@@ -141,8 +160,58 @@ class BotMessagingService
 			'pression_locale' => 'Pression maintenue sur '.$coordinates.'. Rotation offensive en cours.',
 			'defense_zone' => 'Renforcement défensif engagé. La zone reste sous contrôle.',
 			'presence_visible' => 'Commandement Astra actif. Ordres et supervision en cours.',
+			'presence_continue' => 'Relève tactique engagée. La présence Astra reste continue sur '.$coordinates.'.',
+			'brouillage' => $target.' Des mouvements s’organisent. Tous les indices ne disent pas la même chose.',
+			'supervision' => 'Supervision stratégique en cours. Les zones chaudes restent sous observation.',
+			'test_diplomatique' => $target.' Votre secteur retient notre attention. Votre prochaine décision comptera.',
+			'mise_en_garde' => $target.' Le calme actuel ne doit pas être interprété comme un retrait.',
+			'ambiance_zone' => 'Activité accrue autour de '.$coordinates.'. Les relais Astra restent en place.',
 		);
 
 		return isset($templates[$templateKey]) ? trim($templates[$templateKey]) : 'Transmission tactique en cours.';
+	}
+
+	protected function shouldSendSocialMessage(array $row, array $payload)
+	{
+		$db = Database::get();
+		$templateKey = !empty($payload['template_key']) ? (string) $payload['template_key'] : '';
+		$recentFrequency = (int) $db->selectSingle('SELECT COUNT(*) AS count
+			FROM %%BOT_SOCIAL_MESSAGES%%
+			WHERE universe = :universe
+			  AND bot_user_id = :botUserId
+			  AND channel_key = :channelKey
+			  AND status = \'sent\'
+			  AND sent_at >= :since;', array(
+				':universe' => Universe::getEmulated(),
+				':botUserId' => (int) $row['bot_user_id'],
+				':channelKey' => (string) $row['channel_key'],
+				':since' => TIMESTAMP - 900,
+			), 'count');
+		$duplicateCount = (int) $db->selectSingle('SELECT COUNT(*) AS count
+			FROM %%BOT_SOCIAL_MESSAGES%%
+			WHERE universe = :universe
+			  AND bot_user_id = :botUserId
+			  AND channel_key = :channelKey
+			  AND status = \'sent\'
+			  AND message_text = :messageText
+			  AND sent_at >= :since;', array(
+				':universe' => Universe::getEmulated(),
+				':botUserId' => (int) $row['bot_user_id'],
+				':channelKey' => (string) $row['channel_key'],
+				':messageText' => (string) $row['message_text'],
+				':since' => TIMESTAMP - 3600,
+			), 'count');
+
+		$contextScore = 30;
+		$contextScore += !empty($payload['psychological_value']) ? 18 : 0;
+		$contextScore += !empty($payload['information_value']) ? 14 : 0;
+		$contextScore += !empty($payload['coverage_sociale']) ? 12 : 0;
+		$contextScore += !empty($payload['bluff_value']) ? 10 : 0;
+		$contextScore += !empty($payload['relay_value']) ? 8 : 0;
+		$contextScore += $templateKey === 'presence_continue' ? 8 : 0;
+		$contextScore -= min(24, $recentFrequency * 8);
+		$contextScore -= min(30, $duplicateCount * 18);
+
+		return $contextScore >= 28;
 	}
 }

@@ -17,7 +17,7 @@
  * @link https://github.com/ultimateXnova/ultimateXnova
  */
 
-define('DB_VERSION_REQUIRED', 13);
+define('DB_VERSION_REQUIRED', 14);
 define('DB_NAME'			, $database['databasename']);
 define('DB_PREFIX'			, $database['tableprefix']);
 
@@ -42,6 +42,8 @@ $dbTableNames	= array(
 	'BOT_DYNAMIC_STATE' => DB_PREFIX.'bot_dynamic_state',
 	'BOT_ENGINE_CONFIG' => DB_PREFIX.'bot_engine_config',
 	'BOT_ENGINE_RUNS'	=> DB_PREFIX.'bot_engine_runs',
+	'BOT_GLOBAL_STRATEGY' => DB_PREFIX.'bot_global_strategy',
+	'BOT_LEARNING_METRICS' => DB_PREFIX.'bot_learning_metrics',
 	'BOT_MEMORY'		=> DB_PREFIX.'bot_memory',
 	'BOT_MULTIACCOUNT_VALIDATION' => DB_PREFIX.'bot_multiaccount_validation',
 	'BOT_PRESENCE_SNAPSHOTS' => DB_PREFIX.'bot_presence_snapshots',
@@ -52,6 +54,7 @@ $dbTableNames	= array(
 	'BOT_SQUADS'		=> DB_PREFIX.'bot_squads',
 	'BOT_SQUAD_MEMBERS' => DB_PREFIX.'bot_squad_members',
 	'BOT_STATE'			=> DB_PREFIX.'bot_state',
+	'BOT_TERRITORIAL_ZONES' => DB_PREFIX.'bot_territorial_zones',
 	'BOT_TRAITS'		=> DB_PREFIX.'bot_traits',
 	'BUDDY'				=> DB_PREFIX.'buddy',
 	'BUDDY_REQUEST'		=> DB_PREFIX.'buddy_request',

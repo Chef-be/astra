@@ -4,29 +4,36 @@ class BotPopulationGovernor
 {
 	protected $presenceService;
 	protected $allianceService;
+	protected $globalStrategyService;
 
 	public function __construct()
 	{
 		require_once ROOT_PATH.'includes/classes/BotPresenceService.class.php';
 		require_once ROOT_PATH.'includes/classes/BotAllianceService.class.php';
+		require_once ROOT_PATH.'includes/classes/BotGlobalStrategyService.class.php';
 
 		$this->presenceService = new BotPresenceService();
 		$this->allianceService = new BotAllianceService();
+		$this->globalStrategyService = new BotGlobalStrategyService();
 	}
 
 	public function computeAndApply(array $config)
 	{
 		$db = Database::get();
+		$strategy = $this->globalStrategyService->getCurrentStrategy();
+		$strategicState = !empty($strategy['strategic_state']) ? $strategy['strategic_state'] : array();
 		$bots = $db->select('SELECT u.id, u.username, u.bot_profile_id, u.ally_id, p.target_online, p.target_social_online,
 				p.always_active, p.is_visible_socially, p.is_commander_profile, p.target_presence_min, p.target_presence_max,
 				bs.presence_logical, bs.presence_social, bs.hierarchy_status, bs.paused_until, bs.current_campaign_id, bs.is_online_forced,
-				bs.session_started_at, bs.session_target_until, bs.session_rest_until, bs.last_presence_change_at,
+				bs.session_started_at, bs.session_target_until, bs.session_rest_until, bs.last_presence_change_at, bs.structural_state_json,
 				bs.action_queue_size, bs.cooldown_until,
-				ds.fatigue, ds.saturation_logistique, ds.disponibilite_sociale, ds.intensite_campagne, ds.excitation_offensive
+				ds.fatigue, ds.saturation_logistique, ds.disponibilite_sociale, ds.intensite_campagne, ds.excitation_offensive,
+				pl.galaxy, pl.`system`
 			FROM %%USERS%% u
 			LEFT JOIN %%BOT_PROFILES%% p ON p.id = u.bot_profile_id
 			LEFT JOIN %%BOT_STATE%% bs ON bs.bot_user_id = u.id
 			LEFT JOIN %%BOT_DYNAMIC_STATE%% ds ON ds.bot_user_id = u.id
+			LEFT JOIN %%PLANETS%% pl ON pl.id = u.id_planet
 			WHERE u.universe = :universe AND u.is_bot = 1
 			ORDER BY COALESCE(p.always_active, 0) DESC, COALESCE(p.target_online, 0) DESC, COALESCE(bs.last_presence_change_at, 0) ASC, u.id ASC;', array(
 				':universe' => Universe::getEmulated(),
@@ -35,7 +42,7 @@ class BotPopulationGovernor
 		$targetOnline = $this->computeHourlyTarget($bots, $config);
 		$targetSocial = max(0, min((int) $config['target_social_total'], $targetOnline));
 		$defaultAlliance = $this->allianceService->ensureDefaultAlliance($config);
-		$selected = $this->selectOnlineBots($bots, $targetOnline);
+		$selected = $this->selectOnlineBots($bots, $targetOnline, $strategicState);
 		$selectedOnline = array();
 		$selectedSocial = array();
 		$relaySoonCount = 0;
@@ -54,6 +61,7 @@ class BotPopulationGovernor
 				$this->presenceService->applyPresence($botId, 'repos', 'discret', 'pause_administrative', false, array(
 					'session_rest_until' => (int) $bot['paused_until'],
 				));
+				$this->updateStructuralState($botId, $bot, 'reserve_froide', $strategicState, false);
 				$restingCount++;
 				continue;
 			}
@@ -73,6 +81,7 @@ class BotPopulationGovernor
 				$logical = $this->resolveLogicalPresence($bot);
 				$social = $shouldBeVisible ? $this->resolveSocialPresence($bot) : 'discret';
 				$this->presenceService->applyPresence($botId, $logical, $social, 'gouvernance_population', $isForced, $sessionMeta);
+				$this->updateStructuralState($botId, $bot, $this->selectedReserveTier($bot, $shouldBeVisible, !empty($selected[$botId]['relay_soon'])), $strategicState, true);
 				$selectedOnline[] = $botId;
 				if ($shouldBeVisible) {
 					$selectedSocial[] = $botId;
@@ -94,7 +103,10 @@ class BotPopulationGovernor
 			}
 
 			if (!empty($bot['session_rest_until']) && (int) $bot['session_rest_until'] > TIMESTAMP) {
+				$this->updateStructuralState($botId, $bot, 'reserve_froide', $strategicState, false);
 				$restingCount++;
+			} else {
+				$this->updateStructuralState($botId, $bot, 'reserve_chaude', $strategicState, false);
 			}
 
 			$this->presenceService->applyPresence($botId, 'latent', 'discret', 'gouvernance_population', false, $sessionMeta);
@@ -109,6 +121,7 @@ class BotPopulationGovernor
 			'forced_online' => $forcedCount,
 			'relay_soon' => $relaySoonCount,
 			'resting' => $restingCount,
+			'strategic_coverage_zones' => !empty($strategicState['coverage_zones']) ? count($strategicState['coverage_zones']) : 0,
 		);
 	}
 
@@ -147,7 +160,7 @@ class BotPopulationGovernor
 		return max(1, min(count($bots), (int) round((int) $config['target_online_total'] * $multiplier)));
 	}
 
-	protected function selectOnlineBots(array $bots, $targetOnline)
+	protected function selectOnlineBots(array $bots, $targetOnline, array $strategicState = array())
 	{
 		$selected = array();
 		$continuity = array();
@@ -171,18 +184,18 @@ class BotPopulationGovernor
 			}
 
 			if ($isOnline && $sessionActive) {
-				$bot['presence_score'] = $this->scoreMaintainConnected($bot);
+				$bot['presence_score'] = $this->scoreMaintainConnected($bot, $strategicState);
 				$continuity[] = $bot;
 				continue;
 			}
 
 			if ($restOver) {
-				$bot['presence_score'] = $this->scoreActivation($bot);
+				$bot['presence_score'] = $this->scoreActivation($bot, $strategicState);
 				$rotationReady[] = $bot;
 				continue;
 			}
 
-			$bot['presence_score'] = $this->scoreActivation($bot) - 12;
+			$bot['presence_score'] = $this->scoreActivation($bot, $strategicState) - 12;
 			$fallback[] = $bot;
 		}
 
@@ -221,7 +234,7 @@ class BotPopulationGovernor
 		return $leftScore > $rightScore ? -1 : 1;
 	}
 
-	protected function scoreMaintainConnected(array $bot)
+	protected function scoreMaintainConnected(array $bot, array $strategicState = array())
 	{
 		$valueActions = min(30, (int) $bot['action_queue_size'] * 8);
 		$importance = (!empty($bot['is_online_forced']) ? 35 : 0) + ($bot['hierarchy_status'] === 'chef' ? 20 : 0);
@@ -232,11 +245,12 @@ class BotPopulationGovernor
 		$cooldown = (!empty($bot['cooldown_until']) && (int) $bot['cooldown_until'] > TIMESTAMP) ? 14 : 0;
 		$saturation = min(22, (int) round(((int) $bot['saturation_logistique']) / 4));
 		$faibleUtilite = empty($bot['action_queue_size']) && empty($bot['current_campaign_id']) ? 12 : 0;
+		$zoneBias = $this->zoneBias($bot, $strategicState, 'coverage_zones') + $this->zoneBias($bot, $strategicState, 'offensive_zones');
 
-		return $valueActions + $importance + $social + $urgence + $risque - $fatigue - $cooldown - $saturation - $faibleUtilite;
+		return $valueActions + $importance + $social + $urgence + $risque + $zoneBias - $fatigue - $cooldown - $saturation - $faibleUtilite;
 	}
 
-	protected function scoreActivation(array $bot)
+	protected function scoreActivation(array $bot, array $strategicState = array())
 	{
 		$compatibilite = min(20, (int) $bot['target_online']) + ($bot['hierarchy_status'] === 'chef' ? 12 : 0);
 		$besoinSocial = (!empty($bot['is_visible_socially']) ? 8 : 0) + min(10, (int) round(((int) $bot['disponibilite_sociale']) / 10));
@@ -246,8 +260,9 @@ class BotPopulationGovernor
 		$redondance = empty($bot['is_commander_profile']) ? 4 : 0;
 		$fatigue = min(24, (int) round(((int) $bot['fatigue']) / 3));
 		$saturation = min(18, (int) round(((int) $bot['saturation_logistique']) / 5));
+		$zoneBias = $this->zoneBias($bot, $strategicState, 'coverage_zones') + $this->zoneBias($bot, $strategicState, 'offensive_zones') + $this->zoneBias($bot, $strategicState, 'defensive_zones');
 
-		return $compatibilite + $besoinSocial + $campagne + $disponibilite + $queueValue - $redondance - $fatigue - $saturation;
+		return $compatibilite + $besoinSocial + $campagne + $disponibilite + $queueValue + $zoneBias - $redondance - $fatigue - $saturation;
 	}
 
 	protected function requiresNewSession(array $bot)
@@ -348,5 +363,70 @@ class BotPopulationGovernor
 	protected function isLogicalOnline($presence)
 	{
 		return in_array($presence, array('connecte', 'engage', 'alerte', 'coordination', 'campagne', 'harcelement'), true);
+	}
+
+	protected function zoneBias(array $bot, array $strategicState, $key)
+	{
+		if (empty($bot['galaxy']) || empty($bot['system']) || empty($strategicState[$key]) || !is_array($strategicState[$key])) {
+			return 0;
+		}
+
+		$zoneReference = $bot['galaxy'].':'.$bot['system'];
+		foreach ($strategicState[$key] as $zone) {
+			if (!empty($zone['zone_reference']) && $zone['zone_reference'] === $zoneReference) {
+				if ($key === 'coverage_zones') {
+					return min(18, (int) round($zone['coverage_need'] / 8));
+				}
+				if ($key === 'defensive_zones') {
+					return min(16, (int) round($zone['dissuasion_need'] / 10));
+				}
+				return min(18, (int) round($zone['pressure_need'] / 9));
+			}
+		}
+
+		return 0;
+	}
+
+	protected function selectedReserveTier(array $bot, $isVisible, $relaySoon)
+	{
+		if (!empty($bot['current_campaign_id'])) {
+			return 'mission';
+		}
+
+		if ($relaySoon) {
+			return 'relai';
+		}
+
+		if ($isVisible) {
+			return 'social';
+		}
+
+		return 'active';
+	}
+
+	protected function updateStructuralState($botUserId, array $bot, $reserveTier, array $strategicState, $selected)
+	{
+		$current = array();
+		if (!empty($bot['structural_state_json'])) {
+			$decoded = json_decode($bot['structural_state_json'], true);
+			if (is_array($decoded)) {
+				$current = $decoded;
+			}
+		}
+
+		$zoneReference = (!empty($bot['galaxy']) && !empty($bot['system'])) ? $bot['galaxy'].':'.$bot['system'] : '';
+		$current['reserve_tier'] = $reserveTier;
+		$current['current_zone'] = $zoneReference;
+		$current['selected_online'] = $selected ? 1 : 0;
+		$current['coverage_bias'] = $this->zoneBias($bot, $strategicState, 'coverage_zones');
+		$current['offensive_bias'] = $this->zoneBias($bot, $strategicState, 'offensive_zones');
+		$current['defensive_bias'] = $this->zoneBias($bot, $strategicState, 'defensive_zones');
+		$current['last_governance_at'] = TIMESTAMP;
+
+		Database::get()->update('UPDATE %%BOT_STATE%% SET structural_state_json = :structuralStateJson, updated_at = :updatedAt WHERE bot_user_id = :botUserId;', array(
+			':structuralStateJson' => json_encode($current),
+			':updatedAt' => TIMESTAMP,
+			':botUserId' => (int) $botUserId,
+		));
 	}
 }
