@@ -1541,6 +1541,8 @@ CREATE TABLE `%PREFIX%users` (
   `show_fleets_active` BOOLEAN NOT NULL DEFAULT 1,
   `show_news_active` BOOLEAN NOT NULL DEFAULT 1,
   `is_bot` BOOLEAN NOT NULL DEFAULT 0,
+  `noob_protection_disabled` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `noob_protection_disabled_at` int(11) unsigned NOT NULL DEFAULT '0',
   `bot_profile_id` int(11) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `authlevel` (`authlevel`),

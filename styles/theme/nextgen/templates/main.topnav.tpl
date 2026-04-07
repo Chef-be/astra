@@ -42,6 +42,16 @@
                 </a>
               </li>
               {/if}
+              <li class="hover-underline d-flex align-items-center h-100">
+                <a class="text-white d-flex align-items-center text-decoration-none fs-12 m-0 position-relative" href="game.php?page=missions" data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                data-bs-html="true" title="Centre des missions">
+                  <i style="font-size:20px;" class="bi bi-clipboard2-check-fill {if $page == 'missions'}text-danger{/if}"></i>
+                  {if isset($missionsTopnav.badgeCount) && $missionsTopnav.badgeCount > 0}
+                  <span class="badge bg-{$missionsTopnav.badgeVariant}{if $missionsTopnav.badgeVariant == 'warning'} text-dark{/if}" style="position:absolute;right:-10px;top:2px;min-width:24px;box-shadow:0 0 0 2px rgba(6,10,16,0.94);">{$missionsTopnav.badgeCount}</span>
+                  {/if}
+                </a>
+              </li>
               {if isModuleAvailable($smarty.const.MODULE_MESSAGES)}
 
               <li class="hover-underline d-flex align-items-center h-100">

@@ -111,21 +111,18 @@ class ShowFleetMissilePage extends AbstractGamePage
 			$error[] = $LNG['fl_in_vacation_player'];
 		}
 
-		$sql = "SELECT total_points FROM %%USER_POINTS%% WHERE id_owner = :ownerId;";
+		if (DisableNoobProtectionOnAggression((int) $USER['id'], (int) $target['id_owner'])) {
+			$USER['noob_protection_disabled'] = 1;
+			$USER['noob_protection_disabled_at'] = TIMESTAMP;
+		}
 
-		$User2Points = $db->selectSingle($sql, array(
-        ':ownerId'  => $target['id_owner']
-    ));
-
-		$sql	= 'SELECT total_points
-		FROM %%USER_POINTS%%
-		WHERE id_owner = :userId;';
-
-		$USER	+= Database::get()->selectSingle($sql, array(
-			':userId'	=> $USER['id'],
+		$ownerProtectionContext = ResolveNoobProtectionPlayer($USER);
+		$targetProtectionContext = ResolveNoobProtectionPlayer(array_merge(
+			$targetUser,
+			array('id' => isset($target['id_owner']) ? $target['id_owner'] : 0)
 		));
 
-    $IsNoobProtec	= CheckNoobProtec($USER, $User2Points, $targetUser);
+    $IsNoobProtec	= CheckNoobProtec($ownerProtectionContext, $targetProtectionContext, $targetProtectionContext);
 
 		if ($IsNoobProtec['NoobPlayer']){
 			$error[] = $LNG['fl_week_player'];

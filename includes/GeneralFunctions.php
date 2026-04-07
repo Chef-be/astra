@@ -315,6 +315,9 @@ function makebr($text)
 
 function CheckNoobProtec($OwnerPlayer, $TargetPlayer, $Player)
 {
+	$OwnerPlayer = ResolveNoobProtectionPlayer($OwnerPlayer);
+	$TargetPlayer = ResolveNoobProtectionPlayer($TargetPlayer);
+	$Player = ResolveNoobProtectionPlayer($Player);
 	$config	= Config::get();
 	if (
 		$config->noobprotection == 0
@@ -328,6 +331,14 @@ function CheckNoobProtec($OwnerPlayer, $TargetPlayer, $Player)
 
 	return array(
 		'NoobPlayer' => (
+			empty($TargetPlayer['is_bot'])
+			&& empty($Player['is_bot'])
+			&& empty($TargetPlayer['noob_protection_disabled'])
+			&& empty($Player['noob_protection_disabled'])
+			&& isset($TargetPlayer['total_points'])
+			&& isset($OwnerPlayer['total_points'])
+			&& $TargetPlayer['total_points'] > 0
+			&&
 			/* WAHR:
 				Wenn Spieler mehr als 25000 Punkte hat UND
 				Wenn ZielSpieler weniger als 80% der Punkte des Spieler hat.
@@ -337,6 +348,13 @@ function CheckNoobProtec($OwnerPlayer, $TargetPlayer, $Player)
 			($TargetPlayer['total_points'] <= $config->noobprotectiontime) && // Default: 25.000
 			($OwnerPlayer['total_points'] > $TargetPlayer['total_points'] * $config->noobprotectionmulti)),
 		'StrongPlayer' => (
+			empty($OwnerPlayer['is_bot'])
+			&& empty($TargetPlayer['is_bot'])
+			&& empty($OwnerPlayer['noob_protection_disabled'])
+			&& isset($OwnerPlayer['total_points'])
+			&& isset($TargetPlayer['total_points'])
+			&& $TargetPlayer['total_points'] > 0
+			&&
 			/* WAHR:
 				Wenn Spieler weniger als 5000 Punkte hat UND
 				Mehr als das funfache der eigende Punkte hat
@@ -344,6 +362,116 @@ function CheckNoobProtec($OwnerPlayer, $TargetPlayer, $Player)
 			($OwnerPlayer['total_points'] < $config->noobprotectiontime) && // Default: 5.000
 			($OwnerPlayer['total_points'] * $config->noobprotectionmulti < $TargetPlayer['total_points'])),
 	);
+}
+
+function ResolveNoobProtectionPlayer($player)
+{
+	static $cache = array();
+	$defaults = array(
+		'id' => 0,
+		'userid' => 0,
+		'id_owner' => 0,
+		'total_points' => 0,
+		'onlinetime' => 0,
+		'banaday' => 0,
+		'is_bot' => 0,
+		'noob_protection_disabled' => 0,
+		'noob_protection_disabled_at' => 0,
+	);
+
+	if (!is_array($player)) {
+		$player = array();
+	}
+
+	$resolved = array_merge($defaults, $player);
+	$userId = 0;
+	foreach (array('id', 'userid', 'id_owner') as $key) {
+		if (!empty($resolved[$key])) {
+			$userId = (int) $resolved[$key];
+			break;
+		}
+	}
+
+	if ($userId <= 0) {
+		return $resolved;
+	}
+
+	if (!isset($cache[$userId])) {
+		$row = Database::get()->selectSingle('SELECT
+				u.id,
+				u.onlinetime,
+				u.banaday,
+				u.is_bot,
+				u.noob_protection_disabled,
+				u.noob_protection_disabled_at,
+				COALESCE(up.total_points, 0) AS total_points
+			FROM %%USERS%% u
+			LEFT JOIN %%USER_POINTS%% up
+				ON up.id_owner = u.id
+			   AND up.universe = u.universe
+			WHERE u.id = :userId
+			LIMIT 1;', array(
+				':userId' => $userId,
+			));
+
+		$cache[$userId] = empty($row) ? $defaults : array_merge($defaults, $row);
+	}
+
+	foreach ($cache[$userId] as $key => $value) {
+		if (!isset($player[$key]) || $player[$key] === null || $player[$key] === '') {
+			$resolved[$key] = $value;
+		}
+	}
+
+	return $resolved;
+}
+
+function HasAutomaticNoobProtection($player)
+{
+	$player = ResolveNoobProtectionPlayer($player);
+	$config = Config::get();
+
+	if (
+		$config->noobprotection == 0
+		|| $config->noobprotectiontime == 0
+		|| !empty($player['is_bot'])
+		|| !empty($player['noob_protection_disabled'])
+	) {
+		return false;
+	}
+
+	return isset($player['total_points']) && (int) $player['total_points'] > 0 && (int) $player['total_points'] < (int) $config->noobprotectiontime;
+}
+
+function DisableNoobProtectionOnAggression($attackerUserId, $targetUserId)
+{
+	$attackerUserId = (int) $attackerUserId;
+	$targetUserId = (int) $targetUserId;
+
+	if ($attackerUserId <= 0 || $targetUserId <= 0) {
+		return false;
+	}
+
+	$attacker = ResolveNoobProtectionPlayer(array('id' => $attackerUserId));
+	$target = ResolveNoobProtectionPlayer(array('id' => $targetUserId));
+
+	if (!HasAutomaticNoobProtection($attacker)) {
+		return false;
+	}
+
+	if (empty($target['is_bot']) && HasAutomaticNoobProtection($target)) {
+		return false;
+	}
+
+	Database::get()->update('UPDATE %%USERS%% SET
+		noob_protection_disabled = 1,
+		noob_protection_disabled_at = :disabledAt
+		WHERE id = :userId;', array(
+			':disabledAt' => TIMESTAMP,
+			':userId' => $attackerUserId,
+		));
+
+	return true;
 }
 
 function shortly_number($number, $decial = NULL)

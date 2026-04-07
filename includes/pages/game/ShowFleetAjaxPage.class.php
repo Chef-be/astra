@@ -133,7 +133,7 @@ class ShowFleetAjaxPage extends AbstractGamePage
 		planet.system as `system`,
 		planet.planet as planet,
 		planet.planet_type as planet_type,
-		total_points, onlinetime, urlaubs_modus, banaday, authattack
+		total_points, onlinetime, urlaubs_modus, banaday, authattack, is_bot
 		FROM %%PLANETS%% planet
 		INNER JOIN %%USERS%% user ON planet.id_owner = user.id
 		LEFT JOIN %%USER_POINTS%% as stat ON stat.id_owner = user.id
@@ -156,15 +156,15 @@ class ShowFleetAjaxPage extends AbstractGamePage
 			if (IsVacationMode($targetData)) {
 				$this->sendData(605, $LNG['fa_vacation_mode']);
 			}
-			$sql	= 'SELECT total_points
-			FROM %%USER_POINTS%%
-			WHERE id_owner = :userId;';
-
-			$USER	+= Database::get()->selectSingle($sql, array(
-				':userId'	=> $USER['id'],
+			$ownerProtectionContext = ResolveNoobProtectionPlayer($USER);
+			$targetProtectionContext = ResolveNoobProtectionPlayer(array(
+				'id' => isset($targetData['id_owner']) ? $targetData['id_owner'] : 0,
+				'onlinetime' => isset($targetData['onlinetime']) ? $targetData['onlinetime'] : 0,
+				'banaday' => isset($targetData['banaday']) ? $targetData['banaday'] : 0,
+				'is_bot' => isset($targetData['is_bot']) ? $targetData['is_bot'] : 0,
 			));
 
-			$IsNoobProtec	= CheckNoobProtec($USER, $targetData, $targetData);
+			$IsNoobProtec	= CheckNoobProtec($ownerProtectionContext, $targetProtectionContext, $targetProtectionContext);
 
 			if ($IsNoobProtec['NoobPlayer']) {
 				$this->sendData(603, $LNG['fa_week_player']);

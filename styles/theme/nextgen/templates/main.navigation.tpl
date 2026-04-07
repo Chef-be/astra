@@ -49,9 +49,6 @@
         <a class="{if $page == 'resources'}menuActive{/if}" href="game.php?page=resources">{$LNG.lm_resources}</a>
       </li>
       {/if}
-      <li>
-        <a class="{if $page == 'missions'}menuActive{/if}" href="game.php?page=missions">Missions</a>
-      </li>
       {if isModuleAvailable($smarty.const.MODULE_OFFICIER) || isModuleAvailable($smarty.const.MODULE_DMEXTRAS)}
       <li>
         <a class="{if $page == 'officier'}menuActive{/if}" href="game.php?page=officier">{$LNG.lm_officiers}</a>

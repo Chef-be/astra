@@ -323,15 +323,14 @@ class ShowFleetStep3Page extends AbstractGamePage
 				)));
 			}
 
-			$sql	= 'SELECT total_points
-			FROM %%USER_POINTS%%
-			WHERE id_owner = :userId;';
+			if (in_array($targetMission, array(1, 2, 9), true) && DisableNoobProtectionOnAggression((int) $USER['id'], (int) $targetPlayerData['id'])) {
+				$USER['noob_protection_disabled'] = 1;
+				$USER['noob_protection_disabled_at'] = TIMESTAMP;
+			}
 
-			$USER	+= Database::get()->selectSingle($sql, array(
-				':userId'	=> $USER['id'],
-			));
-
-			$IsNoobProtec	= CheckNoobProtec($USER, $targetPlayerData, $targetPlayerData);
+			$ownerProtectionContext = ResolveNoobProtectionPlayer($USER);
+			$targetProtectionContext = ResolveNoobProtectionPlayer($targetPlayerData);
+			$IsNoobProtec	= CheckNoobProtec($ownerProtectionContext, $targetProtectionContext, $targetProtectionContext);
 
 			if ($IsNoobProtec['NoobPlayer'])
 			{

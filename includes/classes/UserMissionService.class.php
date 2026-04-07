@@ -4,6 +4,45 @@ require_once ROOT_PATH.'includes/classes/NotificationService.class.php';
 
 class UserMissionService
 {
+	public function getPlayerSummary($userId)
+	{
+		$this->ensureAssignmentsForUser($userId);
+		$this->refreshUserProgress($userId);
+
+		$rows = Database::get()->select('SELECT status, COUNT(*) AS count
+			FROM %%USER_MISSIONS%%
+			WHERE user_id = :userId AND universe = :universe
+			GROUP BY status;', array(
+				':userId' => (int) $userId,
+				':universe' => Universe::current(),
+			));
+
+		$summary = array(
+			'inProgress' => 0,
+			'claimable' => 0,
+			'claimed' => 0,
+		);
+
+		foreach ($rows as $row) {
+			switch ($row['status']) {
+				case 'in_progress':
+					$summary['inProgress'] = (int) $row['count'];
+					break;
+				case 'claimable':
+					$summary['claimable'] = (int) $row['count'];
+					break;
+				case 'claimed':
+					$summary['claimed'] = (int) $row['count'];
+					break;
+			}
+		}
+
+		$summary['badgeCount'] = $summary['claimable'] > 0 ? $summary['claimable'] : $summary['inProgress'];
+		$summary['badgeVariant'] = $summary['claimable'] > 0 ? 'warning' : 'secondary';
+
+		return $summary;
+	}
+
 	public function getPlayerSnapshot($userId)
 	{
 		global $LNG;

@@ -168,6 +168,7 @@ abstract class AbstractGamePage
 	{
 		global $PLANET, $LNG, $USER, $THEME, $resource, $reslist, $config;
 		require_once ROOT_PATH.'includes/classes/BrandingService.class.php';
+		require_once ROOT_PATH.'includes/classes/UserMissionService.class.php';
 		$db = Database::get();
 
 
@@ -239,6 +240,9 @@ abstract class AbstractGamePage
 				AND message_type IN (1, 2);", array(
 			':userId' => $USER['id'],
 		), 'count');
+
+		$missionService = new UserMissionService();
+		$missionSummary = $missionService->getPlayerSummary($USER['id']);
 		
 		$this->assign(array(
 			'PlanetSelect'		=> $PlanetSelect,
@@ -258,6 +262,7 @@ abstract class AbstractGamePage
 			'hasGate'			=> $PLANET[$resource[43]] > 0,
 			'gameName'			=> $config->game_name,
 			'brandLogoUrl'		=> BrandingService::getActiveLogoUrl(),
+			'missionsTopnav'	=> $missionSummary,
 			'discordUrl'		=> (!empty($config->discord_active) && filter_var($config->discord_url, FILTER_VALIDATE_URL)) ? $config->discord_url : false,
 			'discordEnabled'	=> !empty($config->discord_active) && filter_var($config->discord_url, FILTER_VALIDATE_URL),
 			//overwrite messages, to do : delete from other pages
