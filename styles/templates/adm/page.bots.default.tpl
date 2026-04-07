@@ -171,145 +171,164 @@
     </div>
 
     <div class="col-12 col-xxl-4">
-      <div class="admin-card h-100">
-        <div class="admin-card__body">
-          <div class="bots-section-heading">
+      <details class="admin-fold admin-fold--compact bots-inline-fold">
+        <summary class="admin-fold__summary">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
-              <h2 class="bots-section-title">Pilotage rapide</h2>
-              <p class="bots-section-text">Actions immédiates sur le moteur, la relève, les campagnes et la conformité.</p>
+              <h2 class="bots-section-title mb-0">Pilotage rapide</h2>
+              <p class="bots-section-text mb-0">Actions moteur et état global. Replié par défaut pour garder la permanence lisible.</p>
             </div>
+            <span class="bots-pill">{if $botSnapshot.config.engine_enabled}moteur actif{else}moteur coupé{/if}</span>
           </div>
+        </summary>
+        <div class="admin-fold__body">
+          <div class="admin-card h-100">
+            <div class="admin-card__body">
+              <div class="bots-quick-actions bots-quick-actions--single">
+                <a class="bots-action-tile" href="?page=bots&mode=runEngine&phase=presence&limit=24">
+                  <span class="bots-action-tile__title">Recalculer la présence</span>
+                  <span class="bots-action-tile__text">Réévalue l’ancrage, la rotation et la visibilité sociale.</span>
+                </a>
+                <a class="bots-action-tile" href="?page=bots&mode=runEngine&phase=planning&limit=18">
+                  <span class="bots-action-tile__title">Planifier les décisions</span>
+                  <span class="bots-action-tile__text">Actualise besoins, objectifs et actions candidates.</span>
+                </a>
+                <a class="bots-action-tile" href="?page=bots&mode=runEngine&phase=execution&limit=24">
+                  <span class="bots-action-tile__title">Exécuter la file</span>
+                  <span class="bots-action-tile__text">Traite la file d’actions dans la limite du budget.</span>
+                </a>
+                <a class="bots-action-tile" href="?page=bots&mode=runEngine&phase=messaging&limit=24">
+                  <span class="bots-action-tile__title">Débloquer la messagerie</span>
+                  <span class="bots-action-tile__text">Diffuse les messages privés et sociaux en attente.</span>
+                </a>
+                <a class="bots-action-tile" href="?page=bots&mode=runEngine&phase=compliance&limit=50">
+                  <span class="bots-action-tile__title">Resynchroniser la conformité</span>
+                  <span class="bots-action-tile__text">Valide emails partagés, multi-comptes et conformité bot.</span>
+                </a>
+                <a class="bots-action-tile" href="?page=bots&mode=runEngine&phase=maintenance&limit=24">
+                  <span class="bots-action-tile__title">Maintenance et reprises</span>
+                  <span class="bots-action-tile__text">Nettoie mémoire, campagnes, verrous et actions bloquées.</span>
+                </a>
+              </div>
 
-          <div class="bots-quick-actions bots-quick-actions--single">
-            <a class="bots-action-tile" href="?page=bots&mode=runEngine&phase=presence&limit=24">
-              <span class="bots-action-tile__title">Recalculer la présence</span>
-              <span class="bots-action-tile__text">Réévalue l’ancrage, la rotation et la visibilité sociale.</span>
-            </a>
-            <a class="bots-action-tile" href="?page=bots&mode=runEngine&phase=planning&limit=18">
-              <span class="bots-action-tile__title">Planifier les décisions</span>
-              <span class="bots-action-tile__text">Actualise besoins, objectifs et actions candidates.</span>
-            </a>
-            <a class="bots-action-tile" href="?page=bots&mode=runEngine&phase=execution&limit=24">
-              <span class="bots-action-tile__title">Exécuter la file</span>
-              <span class="bots-action-tile__text">Traite la file d’actions dans la limite du budget.</span>
-            </a>
-            <a class="bots-action-tile" href="?page=bots&mode=runEngine&phase=messaging&limit=24">
-              <span class="bots-action-tile__title">Débloquer la messagerie</span>
-              <span class="bots-action-tile__text">Diffuse les messages privés et sociaux en attente.</span>
-            </a>
-            <a class="bots-action-tile" href="?page=bots&mode=runEngine&phase=compliance&limit=50">
-              <span class="bots-action-tile__title">Resynchroniser la conformité</span>
-              <span class="bots-action-tile__text">Valide emails partagés, multi-comptes et conformité bot.</span>
-            </a>
-            <a class="bots-action-tile" href="?page=bots&mode=runEngine&phase=maintenance&limit=24">
-              <span class="bots-action-tile__title">Maintenance et reprises</span>
-              <span class="bots-action-tile__text">Nettoie mémoire, campagnes, verrous et actions bloquées.</span>
-            </a>
-          </div>
-
-          <div class="bots-status-panel mt-3">
-            <div class="bots-status-row">
-              <span>État moteur</span>
-              <strong>{if $botSnapshot.config.engine_enabled}Actif{else}Désactivé{/if}</strong>
-            </div>
-            <div class="bots-status-row">
-              <span>Hiérarchie</span>
-              <strong>{if $botSnapshot.config.enable_command_hierarchy}Active{else}Coupée{/if}</strong>
-            </div>
-            <div class="bots-status-row">
-              <span>Campagnes</span>
-              <strong>{if $botSnapshot.config.enable_campaigns}Actives{else}Coupées{/if}</strong>
-            </div>
-            <div class="bots-status-row">
-              <span>Messagerie</span>
-              <strong>{if $botSnapshot.config.enable_private_messages || $botSnapshot.config.enable_social_messages}Active{else}Coupée{/if}</strong>
-            </div>
-            <div class="bots-status-row">
-              <span>Adresse commune</span>
-              <strong>{$botSnapshot.config.shared_email|escape}</strong>
+              <div class="bots-status-panel mt-3">
+                <div class="bots-status-row">
+                  <span>État moteur</span>
+                  <strong>{if $botSnapshot.config.engine_enabled}Actif{else}Désactivé{/if}</strong>
+                </div>
+                <div class="bots-status-row">
+                  <span>Hiérarchie</span>
+                  <strong>{if $botSnapshot.config.enable_command_hierarchy}Active{else}Coupée{/if}</strong>
+                </div>
+                <div class="bots-status-row">
+                  <span>Campagnes</span>
+                  <strong>{if $botSnapshot.config.enable_campaigns}Actives{else}Coupées{/if}</strong>
+                </div>
+                <div class="bots-status-row">
+                  <span>Messagerie</span>
+                  <strong>{if $botSnapshot.config.enable_private_messages || $botSnapshot.config.enable_social_messages}Active{else}Coupée{/if}</strong>
+                </div>
+                <div class="bots-status-row">
+                  <span>Adresse commune</span>
+                  <strong>{$botSnapshot.config.shared_email|escape}</strong>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </details>
     </div>
   </section>
 
-  <section class="row g-4 mb-4">
-    <div class="col-12 col-xl-7">
-      <div class="admin-card h-100">
-        <div class="admin-card__body">
-          <div class="bots-section-heading">
-            <div>
-              <h2 class="bots-section-title">Campagnes en cours</h2>
-              <p class="bots-section-text">Campagnes offensives, de pression ou de siège maintenues avec phase, relais, visibilité et narration active.</p>
+  <details class="admin-fold admin-fold--compact mb-4">
+    <summary class="admin-fold__summary">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h2 class="bots-section-title mb-0">Théâtre opérationnel</h2>
+          <p class="bots-section-text mb-0">Campagnes en cours et posture des alliances. Replié par défaut pour éviter de perdre le fil.</p>
+        </div>
+        <span class="bots-pill">{$botSnapshot.metrics.active_campaigns} campagne(s)</span>
+      </div>
+    </summary>
+    <div class="admin-fold__body">
+      <section class="row g-4 mb-0">
+        <div class="col-12 col-xl-7">
+          <div class="admin-card h-100">
+            <div class="admin-card__body">
+              <div class="bots-section-heading">
+                <div>
+                  <h2 class="bots-section-title">Campagnes en cours</h2>
+                  <p class="bots-section-text">Campagnes offensives, de pression ou de siège maintenues avec phase, relais, visibilité et narration active.</p>
+                </div>
+                <span class="badge bg-secondary">{$botSnapshot.metrics.active_campaigns}</span>
+              </div>
+              <div class="bots-campaign-grid mb-3">
+                {foreach from=$botSnapshot.campaigns item=campaign name=campaignPreview}
+                  {if $smarty.foreach.campaignPreview.iteration <= 4}
+                  <article class="bots-campaign-card">
+                    <div class="bots-campaign-card__top">
+                      <span class="bots-pill">{$campaign.campaign_code}</span>
+                      <span class="bots-pill">{$campaign.phase_label}</span>
+                    </div>
+                    <h3 class="bots-campaign-card__title">{$campaign.mode_label}</h3>
+                    <div class="bots-campaign-card__target">{$campaign.focused_target|default:'Sans cible précise'}</div>
+                    <p class="bots-campaign-card__text">{$campaign.narrative}</p>
+                    <div class="bots-campaign-card__meta">
+                      <span>Intensité {$campaign.effective_intensity}</span>
+                      <span>Membres {$campaign.member_count}</span>
+                      <span>Relève {$campaign.relay_strategy_label|default:$campaign.relay_strategy}</span>
+                    </div>
+                  </article>
+                  {/if}
+                {foreachelse}
+                  <div class="admin-empty">Aucune campagne active.</div>
+                {/foreach}
+              </div>
+              <div class="small text-white-50">
+                Affichage synthétique. Les détails complets restent disponibles dans la supervision avancée et les runs moteur.
+              </div>
             </div>
-            <span class="badge bg-secondary">{$botSnapshot.metrics.active_campaigns}</span>
-          </div>
-          <div class="bots-campaign-grid mb-3">
-            {foreach from=$botSnapshot.campaigns item=campaign name=campaignPreview}
-              {if $smarty.foreach.campaignPreview.iteration <= 4}
-              <article class="bots-campaign-card">
-                <div class="bots-campaign-card__top">
-                  <span class="bots-pill">{$campaign.campaign_code}</span>
-                  <span class="bots-pill">{$campaign.phase_label}</span>
-                </div>
-                <h3 class="bots-campaign-card__title">{$campaign.mode_label}</h3>
-                <div class="bots-campaign-card__target">{$campaign.focused_target|default:'Sans cible précise'}</div>
-                <p class="bots-campaign-card__text">{$campaign.narrative}</p>
-                <div class="bots-campaign-card__meta">
-                  <span>Intensité {$campaign.effective_intensity}</span>
-                  <span>Membres {$campaign.member_count}</span>
-                  <span>Relève {$campaign.relay_strategy_label|default:$campaign.relay_strategy}</span>
-                </div>
-              </article>
-              {/if}
-            {foreachelse}
-              <div class="admin-empty">Aucune campagne active.</div>
-            {/foreach}
-          </div>
-          <div class="small text-white-50">
-            Affichage synthétique. Les détails complets restent disponibles dans la supervision avancée et les runs moteur.
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="col-12 col-xl-5">
-      <div class="admin-card h-100">
-        <div class="admin-card__body">
-          <div class="bots-section-heading">
-            <div>
-              <h2 class="bots-section-title">Théâtre d’alliance</h2>
-              <p class="bots-section-text">Posture des alliances bots, noyaux territoriaux et état-major courant.</p>
+        <div class="col-12 col-xl-5">
+          <div class="admin-card h-100">
+            <div class="admin-card__body">
+              <div class="bots-section-heading">
+                <div>
+                  <h2 class="bots-section-title">Théâtre d’alliance</h2>
+                  <p class="bots-section-text">Posture des alliances bots, noyaux territoriaux et état-major courant.</p>
+                </div>
+              </div>
+              <div class="bots-alliance-grid">
+                {foreach from=$botSnapshot.alliance_summaries item=alliance name=alliancePreview}
+                  {if $smarty.foreach.alliancePreview.iteration <= 4}
+                  <article class="bots-alliance-card">
+                    <div class="bots-alliance-card__top">
+                      <strong>{$alliance.ally_tag|default:$alliance.meta_tag}</strong>
+                      <span class="bots-pill">{$alliance.diplomacy_posture_label|default:'En attente'}</span>
+                    </div>
+                    <div class="bots-alliance-card__name">{$alliance.ally_name|default:$alliance.meta_name}</div>
+                    <div class="bots-alliance-card__text">
+                      Tension {$alliance.diplomacy.tension_level|default:0} · Commandants {$alliance.command_state.active_commanders|default:0} · Campagnes {$alliance.command_state.active_campaigns|default:0}
+                    </div>
+                    <div class="bots-alliance-card__zones">
+                      {foreach from=$alliance.territorial_core item=zone}
+                        <span class="bots-pill">{$zone.zone} · {$zone.total_bots}</span>
+                      {/foreach}
+                    </div>
+                  </article>
+                  {/if}
+                {foreachelse}
+                  <div class="admin-empty">Aucune alliance bots pilotée.</div>
+                {/foreach}
+              </div>
             </div>
           </div>
-          <div class="bots-alliance-grid">
-            {foreach from=$botSnapshot.alliance_summaries item=alliance name=alliancePreview}
-              {if $smarty.foreach.alliancePreview.iteration <= 4}
-              <article class="bots-alliance-card">
-                <div class="bots-alliance-card__top">
-                  <strong>{$alliance.ally_tag|default:$alliance.meta_tag}</strong>
-                  <span class="bots-pill">{$alliance.diplomacy_posture_label|default:'En attente'}</span>
-                </div>
-                <div class="bots-alliance-card__name">{$alliance.ally_name|default:$alliance.meta_name}</div>
-                <div class="bots-alliance-card__text">
-                  Tension {$alliance.diplomacy.tension_level|default:0} · Commandants {$alliance.command_state.active_commanders|default:0} · Campagnes {$alliance.command_state.active_campaigns|default:0}
-                </div>
-                <div class="bots-alliance-card__zones">
-                  {foreach from=$alliance.territorial_core item=zone}
-                    <span class="bots-pill">{$zone.zone} · {$zone.total_bots}</span>
-                  {/foreach}
-                </div>
-              </article>
-              {/if}
-            {foreachelse}
-              <div class="admin-empty">Aucune alliance bots pilotée.</div>
-            {/foreach}
-          </div>
         </div>
-      </div>
+      </section>
     </div>
-  </section>
+  </details>
 
   <details id="pilotage" class="bots-fold">
     <summary class="bots-fold__summary">

@@ -2,16 +2,76 @@
 
 <script>
 $(document).ready(function(){
-  $("#searchInServerSettings").on("keyup", function() {
-    var value = $(this).val().toLowerCase();
-    $("#serverSettings label").filter(function() {
-			if ($(this).text().toLowerCase().indexOf(value) > -1) {
-				$(this).parent().removeClass('d-none');
-			}else {
-				$(this).parent().addClass('d-none');
-			}
-    });
+  var activeSection = $('#server-general').attr('id');
+
+  $('#serverSettings .form-gorup').each(function() {
+		if ($(this).hasClass('admin-section-title') && this.id) {
+			activeSection = this.id;
+		}
+
+		$(this).attr('data-admin-section', activeSection || '');
   });
+
+  function syncServerGroupVisibility() {
+		$('#serverSettings .form-gorup').each(function() {
+			var isHidden = $(this).hasClass('admin-search-hidden') || $(this).hasClass('admin-section-hidden');
+			$(this).prop('hidden', isHidden);
+			if (isHidden) {
+				this.style.setProperty('display', 'none', 'important');
+			} else {
+				this.style.removeProperty('display');
+			}
+		});
+  }
+
+  function applyServerSearchFilter() {
+		var value = ($('#searchInServerSettings').val() || '').toLowerCase().trim();
+		$('#serverSettings .form-gorup').each(function() {
+			var text = $(this).text().toLowerCase();
+			var hasMatch = value === '' || text.indexOf(value) !== -1;
+			$(this).toggleClass('admin-search-hidden', !hasMatch);
+		});
+  }
+
+  function applyServerSectionFilter() {
+		var isMobile = window.matchMedia('(max-width: 991px)').matches;
+		var searchValue = ($('#searchInServerSettings').val() || '').trim();
+		var currentSection = $('.admin-section-link.is-active').attr('href');
+		currentSection = currentSection ? currentSection.replace('#', '') : $('#server-general').attr('id');
+
+		$('#serverSettings .form-gorup').each(function() {
+			if (!isMobile || searchValue !== '') {
+				$(this).removeClass('admin-section-hidden');
+				syncServerGroupVisibility();
+				return;
+			}
+
+			var section = $(this).attr('data-admin-section');
+			$(this).toggleClass('admin-section-hidden', section !== currentSection && !$(this).hasClass('admin-settings-toolbar') && !$(this).hasClass('admin-form-submitbar'));
+		});
+
+		syncServerGroupVisibility();
+  }
+
+  $("#searchInServerSettings").on("keyup", function() {
+		applyServerSearchFilter();
+		applyServerSectionFilter();
+  });
+
+  $('.admin-section-link').on('click', function(event) {
+		$('.admin-section-link').removeClass('is-active');
+		$(this).addClass('is-active');
+		if (window.matchMedia('(max-width: 991px)').matches) {
+			event.preventDefault();
+			applyServerSectionFilter();
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		}
+  });
+
+  $(window).on('resize', applyServerSectionFilter);
+  $('.admin-section-link[href="#server-general"]').addClass('is-active');
+  applyServerSearchFilter();
+  applyServerSectionFilter();
 });
 </script>
 

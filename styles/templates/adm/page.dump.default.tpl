@@ -33,20 +33,30 @@
 					<span class="admin-stat-pill">Export à la demande</span>
 				</div>
 			</div>
-			<div class="admin-field-card">
-				<label>{$LNG.du_choose_tables}</label>
-				<div class="admin-checkbox-grid">
-					{foreach $dumpData.sqlTables as $tableName}
-						<label class="admin-checkbox-card">
-							<input type="checkbox" class="form-check-input dbtable-checkbox" name="dbtables[]" value="{$tableName}">
-							<span>
-								<strong>{$tableName}</strong>
-								<span>Inclure dans l’export SQL</span>
-							</span>
-						</label>
-					{/foreach}
+			<details class="admin-fold admin-fold--compact" open>
+				<summary class="admin-fold__summary">
+					<div>
+						<h3 class="h5 mb-1">{$LNG.du_choose_tables}</h3>
+						<p class="text-white-50 mb-0">La liste complète reste accessible ici, mais n’écrase plus toute la page sur mobile.</p>
+					</div>
+					<span class="admin-pill">{$dumpData.sqlTables|@count} tables</span>
+				</summary>
+				<div class="admin-fold__body">
+					<div class="admin-field-card">
+						<div class="admin-checkbox-grid admin-checkbox-grid--scroll">
+							{foreach $dumpData.sqlTables as $tableName}
+								<label class="admin-checkbox-card">
+									<input type="checkbox" class="form-check-input dbtable-checkbox" name="dbtables[]" value="{$tableName}">
+									<span>
+										<strong>{$tableName}</strong>
+										<span>Inclure dans l’export SQL</span>
+									</span>
+								</label>
+							{/foreach}
+						</div>
+					</div>
 				</div>
-			</div>
+			</details>
 			<div class="admin-actions mt-4">
 				<input class="btn btn-primary" type="submit" value="{$LNG.du_submit}">
 			</div>

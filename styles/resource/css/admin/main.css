@@ -693,6 +693,10 @@ a {
 	margin-top: 1rem;
 }
 
+.admin-fold--compact {
+	border-radius: 22px;
+}
+
 .admin-fold__summary {
 	list-style: none;
 	cursor: pointer;
@@ -709,6 +713,25 @@ a {
 
 .admin-fold__body {
 	padding: 0 1rem 1rem;
+}
+
+.admin-search-hidden {
+	display: none !important;
+}
+
+.bots-inline-fold {
+	height: 100%;
+}
+
+.admin-table-responsive--tall {
+	max-height: min(70vh, 960px);
+	overflow: auto;
+}
+
+.admin-checkbox-grid--scroll {
+	max-height: min(68vh, 920px);
+	overflow: auto;
+	padding-right: 0.2rem;
 }
 
 .admin-pagination {
@@ -798,6 +821,11 @@ a {
 	.admin-pagination__link {
 		flex: 1 1 calc(50% - 0.3rem);
 	}
+
+	.admin-table-responsive--tall,
+	.admin-checkbox-grid--scroll {
+		max-height: 60vh;
+	}
 }
 
 .admin-mail-preview {
@@ -840,6 +868,12 @@ a {
 	color: #fff;
 	border-color: var(--admin-border-strong);
 	background: rgba(56, 189, 248, 0.16);
+}
+
+.admin-section-link.is-active {
+	color: #fff;
+	border-color: var(--admin-border-strong);
+	background: linear-gradient(90deg, rgba(84, 210, 255, 0.18), rgba(94, 234, 212, 0.1));
 }
 
 #serverSettings,
@@ -2441,14 +2475,41 @@ a {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
+	.admin-kpi-card__meta {
+		display: none;
+	}
+
+	#serverSettings,
+	#universeSettings {
+		display: block;
+	}
+
 	#serverSettings .form-gorup,
 	#universeSettings .form-gorup {
 		grid-column: 1 / -1;
+		margin-bottom: 1rem !important;
 	}
 
 	.admin-section-nav,
 	.admin-settings-toolbar {
 		position: static;
+	}
+
+	.admin-section-hidden {
+		display: none !important;
+	}
+
+	.bots-admin-page .bots-hero {
+		display: none;
+	}
+
+	.bots-admin-page .bots-presence-overview {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.bots-admin-page .bots-panel__head .small,
+	.bots-admin-page .bots-section-text {
+		display: none;
 	}
 }
 

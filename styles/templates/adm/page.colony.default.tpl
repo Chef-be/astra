@@ -9,22 +9,29 @@
 	</section>
 
 	<form id="colonySettings" action="admin.php?page=colonySettings&amp;mode=saveSettings" method="post" class="admin-stack">
-		{foreach from=$colonySettingGroups item=group}
-			<div class="admin-table-shell admin-stack">
-				<div>
-					<h2 class="h5 mb-1">{$group.title}</h2>
-					<p class="text-white-50 mb-0">{$group.description}</p>
+		{foreach from=$colonySettingGroups item=group name=colonyGroups}
+			<details class="admin-fold admin-fold--compact" {if $smarty.foreach.colonyGroups.first}open{/if}>
+				<summary class="admin-fold__summary">
+					<div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+						<div>
+							<h2 class="h5 mb-1">{$group.title}</h2>
+							<p class="text-white-50 mb-0">{$group.description}</p>
+						</div>
+						<span class="admin-pill">{$group.fields|@count} entrée(s)</span>
+					</div>
+				</summary>
+				<div class="admin-fold__body">
+					<div class="admin-media-grid">
+						{foreach from=$group.fields item=field}
+							<label class="admin-media-tile">
+								<img src="{$field.image}" alt="{$field.label|escape:'html'}">
+								<strong>{$field.label}</strong>
+								<input id="{$field.name}" class="form-control bg-dark text-white border-secondary text-center" name="{$field.name}" value="{$field.value}" type="text" maxlength="5">
+							</label>
+						{/foreach}
+					</div>
 				</div>
-				<div class="admin-media-grid">
-					{foreach from=$group.fields item=field}
-						<label class="admin-media-tile">
-							<img src="{$field.image}" alt="{$field.label|escape:'html'}">
-							<strong>{$field.label}</strong>
-							<input id="{$field.name}" class="form-control bg-dark text-white border-secondary text-center" name="{$field.name}" value="{$field.value}" type="text" maxlength="5">
-						</label>
-					{/foreach}
-				</div>
-			</div>
+			</details>
 		{/foreach}
 
 		<div class="admin-actions">

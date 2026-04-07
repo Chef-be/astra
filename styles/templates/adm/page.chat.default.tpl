@@ -90,61 +90,74 @@
 		</div>
 
 		<div class="admin-panel-grid__wide admin-stack">
-			<div class="admin-card">
-				<div class="card-body admin-stack">
-					<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+			<details class="admin-fold admin-fold--compact">
+				<summary class="admin-fold__summary">
+					<div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 						<div>
-							<h2 class="h5 mb-1">Paramètres du relais</h2>
-							<p class="text-white-50 mb-0">Conservez les mêmes endpoints et noms de champs que le backend existant, mais dans une lecture beaucoup plus exploitable.</p>
+							<h2 class="h5 mb-1">Configuration avancée du relais</h2>
+							<p class="text-white-50 mb-0">Endpoints, historique, rétention et options globales. Replié par défaut pour garder la modération au premier plan.</p>
 						</div>
-						<a class="admin-shell-action admin-shell-action--warning" href="?page=chat&mode=runRetention">Purger selon la rétention</a>
+						<span class="admin-pill">Réglages</span>
 					</div>
-
-					<form action="?page=chat&mode=saveSettings" method="post" class="admin-stack">
-						<input type="hidden" name="opt_save" value="1">
-						<div class="row g-3">
-							<div class="col-md-6">
-								<label class="form-label" for="chat_channelname">{$ch_channelname}</label>
-								<input id="chat_channelname" class="form-control bg-black text-white border-secondary" name="chat_channelname" value="{$chat_channelname}" type="text">
-							</div>
-							<div class="col-md-6">
-								<label class="form-label" for="chat_botname">{$ch_botname}</label>
-								<input id="chat_botname" class="form-control bg-black text-white border-secondary" name="chat_botname" value="{$chat_botname}" type="text">
-							</div>
-							<div class="col-md-6">
-								<label class="form-label" for="chat_history_limit">Historique chargé par canal</label>
-								<input id="chat_history_limit" class="form-control bg-black text-white border-secondary" name="chat_history_limit" value="{$chat_history_limit}" type="number" min="20" max="300">
-							</div>
-							<div class="col-md-6">
-								<label class="form-label" for="chat_retention_days">Durée de conservation</label>
-								<div class="input-group">
-									<input id="chat_retention_days" class="form-control bg-black text-white border-secondary" name="chat_retention_days" value="{$chat_retention_days}" type="number" min="1">
-									<span class="input-group-text bg-secondary text-white border-secondary">jours</span>
+				</summary>
+				<div class="admin-fold__body">
+					<div class="admin-card">
+						<div class="card-body admin-stack">
+							<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+								<div>
+									<h2 class="h5 mb-1">Paramètres du relais</h2>
+									<p class="text-white-50 mb-0">Conservez les mêmes endpoints et noms de champs que le backend existant, mais dans une lecture beaucoup plus exploitable.</p>
 								</div>
+								<a class="admin-shell-action admin-shell-action--warning" href="?page=chat&mode=runRetention">Purger selon la rétention</a>
 							</div>
-						</div>
 
-						<div class="admin-toggle-list">
-							<label class="form-check-label"><input id="chat_nickchange" class="form-check-input me-2" name="chat_nickchange"{if $chat_nickchange == '1'} checked="checked"{/if} type="checkbox">Changement de pseudo autorisé</label>
-							<label class="form-check-label"><input id="chat_logmessage" class="form-check-input me-2" name="chat_logmessage"{if $chat_logmessage == '1'} checked="checked"{/if} type="checkbox">Journaliser les messages</label>
-							<label class="form-check-label"><input id="chat_allowmes" class="form-check-input me-2" name="chat_allowmes"{if $chat_allowmes == '1'} checked="checked"{/if} type="checkbox">Messages privés autorisés</label>
-							<label class="form-check-label"><input id="chat_allowdelmes" class="form-check-input me-2" name="chat_allowdelmes"{if $chat_allowdelmes == '1'} checked="checked"{/if} type="checkbox">Suppression des messages par la modération</label>
-							<label class="form-check-label"><input id="chat_allowchan" class="form-check-input me-2" name="chat_allowchan"{if $chat_allowchan == '1'} checked="checked"{/if} type="checkbox">Canaux personnalisés autorisés</label>
-							<label class="form-check-label"><input id="chat_closed" class="form-check-input me-2" name="chat_closed"{if $chat_closed == '1'} checked="checked"{/if} type="checkbox">Fermer le chat pour les joueurs</label>
-						</div>
+							<form action="?page=chat&mode=saveSettings" method="post" class="admin-stack">
+								<input type="hidden" name="opt_save" value="1">
+								<div class="row g-3">
+									<div class="col-md-6">
+										<label class="form-label" for="chat_channelname">{$ch_channelname}</label>
+										<input id="chat_channelname" class="form-control bg-black text-white border-secondary" name="chat_channelname" value="{$chat_channelname}" type="text">
+									</div>
+									<div class="col-md-6">
+										<label class="form-label" for="chat_botname">{$ch_botname}</label>
+										<input id="chat_botname" class="form-control bg-black text-white border-secondary" name="chat_botname" value="{$chat_botname}" type="text">
+									</div>
+									<div class="col-md-6">
+										<label class="form-label" for="chat_history_limit">Historique chargé par canal</label>
+										<input id="chat_history_limit" class="form-control bg-black text-white border-secondary" name="chat_history_limit" value="{$chat_history_limit}" type="number" min="20" max="300">
+									</div>
+									<div class="col-md-6">
+										<label class="form-label" for="chat_retention_days">Durée de conservation</label>
+										<div class="input-group">
+											<input id="chat_retention_days" class="form-control bg-black text-white border-secondary" name="chat_retention_days" value="{$chat_retention_days}" type="number" min="1">
+											<span class="input-group-text bg-secondary text-white border-secondary">jours</span>
+										</div>
+									</div>
+								</div>
 
-						<section class="admin-form-submitbar">
-							<div class="admin-form-submitbar__copy">
-								<strong>Enregistrer la configuration chat</strong>
-								<span>Le relais conserve l’historique chargé et la rétention selon les paramètres saisis ici.</span>
-							</div>
-							<div class="d-flex justify-content-end">
-								<button class="btn btn-primary px-4" type="submit">Enregistrer</button>
-							</div>
-						</section>
-					</form>
+								<div class="admin-toggle-list">
+									<label class="form-check-label"><input id="chat_nickchange" class="form-check-input me-2" name="chat_nickchange"{if $chat_nickchange == '1'} checked="checked"{/if} type="checkbox">Changement de pseudo autorisé</label>
+									<label class="form-check-label"><input id="chat_logmessage" class="form-check-input me-2" name="chat_logmessage"{if $chat_logmessage == '1'} checked="checked"{/if} type="checkbox">Journaliser les messages</label>
+									<label class="form-check-label"><input id="chat_allowmes" class="form-check-input me-2" name="chat_allowmes"{if $chat_allowmes == '1'} checked="checked"{/if} type="checkbox">Messages privés autorisés</label>
+									<label class="form-check-label"><input id="chat_allowdelmes" class="form-check-input me-2" name="chat_allowdelmes"{if $chat_allowdelmes == '1'} checked="checked"{/if} type="checkbox">Suppression des messages par la modération</label>
+									<label class="form-check-label"><input id="chat_allowchan" class="form-check-input me-2" name="chat_allowchan"{if $chat_allowchan == '1'} checked="checked"{/if} type="checkbox">Canaux personnalisés autorisés</label>
+									<label class="form-check-label"><input id="chat_closed" class="form-check-input me-2" name="chat_closed"{if $chat_closed == '1'} checked="checked"{/if} type="checkbox">Fermer le chat pour les joueurs</label>
+								</div>
+
+								<section class="admin-form-submitbar">
+									<div class="admin-form-submitbar__copy">
+										<strong>Enregistrer la configuration chat</strong>
+										<span>Le relais conserve l’historique chargé et la rétention selon les paramètres saisis ici.</span>
+									</div>
+									<div class="d-flex justify-content-end">
+										<button class="btn btn-primary px-4" type="submit">Enregistrer</button>
+									</div>
+								</section>
+							</form>
+						</div>
+					</div>
 				</div>
-			</div>
+			</details>
 
 			<div id="chat-mutes" class="admin-card">
 				<div class="card-body admin-stack">
@@ -157,7 +170,7 @@
 					</div>
 					{if $activeMutes|@count > 0}
 						<div class="admin-table-shell">
-							<div class="table-responsive">
+							<div class="table-responsive admin-scroll-region">
 								<table class="table table-dark table-striped align-middle mb-0">
 									<thead>
 										<tr>
@@ -215,7 +228,7 @@
 						<span class="admin-pill">{$messageCountTotal} message(s)</span>
 					</div>
 					<div class="admin-table-shell">
-						<div class="table-responsive">
+						<div class="table-responsive admin-scroll-region">
 							<table class="table table-dark table-striped align-middle mb-0">
 								<thead>
 									<tr>
@@ -270,7 +283,7 @@
 		</div>
 	</section>
 
-	<details class="admin-fold">
+	<details class="admin-fold admin-fold--compact">
 		<summary class="admin-fold__summary">
 			<div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 				<div>

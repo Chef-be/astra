@@ -36,6 +36,17 @@
 	<form action="?page=planetFields&mode=send" method="post" class="admin-stack">
 		<input type="hidden" name="opt_save" value="1">
 
+		<details class="admin-fold admin-fold--compact">
+			<summary class="admin-fold__summary">
+				<div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+					<div>
+						<h2 class="h5 mb-1">Grille orbitale complète</h2>
+						<p class="text-white-50 mb-0">15 positions à régler, de la plus chaude à la plus froide.</p>
+					</div>
+					<span class="admin-pill">15 positions</span>
+				</div>
+			</summary>
+			<div class="admin-fold__body">
 		<section class="admin-orbit-grid">
 			<article class="admin-orbit-card">
 				<div class="admin-orbit-card__title">Position 1</div>
@@ -143,6 +154,8 @@
 				</div>
 			</article>
 		</section>
+			</div>
+		</details>
 
 		<section class="admin-form-submitbar">
 			<div class="admin-form-submitbar__copy">

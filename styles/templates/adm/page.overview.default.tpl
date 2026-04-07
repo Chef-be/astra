@@ -165,8 +165,8 @@
 		</div>
 	</section>
 
-	<section class="admin-card">
-		<div class="card-body admin-stack">
+	<details class="admin-fold admin-fold--compact">
+		<summary class="admin-fold__summary">
 			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
 				<div>
 					<h2 class="h4 mb-1">Organisation de l’administration</h2>
@@ -174,7 +174,8 @@
 				</div>
 				<span class="admin-pill">{$adminNavigation|@count} espaces disponibles</span>
 			</div>
-
+		</summary>
+		<div class="admin-fold__body">
 			<div class="admin-overview-grid admin-overview-grid--sections">
 				{foreach from=$adminNavigation item=section}
 					<a class="admin-section-card" href="{$section.items[0].url|default:'admin.php?page=overview'}">
@@ -203,7 +204,7 @@
 				{/foreach}
 			</div>
 		</div>
-	</section>
+	</details>
 </div>
 
 {/block}

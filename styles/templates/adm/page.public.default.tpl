@@ -85,84 +85,106 @@
 			</div>
 		</section>
 
-		<section class="admin-card">
-			<div class="card-body admin-stack">
-				<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-					<div>
-						<h2 class="h5 mb-1">Captures d’écran</h2>
-						<p class="text-white-50 small mb-0">Réorganisez l’ordre par glisser-déposer, choisissez la capture mise en avant et enrichissez chaque description.</p>
-					</div>
-					<input type="file" name="public_screens_upload[]" multiple accept=".png,.jpg,.jpeg,.gif,.webp" class="form-control bg-black text-white border-secondary" style="max-width:360px;">
+		<details class="admin-fold admin-fold--compact">
+			<summary class="admin-fold__summary">
+				<div>
+					<h2 class="h5 mb-1">Captures d’écran</h2>
+					<p class="text-white-50 small mb-0">Gestion de la galerie publique, repliée par défaut pour garder la page éditoriale lisible sur mobile.</p>
 				</div>
-				{if $public_screenshots|@count > 0}
-					<div class="row g-3" id="publicScreensAdminGrid">
-						{foreach $public_screenshots as $screen name=publicScreensLoop}
-							<div class="col-12 col-md-6 col-xl-4 public-screen-admin-column" draggable="true" data-path="{$screen.path|escape:'html'}">
-								<div class="admin-card admin-screen-card h-100">
-									<div class="admin-screen-card__preview" style="background:#111 url('{$screen.path}') center center / cover no-repeat;"></div>
-									<div class="card-body">
-										<input type="hidden" name="public_screens_path[]" value="{$screen.path|escape:'html'}">
-										<div class="d-flex justify-content-between align-items-center gap-3 mb-3">
-											<span class="admin-pill">Déplacer</span>
-											<label class="form-check-label small text-warning">
-												<input class="form-check-input me-2" type="radio" name="public_screens_featured_path" value="{$screen.path|escape:'html'}" {if $smarty.foreach.publicScreensLoop.first}checked{/if}>Mise en avant
-											</label>
+				<span class="admin-pill">{$public_screenshots|@count} visuel(x)</span>
+			</summary>
+			<div class="admin-fold__body">
+				<section class="admin-card">
+					<div class="card-body admin-stack">
+						<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+							<div>
+								<h2 class="h5 mb-1">Captures d’écran</h2>
+								<p class="text-white-50 small mb-0">Réorganisez l’ordre par glisser-déposer, choisissez la capture mise en avant et enrichissez chaque description.</p>
+							</div>
+							<input type="file" name="public_screens_upload[]" multiple accept=".png,.jpg,.jpeg,.gif,.webp" class="form-control bg-black text-white border-secondary" style="max-width:360px;">
+						</div>
+						{if $public_screenshots|@count > 0}
+							<div class="row g-3" id="publicScreensAdminGrid">
+								{foreach $public_screenshots as $screen name=publicScreensLoop}
+									<div class="col-12 col-md-6 col-xl-4 public-screen-admin-column" draggable="true" data-path="{$screen.path|escape:'html'}">
+										<div class="admin-card admin-screen-card h-100">
+											<div class="admin-screen-card__preview" style="background:#111 url('{$screen.path}') center center / cover no-repeat;"></div>
+											<div class="card-body">
+												<input type="hidden" name="public_screens_path[]" value="{$screen.path|escape:'html'}">
+												<div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+													<span class="admin-pill">Déplacer</span>
+													<label class="form-check-label small text-warning">
+														<input class="form-check-input me-2" type="radio" name="public_screens_featured_path" value="{$screen.path|escape:'html'}" {if $smarty.foreach.publicScreensLoop.first}checked{/if}>Mise en avant
+													</label>
+												</div>
+												<label class="form-label small mb-1">Titre</label>
+												<input type="text" name="public_screens_title[]" class="form-control bg-dark text-white border-secondary mb-2" value="{$screen.title|default:$screen.label|escape:'html'}">
+												<label class="form-label small mb-1">Texte</label>
+												<textarea name="public_screens_description[]" class="form-control bg-dark text-white border-secondary mb-3 rich-editor" rows="6">{$screen.description|escape:'html'}</textarea>
+												<label class="form-check-label small text-white-50">
+													<input class="form-check-input me-2" type="checkbox" name="delete_public_screens[]" value="{$screen.path|escape:'html'}">Supprimer cette capture
+												</label>
+											</div>
 										</div>
-										<label class="form-label small mb-1">Titre</label>
-										<input type="text" name="public_screens_title[]" class="form-control bg-dark text-white border-secondary mb-2" value="{$screen.title|default:$screen.label|escape:'html'}">
-										<label class="form-label small mb-1">Texte</label>
-										<textarea name="public_screens_description[]" class="form-control bg-dark text-white border-secondary mb-3 rich-editor" rows="6">{$screen.description|escape:'html'}</textarea>
-										<label class="form-check-label small text-white-50">
-											<input class="form-check-input me-2" type="checkbox" name="delete_public_screens[]" value="{$screen.path|escape:'html'}">Supprimer cette capture
-										</label>
 									</div>
-								</div>
+								{/foreach}
 							</div>
-						{/foreach}
+						{else}
+							<div class="admin-empty-state">Aucune capture personnalisée n’est enregistrée. La galerie utilise encore les visuels par défaut.</div>
+						{/if}
 					</div>
-				{else}
-					<div class="admin-empty-state">Aucune capture personnalisée n’est enregistrée. La galerie utilise encore les visuels par défaut.</div>
-				{/if}
+				</section>
 			</div>
-		</section>
+		</details>
 
-		<section class="admin-panel-grid">
-			<div class="admin-panel-grid__side">
-				<div class="admin-card h-100">
-					<div class="card-body">
-						<label class="form-label fw-bold" for="secret_question_options">Questions secrètes de l’inscription</label>
-						<p class="text-white-50 small">Une question par ligne. Cette liste sert à l’inscription et à la validation serveur.</p>
-						<textarea id="secret_question_options" name="secret_question_options" class="form-control bg-black text-white border-secondary" rows="8">{$secret_question_options|escape:'html'}</textarea>
-					</div>
+		<details class="admin-fold admin-fold--compact">
+			<summary class="admin-fold__summary">
+				<div>
+					<h2 class="h5 mb-1">SEO, métadonnées et sécurité d’inscription</h2>
+					<p class="text-white-50 small mb-0">Bloc secondaire replié par défaut pour laisser la priorité au contenu éditorial principal.</p>
 				</div>
-			</div>
-
-			<div class="admin-panel-grid__wide">
-				<div class="admin-card h-100">
-					<div class="card-body">
-						<h2 class="h5 mb-3">SEO et métadonnées</h2>
-						<div class="row g-3">
-							<div class="col-12">
-								<label class="form-label" for="seo_meta_title">Titre SEO</label>
-								<input id="seo_meta_title" name="seo_meta_title" type="text" class="form-control bg-black text-white border-secondary" value="{$seo_meta_title|escape:'html'}" maxlength="255">
-							</div>
-							<div class="col-12">
-								<label class="form-label" for="seo_meta_description">Description</label>
-								<textarea id="seo_meta_description" name="seo_meta_description" class="form-control bg-black text-white border-secondary" rows="4">{$seo_meta_description|escape:'html'}</textarea>
-							</div>
-							<div class="col-12">
-								<label class="form-label" for="seo_meta_keywords">Mots-clés</label>
-								<input id="seo_meta_keywords" name="seo_meta_keywords" type="text" class="form-control bg-black text-white border-secondary" value="{$seo_meta_keywords|escape:'html'}">
-							</div>
-							<div class="col-12">
-								<label class="form-label" for="seo_og_image_url">Image Open Graph</label>
-								<input id="seo_og_image_url" name="seo_og_image_url" type="text" class="form-control bg-black text-white border-secondary" value="{$seo_og_image_url|escape:'html'}" placeholder="styles/resource/images/meta.png ou https://...">
+				<span class="admin-pill">Secondaire</span>
+			</summary>
+			<div class="admin-fold__body">
+				<section class="admin-panel-grid">
+					<div class="admin-panel-grid__side">
+						<div class="admin-card h-100">
+							<div class="card-body">
+								<label class="form-label fw-bold" for="secret_question_options">Questions secrètes de l’inscription</label>
+								<p class="text-white-50 small">Une question par ligne. Cette liste sert à l’inscription et à la validation serveur.</p>
+								<textarea id="secret_question_options" name="secret_question_options" class="form-control bg-black text-white border-secondary" rows="8">{$secret_question_options|escape:'html'}</textarea>
 							</div>
 						</div>
 					</div>
-				</div>
+
+					<div class="admin-panel-grid__wide">
+						<div class="admin-card h-100">
+							<div class="card-body">
+								<h2 class="h5 mb-3">SEO et métadonnées</h2>
+								<div class="row g-3">
+									<div class="col-12">
+										<label class="form-label" for="seo_meta_title">Titre SEO</label>
+										<input id="seo_meta_title" name="seo_meta_title" type="text" class="form-control bg-black text-white border-secondary" value="{$seo_meta_title|escape:'html'}" maxlength="255">
+									</div>
+									<div class="col-12">
+										<label class="form-label" for="seo_meta_description">Description</label>
+										<textarea id="seo_meta_description" name="seo_meta_description" class="form-control bg-black text-white border-secondary" rows="4">{$seo_meta_description|escape:'html'}</textarea>
+									</div>
+									<div class="col-12">
+										<label class="form-label" for="seo_meta_keywords">Mots-clés</label>
+										<input id="seo_meta_keywords" name="seo_meta_keywords" type="text" class="form-control bg-black text-white border-secondary" value="{$seo_meta_keywords|escape:'html'}">
+									</div>
+									<div class="col-12">
+										<label class="form-label" for="seo_og_image_url">Image Open Graph</label>
+										<input id="seo_og_image_url" name="seo_og_image_url" type="text" class="form-control bg-black text-white border-secondary" value="{$seo_og_image_url|escape:'html'}" placeholder="styles/resource/images/meta.png ou https://...">
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
 			</div>
-		</section>
+		</details>
 
 		<section class="admin-form-submitbar">
 			<div class="admin-form-submitbar__copy">

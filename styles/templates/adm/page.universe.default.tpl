@@ -1,28 +1,82 @@
 {block name="content"}
 <script>
 $(document).ready(function(){
-  $("#searchInUniverseSettings").on("keyup", function() {
-    var value = $(this).val().toLowerCase();
-    $("#universeSettings label").filter(function() {
-
-			if ($(this).text().toLowerCase().indexOf(value) > -1) {
-				$(this).parent().removeClass('d-none');
-			}else {
-				$(this).parent().addClass('d-none');
-			}
-
-
-    });
-
-
-
-  });
-
   $("#universeSettings").on("keydown", "input, select", function(event) {
     if (event.key === "Enter" && this.type !== "submit" && this.type !== "button") {
       event.preventDefault();
     }
   });
+
+  var activeSection = $('#universe-general').attr('id');
+
+  $('#universeSettings .form-gorup').each(function() {
+		if ($(this).hasClass('admin-section-title') && this.id) {
+			activeSection = this.id;
+		}
+
+		$(this).attr('data-admin-section', activeSection || '');
+  });
+
+  function syncUniverseGroupVisibility() {
+		$('#universeSettings .form-gorup').each(function() {
+			var isHidden = $(this).hasClass('admin-search-hidden') || $(this).hasClass('admin-section-hidden');
+			$(this).prop('hidden', isHidden);
+			if (isHidden) {
+				this.style.setProperty('display', 'none', 'important');
+			} else {
+				this.style.removeProperty('display');
+			}
+		});
+  }
+
+  function applyUniverseSearchFilter() {
+		var value = ($('#searchInUniverseSettings').val() || '').toLowerCase().trim();
+		$('#universeSettings .form-gorup').each(function() {
+			var text = $(this).text().toLowerCase();
+			var hasMatch = value === '' || text.indexOf(value) !== -1;
+			$(this).toggleClass('admin-search-hidden', !hasMatch);
+		});
+  }
+
+  function applyUniverseSectionFilter() {
+		var isMobile = window.matchMedia('(max-width: 991px)').matches;
+		var searchValue = ($('#searchInUniverseSettings').val() || '').trim();
+		var currentSection = $('.admin-section-link.is-active').attr('href');
+		currentSection = currentSection ? currentSection.replace('#', '') : $('#universe-general').attr('id');
+
+		$('#universeSettings .form-gorup').each(function() {
+			if (!isMobile || searchValue !== '') {
+				$(this).removeClass('admin-section-hidden');
+				syncUniverseGroupVisibility();
+				return;
+			}
+
+			var section = $(this).attr('data-admin-section');
+			$(this).toggleClass('admin-section-hidden', section !== currentSection && !$(this).hasClass('admin-settings-toolbar') && !$(this).hasClass('admin-form-submitbar'));
+		});
+
+		syncUniverseGroupVisibility();
+  }
+
+  $("#searchInUniverseSettings").on("keyup", function() {
+		applyUniverseSearchFilter();
+		applyUniverseSectionFilter();
+  });
+
+  $('.admin-section-link').on('click', function(event) {
+		$('.admin-section-link').removeClass('is-active');
+		$(this).addClass('is-active');
+		if (window.matchMedia('(max-width: 991px)').matches) {
+			event.preventDefault();
+			applyUniverseSectionFilter();
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		}
+  });
+
+  $(window).on('resize', applyUniverseSectionFilter);
+  $('.admin-section-link[href="#universe-general"]').addClass('is-active');
+  applyUniverseSearchFilter();
+  applyUniverseSectionFilter();
 });
 </script>
 
