@@ -593,7 +593,34 @@
     },
 
     updateChatIndicator: function() {
-      $('#astraChatIcon').css('color', this.connected ? '#22c55e' : '#94a3b8');
+      var icon = $('#astraChatIcon');
+      var link = $('#astraChatLink');
+      var tooltipText = this.connected
+        ? 'Discussion instantanée : serveur en ligne'
+        : 'Discussion instantanée : serveur hors ligne';
+      var tooltipInstance = null;
+
+      icon.css('color', this.connected ? '#22c55e' : '#ef4444');
+
+      if (!link.length) {
+        return;
+      }
+
+      link.attr('title', tooltipText);
+      link.attr('data-bs-original-title', tooltipText);
+      link.attr('aria-label', tooltipText);
+
+      if (window.bootstrap && window.bootstrap.Tooltip) {
+        tooltipInstance = window.bootstrap.Tooltip.getInstance(link[0]);
+        if (tooltipInstance) {
+          tooltipInstance.dispose();
+        }
+
+        window.bootstrap.Tooltip.getOrCreateInstance(link[0], {
+          html: true,
+          placement: 'bottom'
+        });
+      }
     },
 
     bindChatBadgeUi: function() {

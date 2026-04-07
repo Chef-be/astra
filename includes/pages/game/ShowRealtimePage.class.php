@@ -160,6 +160,12 @@ class ShowRealtimePage extends AbstractGamePage
 
 		$service = new BotAdminService();
 		$result = $service->createStructuredCommand($command, (int) $USER['id']);
+		if ($result['status'] === 'ok' && !empty($result['commandId'])) {
+			$dispatchResult = $service->dispatchCommandById((int) $result['commandId']);
+			$result['dispatch'] = $dispatchResult;
+			$result['commandStatus'] = $dispatchResult['status'];
+			$result['responseText'] = isset($dispatchResult['responseText']) ? $dispatchResult['responseText'] : '';
+		}
 		$this->sendJSON($result);
 	}
 

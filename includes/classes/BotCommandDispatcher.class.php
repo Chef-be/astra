@@ -486,21 +486,75 @@ class BotCommandDispatcher
 		}
 
 		if ($type === 'bot') {
-			return $this->idsFromRows($db->select('SELECT id FROM %%USERS%% WHERE universe = :universe AND is_bot = 1 AND LOWER(username) = LOWER(:username);', array(
+			$rows = $db->select('SELECT id FROM %%USERS%% WHERE universe = :universe AND is_bot = 1 AND LOWER(username) = LOWER(:username);', array(
 				':universe' => Universe::getEmulated(),
 				':username' => $reference,
-			)));
+			));
+			if (empty($rows) && $reference !== '') {
+				$rows = $db->select('SELECT id
+					FROM %%USERS%%
+					WHERE universe = :universe
+					  AND is_bot = 1
+					  AND LOWER(username) LIKE LOWER(:username)
+					ORDER BY LENGTH(username) ASC, id ASC
+					LIMIT 20;', array(
+						':universe' => Universe::getEmulated(),
+						':username' => $reference.'%',
+					));
+			}
+			if (empty($rows) && $reference !== '') {
+				$rows = $db->select('SELECT id
+					FROM %%USERS%%
+					WHERE universe = :universe
+					  AND is_bot = 1
+					  AND LOWER(username) LIKE LOWER(:username)
+					ORDER BY LENGTH(username) ASC, id ASC
+					LIMIT 20;', array(
+						':universe' => Universe::getEmulated(),
+						':username' => '%'.$reference.'%',
+					));
+			}
+			return $this->idsFromRows($rows);
 		}
 
 		if ($type === 'chef') {
 			if ($reference !== '') {
-				return $this->idsFromRows($db->select('SELECT u.id
+				$rows = $db->select('SELECT u.id
 					FROM %%USERS%% u
 					INNER JOIN %%BOT_STATE%% bs ON bs.bot_user_id = u.id
 					WHERE u.universe = :universe AND u.is_bot = 1 AND bs.hierarchy_status = \'chef\' AND LOWER(u.username) = LOWER(:username);', array(
 						':universe' => Universe::getEmulated(),
 						':username' => $reference,
-					)));
+					));
+				if (empty($rows)) {
+					$rows = $db->select('SELECT u.id
+						FROM %%USERS%% u
+						INNER JOIN %%BOT_STATE%% bs ON bs.bot_user_id = u.id
+						WHERE u.universe = :universe
+						  AND u.is_bot = 1
+						  AND bs.hierarchy_status = \'chef\'
+						  AND LOWER(u.username) LIKE LOWER(:username)
+						ORDER BY LENGTH(u.username) ASC, u.id ASC
+						LIMIT 20;', array(
+							':universe' => Universe::getEmulated(),
+							':username' => $reference.'%',
+						));
+				}
+				if (empty($rows)) {
+					$rows = $db->select('SELECT u.id
+						FROM %%USERS%% u
+						INNER JOIN %%BOT_STATE%% bs ON bs.bot_user_id = u.id
+						WHERE u.universe = :universe
+						  AND u.is_bot = 1
+						  AND bs.hierarchy_status = \'chef\'
+						  AND LOWER(u.username) LIKE LOWER(:username)
+						ORDER BY LENGTH(u.username) ASC, u.id ASC
+						LIMIT 20;', array(
+							':universe' => Universe::getEmulated(),
+							':username' => '%'.$reference.'%',
+						));
+				}
+				return $this->idsFromRows($rows);
 			}
 
 			return $this->idsFromRows($db->select('SELECT u.id

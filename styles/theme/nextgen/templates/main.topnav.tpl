@@ -34,10 +34,10 @@
               </li>
               {if isModuleAvailable($smarty.const.MODULE_CHAT)}
               <li class="hover-underline d-flex align-items-center h-100">
-                <a class="text-white d-flex align-items-center text-decoration-none fs-12 m-0 position-relative" href="game.php?page=chat" data-bs-toggle="tooltip"
+                <a id="astraChatLink" class="text-white d-flex align-items-center text-decoration-none fs-12 m-0 position-relative" href="game.php?page=chat" data-bs-toggle="tooltip"
                 data-bs-placement="bottom"
-                data-bs-html="true" title="Discussion instantanée">
-                  <i id="astraChatIcon" style="font-size:20px;" class="bi bi-chat-dots {if $page == 'chat'}text-danger{/if}"></i>
+                data-bs-html="true" title="Discussion instantanée : état du serveur en cours de vérification">
+                  <i id="astraChatIcon" style="font-size:20px;" class="bi bi-chat-dots"></i>
                   <span id="astraChatMentionBadge" class="badge bg-danger" style="display:none;position:absolute;right:-12px;top:-4px;min-width:22px;">0</span>
                 </a>
               </li>
