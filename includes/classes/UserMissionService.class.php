@@ -37,8 +37,12 @@ class UserMissionService
 			}
 		}
 
-		$summary['badgeCount'] = $summary['claimable'] > 0 ? $summary['claimable'] : $summary['inProgress'];
-		$summary['badgeVariant'] = $summary['claimable'] > 0 ? 'warning' : 'secondary';
+		$summary['attentionCount'] = $summary['claimable'] + $summary['inProgress'];
+		$summary['signature'] = implode('|', array(
+			$summary['claimable'],
+			$summary['inProgress'],
+			$summary['claimed'],
+		));
 
 		return $summary;
 	}

@@ -35,3 +35,59 @@ function resourceTicker(config, init) {
 function getRessource(name) {
 	return parseInt($('#current_'+name).data('real'));
 }
+
+(function(window, document) {
+	'use strict';
+
+	function initMissionIndicator() {
+		var data = window.astraMissionTopnav || {};
+		var icon = document.getElementById('astraMissionIcon');
+		var link = document.getElementById('astraMissionLink');
+		var userId = parseInt(data.userId || 0, 10);
+		var signature = String(data.signature || '');
+		var attentionCount = parseInt(data.attentionCount || 0, 10);
+		var page = '';
+		var storageKey;
+		var seenSignature = '';
+
+		if (!icon || !link || !signature || !userId) {
+			return;
+		}
+
+		page = String(window.location.search || '').indexOf('page=missions') !== -1 ? 'missions' : '';
+		storageKey = 'astra-missions-seen:' + userId;
+
+		try {
+			seenSignature = window.localStorage.getItem(storageKey) || '';
+		} catch (error) {
+			seenSignature = '';
+		}
+
+		function markSeen() {
+			try {
+				window.localStorage.setItem(storageKey, signature);
+			} catch (error) {}
+
+			icon.classList.remove('astra-mission-attention');
+		}
+
+		if (page === 'missions') {
+			markSeen();
+			return;
+		}
+
+		if (attentionCount > 0 && seenSignature !== signature) {
+			icon.classList.add('astra-mission-attention');
+		} else {
+			icon.classList.remove('astra-mission-attention');
+		}
+
+		link.addEventListener('click', markSeen);
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initMissionIndicator);
+	} else {
+		initMissionIndicator();
+	}
+})(window, document);

@@ -43,13 +43,10 @@
               </li>
               {/if}
               <li class="hover-underline d-flex align-items-center h-100">
-                <a class="text-white d-flex align-items-center text-decoration-none fs-12 m-0 position-relative" href="game.php?page=missions" data-bs-toggle="tooltip"
+                <a id="astraMissionLink" class="text-white d-flex align-items-center text-decoration-none fs-12 m-0 position-relative" href="game.php?page=missions" data-bs-toggle="tooltip"
                 data-bs-placement="bottom"
                 data-bs-html="true" title="Centre des missions">
-                  <i style="font-size:20px;" class="bi bi-flag-fill {if $page == 'missions'}text-danger{/if}"></i>
-                  {if isset($missionsTopnav.badgeCount) && $missionsTopnav.badgeCount > 0}
-                  <span class="badge bg-{$missionsTopnav.badgeVariant}{if $missionsTopnav.badgeVariant == 'warning'} text-dark{/if}" style="position:absolute;right:-10px;top:2px;min-width:24px;box-shadow:0 0 0 2px rgba(6,10,16,0.94);">{$missionsTopnav.badgeCount}</span>
-                  {/if}
+                  <i id="astraMissionIcon" style="font-size:20px;" class="bi bi-card-checklist"></i>
                 </a>
               </li>
               {if isModuleAvailable($smarty.const.MODULE_MESSAGES)}
@@ -209,6 +206,8 @@
 <script type="text/javascript">
 var viewShortlyNumber	= {$shortlyNumber|json};
 var vacation			= {$vmode};
+var astraMissionTopnav = {$missionsTopnav|json};
+astraMissionTopnav.userId = {$userID|json};
 $(function() {
 {foreach $resourceTable as $resourceID => $resourceData}
 {if isset($resourceData.production)}
@@ -222,6 +221,17 @@ $(function() {
 {/foreach}
 });
 </script>
+<style>
+@keyframes astraMissionPulse {
+  0%, 100% { opacity: 1; transform: scale(1); text-shadow: 0 0 0 rgba(255, 181, 71, 0); }
+  50% { opacity: 0.78; transform: scale(1.08); text-shadow: 0 0 14px rgba(255, 181, 71, 0.72); }
+}
+
+#astraMissionIcon.astra-mission-attention {
+  color: #ffb547 !important;
+  animation: astraMissionPulse 1.15s ease-in-out infinite;
+}
+</style>
 <script src="scripts/game/topnav.js"></script>
 <script src="scripts/game/realtime.js?v={$VERSION}"></script>
 {if $hasGate}<script src="scripts/game/gate.js"></script>{/if}

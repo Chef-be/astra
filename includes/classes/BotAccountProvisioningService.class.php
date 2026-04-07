@@ -13,14 +13,32 @@ class BotAccountProvisioningService
 		$presenceService = new BotPresenceService();
 		$traitService = new BotTraitService();
 		$dynamicService = new BotDynamicStateService();
-		$bots = $db->select('SELECT id, universe FROM %%USERS%% WHERE universe = :universe AND is_bot = 1 ORDER BY id ASC;', array(
+		$activeProfiles = $this->getActiveProfiles();
+		$commanderProfiles = $this->getCommanderProfiles($activeProfiles);
+		$bots = $db->select('SELECT u.id, u.universe, u.bot_profile_id, bs.hierarchy_status
+			FROM %%USERS%% u
+			LEFT JOIN %%BOT_STATE%% bs ON bs.bot_user_id = u.id
+			WHERE u.universe = :universe AND u.is_bot = 1
+			ORDER BY u.id ASC;', array(
 			':universe' => Universe::getEmulated(),
 		));
 
 		$multiService = new BotMultiAccountService();
-		foreach ($bots as $bot) {
-			$db->update('UPDATE %%USERS%% SET email = :sharedEmail, email_2 = :sharedEmail WHERE id = :userId;', array(
+		foreach ($bots as $index => $bot) {
+			$profileId = $this->resolveProfileIdForBot($bot, $activeProfiles, $commanderProfiles, $index);
+			$db->update('UPDATE %%USERS%% SET
+				email = :sharedEmail,
+				email_2 = :sharedEmail,
+				bot_profile_id = :profileId,
+				noob_protection_disabled = 1,
+				noob_protection_disabled_at = CASE
+					WHEN noob_protection_disabled_at IS NULL OR noob_protection_disabled_at = 0 THEN :disabledAt
+					ELSE noob_protection_disabled_at
+				END
+				WHERE id = :userId;', array(
 				':sharedEmail' => $config['shared_email'],
+				':profileId' => $profileId,
+				':disabledAt' => TIMESTAMP,
 				':userId' => (int) $bot['id'],
 			));
 
@@ -244,6 +262,42 @@ class BotAccountProvisioningService
 	protected function generateRandomPassword($length = 24)
 	{
 		return substr(bin2hex(random_bytes(max(12, (int) ceil($length / 2)))), 0, $length);
+	}
+
+	protected function getActiveProfiles()
+	{
+		return Database::get()->select('SELECT id, name, is_commander_profile
+			FROM %%BOT_PROFILES%%
+			WHERE universe = :universe
+			  AND is_active = 1
+			  AND archived_at IS NULL
+			ORDER BY id ASC;', array(
+				':universe' => Universe::getEmulated(),
+			));
+	}
+
+	protected function getCommanderProfiles(array $profiles)
+	{
+		return array_values(array_filter($profiles, function($profile) {
+			return !empty($profile['is_commander_profile']);
+		}));
+	}
+
+	protected function resolveProfileIdForBot(array $bot, array $profiles, array $commanderProfiles, $index)
+	{
+		if (!empty($bot['bot_profile_id'])) {
+			return (int) $bot['bot_profile_id'];
+		}
+
+		if ($bot['hierarchy_status'] === 'chef' && !empty($commanderProfiles)) {
+			return (int) $commanderProfiles[$index % count($commanderProfiles)]['id'];
+		}
+
+		if (empty($profiles)) {
+			return null;
+		}
+
+		return (int) $profiles[$index % count($profiles)]['id'];
 	}
 
 	protected function generateBotName($index, $mode = 'random')

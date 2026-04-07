@@ -139,7 +139,7 @@ class ShowRealtimePage extends AbstractGamePage
 			$this->sendJSON(array('status' => 'error', 'message' => 'Accès refusé.'));
 		}
 
-		$command = trim(HTTP::_GP('command', '', true));
+		$command = trim(html_entity_decode(HTTP::_GP('command', '', true), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 		if ($command === '') {
 			$this->sendJSON(array('status' => 'error', 'message' => 'Commande vide.'));
 		}
