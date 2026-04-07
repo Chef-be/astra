@@ -14,24 +14,37 @@
 				</div>
 			</div>
 
-			<div class="admin-fact-grid">
-				<div class="admin-fact-card">
-					<span class="admin-fact-card__label">Parcours conseillé</span>
-					<strong class="admin-fact-card__value">Recherche → compte → module</strong>
+			<details class="admin-fold admin-fold--compact">
+				<summary class="admin-fold__summary">
+					<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+						<div>
+							<h3 class="h5 mb-1">Repères d’édition</h3>
+							<p class="text-white-50 mb-0">Contexte d’usage et garde-fous, repliés par défaut sur petit écran.</p>
+						</div>
+						<span class="admin-pill">Guide rapide</span>
+					</div>
+				</summary>
+				<div class="admin-fold__body">
+					<div class="admin-fact-grid">
+						<div class="admin-fact-card">
+							<span class="admin-fact-card__label">Parcours conseillé</span>
+							<strong class="admin-fact-card__value">Recherche → compte → module</strong>
+						</div>
+						<div class="admin-fact-card">
+							<span class="admin-fact-card__label">Usage</span>
+							<strong class="admin-fact-card__value">Intervention ciblée</strong>
+						</div>
+						<div class="admin-fact-card">
+							<span class="admin-fact-card__label">Sécurité</span>
+							<strong class="admin-fact-card__value">Édition par domaine</strong>
+						</div>
+						<div class="admin-fact-card">
+							<span class="admin-fact-card__label">Objectif</span>
+							<strong class="admin-fact-card__value">Moins d’erreurs, plus vite</strong>
+						</div>
+					</div>
 				</div>
-				<div class="admin-fact-card">
-					<span class="admin-fact-card__label">Usage</span>
-					<strong class="admin-fact-card__value">Intervention ciblée</strong>
-				</div>
-				<div class="admin-fact-card">
-					<span class="admin-fact-card__label">Sécurité</span>
-					<strong class="admin-fact-card__value">Édition par domaine</strong>
-				</div>
-				<div class="admin-fact-card">
-					<span class="admin-fact-card__label">Objectif</span>
-					<strong class="admin-fact-card__value">Moins d’erreurs, plus vite</strong>
-				</div>
-			</div>
+			</details>
 		</div>
 	</section>
 

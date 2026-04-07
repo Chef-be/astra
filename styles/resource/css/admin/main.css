@@ -2511,6 +2511,30 @@ a {
 	.bots-admin-page .bots-section-text {
 		display: none;
 	}
+
+	.admin-feature-card {
+		padding: 0.85rem;
+		border-radius: 18px;
+	}
+
+	.admin-feature-card__media {
+		min-height: 76px;
+		margin-bottom: 0.75rem;
+	}
+
+	.admin-feature-card__media img {
+		max-height: 60px;
+	}
+
+	.admin-feature-card__description {
+		font-size: 0.84rem;
+		line-height: 1.35;
+	}
+
+	.admin-feature-card__foot {
+		padding-top: 0.55rem;
+		font-size: 0.86rem;
+	}
 }
 
 @media (max-width: 767px) {
