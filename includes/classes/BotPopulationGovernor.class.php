@@ -20,10 +20,13 @@ class BotPopulationGovernor
 		$bots = $db->select('SELECT u.id, u.username, u.bot_profile_id, u.ally_id, p.target_online, p.target_social_online,
 				p.always_active, p.is_visible_socially, p.is_commander_profile, p.target_presence_min, p.target_presence_max,
 				bs.presence_logical, bs.presence_social, bs.hierarchy_status, bs.paused_until, bs.current_campaign_id, bs.is_online_forced,
-				bs.session_started_at, bs.session_target_until, bs.session_rest_until, bs.last_presence_change_at
+				bs.session_started_at, bs.session_target_until, bs.session_rest_until, bs.last_presence_change_at,
+				bs.action_queue_size, bs.cooldown_until,
+				ds.fatigue, ds.saturation_logistique, ds.disponibilite_sociale, ds.intensite_campagne, ds.excitation_offensive
 			FROM %%USERS%% u
 			LEFT JOIN %%BOT_PROFILES%% p ON p.id = u.bot_profile_id
 			LEFT JOIN %%BOT_STATE%% bs ON bs.bot_user_id = u.id
+			LEFT JOIN %%BOT_DYNAMIC_STATE%% ds ON ds.bot_user_id = u.id
 			WHERE u.universe = :universe AND u.is_bot = 1
 			ORDER BY COALESCE(p.always_active, 0) DESC, COALESCE(p.target_online, 0) DESC, COALESCE(bs.last_presence_change_at, 0) ASC, u.id ASC;', array(
 				':universe' => Universe::getEmulated(),
@@ -168,21 +171,24 @@ class BotPopulationGovernor
 			}
 
 			if ($isOnline && $sessionActive) {
+				$bot['presence_score'] = $this->scoreMaintainConnected($bot);
 				$continuity[] = $bot;
 				continue;
 			}
 
 			if ($restOver) {
+				$bot['presence_score'] = $this->scoreActivation($bot);
 				$rotationReady[] = $bot;
 				continue;
 			}
 
+			$bot['presence_score'] = $this->scoreActivation($bot) - 12;
 			$fallback[] = $bot;
 		}
 
-		usort($continuity, array($this, 'sortContinuityBots'));
-		usort($rotationReady, array($this, 'sortRotationBots'));
-		usort($fallback, array($this, 'sortFallbackBots'));
+		usort($continuity, array($this, 'sortPresenceScoreDesc'));
+		usort($rotationReady, array($this, 'sortPresenceScoreDesc'));
+		usort($fallback, array($this, 'sortPresenceScoreDesc'));
 
 		foreach (array($continuity, $rotationReady, $fallback) as $pool) {
 			foreach ($pool as $bot) {
@@ -204,37 +210,44 @@ class BotPopulationGovernor
 		return $selected;
 	}
 
-	protected function sortContinuityBots(array $left, array $right)
+	protected function sortPresenceScoreDesc(array $left, array $right)
 	{
-		$leftTarget = !empty($left['session_target_until']) ? (int) $left['session_target_until'] : PHP_INT_MAX;
-		$rightTarget = !empty($right['session_target_until']) ? (int) $right['session_target_until'] : PHP_INT_MAX;
-		if ($leftTarget === $rightTarget) {
+		$leftScore = isset($left['presence_score']) ? (float) $left['presence_score'] : 0;
+		$rightScore = isset($right['presence_score']) ? (float) $right['presence_score'] : 0;
+		if ($leftScore === $rightScore) {
 			return (int) $left['id'] <=> (int) $right['id'];
 		}
 
-		return $leftTarget <=> $rightTarget;
+		return $leftScore > $rightScore ? -1 : 1;
 	}
 
-	protected function sortRotationBots(array $left, array $right)
+	protected function scoreMaintainConnected(array $bot)
 	{
-		$leftChanged = !empty($left['last_presence_change_at']) ? (int) $left['last_presence_change_at'] : 0;
-		$rightChanged = !empty($right['last_presence_change_at']) ? (int) $right['last_presence_change_at'] : 0;
-		if ($leftChanged === $rightChanged) {
-			return (int) $left['id'] <=> (int) $right['id'];
-		}
+		$valueActions = min(30, (int) $bot['action_queue_size'] * 8);
+		$importance = (!empty($bot['is_online_forced']) ? 35 : 0) + ($bot['hierarchy_status'] === 'chef' ? 20 : 0);
+		$social = !empty($bot['is_visible_socially']) ? 10 : 0;
+		$urgence = !empty($bot['current_campaign_id']) ? 24 : min(18, (int) round(((int) $bot['intensite_campagne']) / 5));
+		$risque = (!empty($bot['current_campaign_id']) || $bot['hierarchy_status'] === 'chef') ? 12 : 0;
+		$fatigue = min(28, (int) round(((int) $bot['fatigue']) / 3));
+		$cooldown = (!empty($bot['cooldown_until']) && (int) $bot['cooldown_until'] > TIMESTAMP) ? 14 : 0;
+		$saturation = min(22, (int) round(((int) $bot['saturation_logistique']) / 4));
+		$faibleUtilite = empty($bot['action_queue_size']) && empty($bot['current_campaign_id']) ? 12 : 0;
 
-		return $leftChanged <=> $rightChanged;
+		return $valueActions + $importance + $social + $urgence + $risque - $fatigue - $cooldown - $saturation - $faibleUtilite;
 	}
 
-	protected function sortFallbackBots(array $left, array $right)
+	protected function scoreActivation(array $bot)
 	{
-		$leftRest = !empty($left['session_rest_until']) ? (int) $left['session_rest_until'] : PHP_INT_MAX;
-		$rightRest = !empty($right['session_rest_until']) ? (int) $right['session_rest_until'] : PHP_INT_MAX;
-		if ($leftRest === $rightRest) {
-			return (int) $left['id'] <=> (int) $right['id'];
-		}
+		$compatibilite = min(20, (int) $bot['target_online']) + ($bot['hierarchy_status'] === 'chef' ? 12 : 0);
+		$besoinSocial = (!empty($bot['is_visible_socially']) ? 8 : 0) + min(10, (int) round(((int) $bot['disponibilite_sociale']) / 10));
+		$campagne = !empty($bot['current_campaign_id']) ? 24 : min(14, (int) round(((int) $bot['intensite_campagne']) / 6));
+		$disponibilite = empty($bot['cooldown_until']) || (int) $bot['cooldown_until'] <= TIMESTAMP ? 12 : 0;
+		$queueValue = min(18, (int) $bot['action_queue_size'] * 6);
+		$redondance = empty($bot['is_commander_profile']) ? 4 : 0;
+		$fatigue = min(24, (int) round(((int) $bot['fatigue']) / 3));
+		$saturation = min(18, (int) round(((int) $bot['saturation_logistique']) / 5));
 
-		return $leftRest <=> $rightRest;
+		return $compatibilite + $besoinSocial + $campagne + $disponibilite + $queueValue - $redondance - $fatigue - $saturation;
 	}
 
 	protected function requiresNewSession(array $bot)

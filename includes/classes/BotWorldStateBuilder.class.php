@@ -4,7 +4,9 @@ class BotWorldStateBuilder
 {
 	public function build($botUserId)
 	{
+		require_once ROOT_PATH.'includes/classes/BotInferenceService.class.php';
 		$db = Database::get();
+		$inferenceService = new BotInferenceService();
 		$bot = $db->selectSingle('SELECT u.*, p.*
 			FROM %%USERS%% u
 			LEFT JOIN %%BOT_PROFILES%% p ON p.id = u.bot_profile_id
@@ -201,7 +203,6 @@ class BotWorldStateBuilder
 
 		$freeFieldsRatio = empty($planet['field_max']) ? 0 : max(0, min(1, ($planet['field_max'] - $planet['field_current']) / max(1, $planet['field_max'])));
 		$resourceLoad = $this->computeResourceLoad($planet);
-		$bestTarget = $this->findBestTarget($nearbyTargets, $bot, $planet);
 		$currentCampaign = array();
 		if (!empty($state['current_campaign_id'])) {
 			$currentCampaign = $db->selectSingle('SELECT *
@@ -211,6 +212,15 @@ class BotWorldStateBuilder
 					':campaignId' => (int) $state['current_campaign_id'],
 				));
 		}
+		$inferredTargets = $inferenceService->inferTargets($bot, $planet, $nearbyTargets, $memory, $relationships);
+		$bestTarget = !empty($inferredTargets[0]) ? $inferredTargets[0] : array();
+		$zoneContext = $inferenceService->buildZoneContext(
+			$planet,
+			$inferredTargets,
+			$incomingHostiles,
+			$activeCampaigns,
+			isset($bot['ally_id']) ? (int) $bot['ally_id'] : 0
+		);
 
 		return array(
 			'bot' => $bot,
@@ -226,7 +236,9 @@ class BotWorldStateBuilder
 			'alliance_meta' => empty($allianceMeta) ? array() : $allianceMeta,
 			'hierarchy' => $hierarchy,
 			'nearby_targets' => $nearbyTargets,
+			'inferred_targets' => $inferredTargets,
 			'best_target' => $bestTarget,
+			'zone_context' => $zoneContext,
 			'incoming_hostiles' => $incomingHostiles,
 			'own_fleets' => $ownFleets,
 			'planet_count' => count($botPlanets),
@@ -250,32 +262,6 @@ class BotWorldStateBuilder
 		}
 
 		return $ratios;
-	}
-
-	protected function findBestTarget(array $targets, array $bot, array $planet)
-	{
-		$best = array();
-		$bestScore = -1;
-
-		foreach ($targets as $target) {
-			$loot = ((float) $target['metal'] + (float) $target['crystal'] + (float) $target['deuterium']) / 10000;
-			$inactivity = max(0, (TIMESTAMP - (int) $target['onlinetime']) / 3600);
-			$distance = abs((int) $planet['system'] - (int) $target['system']);
-			$pointsPenalty = min(60, ((float) $target['total_points']) / 50000);
-			$score = ($loot * 8) + min(30, $inactivity) - min(18, $distance) - $pointsPenalty;
-
-			if ((int) $bot['ally_id'] > 0 && (int) $bot['ally_id'] === (int) $target['ally_id']) {
-				$score -= 100;
-			}
-
-			if ($score > $bestScore) {
-				$bestScore = $score;
-				$best = $target;
-				$best['target_score'] = round($score, 2);
-			}
-		}
-
-		return $best;
 	}
 
 	protected function countQueueEntries($serializedQueue)

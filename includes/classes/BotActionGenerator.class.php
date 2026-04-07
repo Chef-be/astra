@@ -55,6 +55,46 @@ class BotActionGenerator
 			$actions[] = $this->action('queue_social_message', $goal, 25, 8, 60, array('channel_key' => 'bots', 'template_key' => 'defense_zone'));
 		}
 
+		if ($goal === 'surveillance_active') {
+			if (!empty($bestTarget)) {
+				$coordinates = $bestTarget['galaxy'].':'.$bestTarget['system'].':'.$bestTarget['planet'];
+				$actions[] = $this->action('send_spy', $goal, 72, 14, 88, array(
+					'target_coordinates' => $coordinates,
+					'target_planet_id' => (int) $bestTarget['id'],
+					'information_value' => 1,
+				));
+			}
+
+			$actions[] = $this->action('presence_ping', $goal, 24, 2, 95, array('relay_value' => 1));
+			$actions[] = $this->action('queue_social_message', $goal, 26, 6, 64, array('channel_key' => 'bots', 'template_key' => 'presence_visible'));
+		}
+
+		if ($goal === 'relai_offensif') {
+			$actions[] = $this->action('presence_ping', $goal, 34, 2, 96, array('relay_value' => 1, 'continuity_value' => 1));
+			$actions[] = $this->action('queue_social_message', $goal, 28, 4, 70, array('channel_key' => 'bots', 'template_key' => 'presence_visible', 'coverage_sociale' => 1));
+			if (!empty($bestTarget)) {
+				$coordinates = $bestTarget['galaxy'].':'.$bestTarget['system'].':'.$bestTarget['planet'];
+				$actions[] = $this->action('send_spy', $goal, 48, 12, 84, array(
+					'target_coordinates' => $coordinates,
+					'target_planet_id' => (int) $bestTarget['id'],
+					'prepare_hidden' => 1,
+				));
+			}
+		}
+
+		if ($goal === 'pression_psychologique') {
+			$actions[] = $this->action('queue_social_message', $goal, 62, 6, 82, array('channel_key' => 'bots', 'template_key' => 'pression_locale', 'psychological_value' => 1));
+			if (!empty($bestTarget['id_owner'])) {
+				$actions[] = $this->action('queue_private_message', $goal, 64, 8, 80, array(
+					'target_user_id' => (int) $bestTarget['id_owner'],
+					'target_username' => $bestTarget['username'],
+					'template_key' => 'intimidation',
+					'psychological_value' => 1,
+				));
+			}
+			$actions[] = $this->action('presence_ping', $goal, 18, 1, 94, array('coverage_sociale' => 1));
+		}
+
 		if ($goal === 'soutien_alliance') {
 			$actions[] = $this->action('presence_ping', $goal, 28, 2, 94, array());
 			$actions[] = $this->action('queue_social_message', $goal, 36, 4, 74, array('channel_key' => 'bots', 'template_key' => 'presence_visible'));
@@ -66,7 +106,7 @@ class BotActionGenerator
 		}
 
 		if ($goal === 'camouflage_discret') {
-			$actions[] = $this->action('presence_ping', $goal, 20, 1, 90, array('force_discretion' => 1));
+			$actions[] = $this->action('presence_ping', $goal, 20, 1, 90, array('force_discretion' => 1, 'prepare_hidden' => 1));
 		}
 
 		if ($goal === 'communication_ciblee') {

@@ -13,7 +13,9 @@ class BotActionScorer
 			$coherenceProfile = $this->profileCoherence($action['action_type'], $profileDoctrine, $role);
 			$coherenceDoctrine = $this->doctrineCoherence($action['action_type'], $profileDoctrine);
 			$coherenceRole = $this->roleCoherence($action['action_type'], $role);
-			$opportunity = empty($snapshot['best_target']) ? 0 : min(14, max(0, (float) $snapshot['best_target']['target_score']));
+			$bestTarget = !empty($snapshot['best_target']) ? $snapshot['best_target'] : array();
+			$zoneContext = isset($snapshot['zone_context']['current_zone']) ? $snapshot['zone_context']['current_zone'] : array();
+			$opportunity = empty($bestTarget) ? 0 : min(18, max(0, (float) $bestTarget['opportunity_score'] / 6));
 			$cost = $this->estimateCostPenalty($action['action_type'], isset($action['payload']) ? $action['payload'] : array());
 			$queuePenalty = min(15, ((int) $snapshot['queue_state']['building'] + (int) $snapshot['queue_state']['shipyard'] + (int) $snapshot['queue_state']['research']) * 2);
 			$hierarchyPriority = !empty($snapshot['hierarchy']['commander']['current_target_json']) ? 10 : 0;
@@ -23,6 +25,10 @@ class BotActionScorer
 			$chargeLogistique = min(12, isset($snapshot['dynamic']['saturation_logistique']) ? (int) round($snapshot['dynamic']['saturation_logistique'] / 10) : 0);
 			$cooldownPenalty = !empty($snapshot['state']['cooldown_until']) && (int) $snapshot['state']['cooldown_until'] > TIMESTAMP ? 8 : 0;
 			$tacticalPenalty = $this->tacticalIncoherencePenalty($action['action_type'], $snapshot, $decision);
+			$territorialValue = min(14, isset($zoneContext['strategic_value']) ? (int) round($zoneContext['strategic_value'] / 8) : 0);
+			$psychologicalValue = min(12, isset($bestTarget['psychological_score']) ? (int) round($bestTarget['psychological_score'] / 10) : 0);
+			$continuityValue = $this->continuityValue($action, $decision, $snapshot);
+			$informationValue = $this->informationValue($action, $bestTarget);
 
 			$utility = (float) $action['benefit']
 				+ $coherenceProfile
@@ -33,6 +39,10 @@ class BotActionScorer
 				+ $bonusActifs
 				+ $campaignBoost
 				+ $coherenceSociale
+				+ $territorialValue
+				+ $psychologicalValue
+				+ $continuityValue
+				+ $informationValue
 				+ $faisabilite
 				+ min(10, (float) $action['confidence'] / 10)
 				- (float) $cost
@@ -193,13 +203,59 @@ class BotActionScorer
 		}
 
 		return sprintf(
-			'Objectif %s, besoin dominant %s, posture %s, confiance %d, prochaine étape %s%s.',
+			'Objectif %s, besoin dominant %s, posture %s, menace %d, opportunité %d, confiance %d, prochaine étape %s%s.',
 			$action['goal'],
 			isset($decision['primary_need']) ? $decision['primary_need'] : 'stabilisation',
 			isset($decision['social_posture']) ? $decision['social_posture'] : 'reserve',
+			isset($decision['threat_level']) ? (int) $decision['threat_level'] : 0,
+			isset($decision['opportunity_level']) ? (int) $decision['opportunity_level'] : 0,
 			isset($action['confidence']) ? (int) $action['confidence'] : 0,
 			isset($action['next_step']) ? $action['next_step'] : 'analyse',
 			$target
 		);
+	}
+
+	protected function continuityValue(array $action, array $decision, array $snapshot)
+	{
+		$value = 0;
+		if ($action['action_type'] === 'presence_ping') {
+			$value += 6;
+		}
+
+		if (!empty($action['payload']['relay_value'])) {
+			$value += 8;
+		}
+
+		if (!empty($action['payload']['continuity_value'])) {
+			$value += 6;
+		}
+
+		if (!empty($snapshot['campaigns'])) {
+			$value += 4;
+		}
+
+		if (isset($decision['primary_need']) && $decision['primary_need'] === 'besoin_presence_continue') {
+			$value += 8;
+		}
+
+		return $value;
+	}
+
+	protected function informationValue(array $action, array $bestTarget)
+	{
+		if ($action['action_type'] !== 'send_spy') {
+			return 0;
+		}
+
+		$value = 8;
+		if (!empty($action['payload']['information_value'])) {
+			$value += 4;
+		}
+
+		if (!empty($bestTarget['threat_score'])) {
+			$value += min(6, (int) round($bestTarget['threat_score'] / 20));
+		}
+
+		return $value;
 	}
 }

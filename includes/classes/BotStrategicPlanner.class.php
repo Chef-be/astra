@@ -46,6 +46,15 @@ class BotStrategicPlanner
 		$allianceSupport = !empty($snapshot['alliance_meta']) ? 60 : 0;
 		$subordinateCount = !empty($snapshot['hierarchy']['subordinates']) ? count($snapshot['hierarchy']['subordinates']) : 0;
 		$communicationReadiness = isset($dynamic['disponibilite_sociale']) ? (int) $dynamic['disponibilite_sociale'] : 40;
+		$zoneContext = isset($snapshot['zone_context']['current_zone']) ? $snapshot['zone_context']['current_zone'] : array();
+		$zonePressure = isset($zoneContext['pressure_need']) ? (int) $zoneContext['pressure_need'] : 0;
+		$zoneCoverage = isset($zoneContext['coverage_need']) ? (int) $zoneContext['coverage_need'] : 0;
+		$zoneDissuasion = isset($zoneContext['dissuasion_need']) ? (int) $zoneContext['dissuasion_need'] : 0;
+		$zoneProfitability = isset($zoneContext['profitability_score']) ? (int) $zoneContext['profitability_score'] : 0;
+		$targetInference = isset($snapshot['best_target']) ? $snapshot['best_target'] : array();
+		$psychologicalPressure = isset($targetInference['psychological_score']) ? (int) $targetInference['psychological_score'] : 0;
+		$territorialControl = isset($targetInference['territorial_score']) ? (int) $targetInference['territorial_score'] : 0;
+		$relayNeed = min(100, max(0, $zoneCoverage + ($campaignScore * 0.25) - ((isset($snapshot['state']['action_queue_size']) ? (int) $snapshot['state']['action_queue_size'] : 0) * 8)));
 
 		$scores = array();
 		$scores['besoin_economique'] =
@@ -62,19 +71,19 @@ class BotStrategicPlanner
 		$scores['besoin_pression_offensive'] =
 			$this->weightedScore(isset($weights['aggression']) ? $weights['aggression'] : array(), array(
 				'agressivite' => isset($traits['aggressivite']) ? $traits['aggressivite'] : 50,
-				'opportunite_raid' => $opportunity,
+				'opportunite_raid' => max($opportunity, $zonePressure),
 				'superiorite_locale' => isset($dynamic['superiorite_locale']) ? $dynamic['superiorite_locale'] : 50,
 				'appetit_raid' => isset($dynamic['appetit_raid']) ? $dynamic['appetit_raid'] : 40,
 				'rancune' => isset($traits['rancune']) ? $traits['rancune'] : 0,
 				'ordre_offensif' => max($manualOrderScore, $hierarchyPressure),
-				'intensite_campagne' => isset($dynamic['intensite_campagne']) ? $dynamic['intensite_campagne'] : 0,
+				'intensite_campagne' => max(isset($dynamic['intensite_campagne']) ? $dynamic['intensite_campagne'] : 0, $zonePressure),
 				'soutien_alliance' => !empty($snapshot['bot']['ally_id']) ? 60 : 0,
 				'peur' => isset($dynamic['peur']) ? $dynamic['peur'] : 0,
 				'fatigue' => isset($dynamic['fatigue']) ? $dynamic['fatigue'] : 0,
 			));
 
-		$scores['besoin_defensif'] = min(100, ($incomingThreat * 0.65) + ((isset($traits['defense']) ? $traits['defense'] : 50) * 0.20) + ((isset($dynamic['vigilance']) ? $dynamic['vigilance'] : 50) * 0.15));
-		$scores['besoin_expansion'] = min(100, ($freeFields < 25 ? 45 : 15) + ((isset($traits['expansion']) ? $traits['expansion'] : 50) * 0.35) + (max(0, 4 - $planetCount) * 15) + ($campaignScore * 0.10));
+		$scores['besoin_defensif'] = min(100, ($incomingThreat * 0.45) + ($zoneDissuasion * 0.25) + ((isset($traits['defense']) ? $traits['defense'] : 50) * 0.20) + ((isset($dynamic['vigilance']) ? $dynamic['vigilance'] : 50) * 0.10));
+		$scores['besoin_expansion'] = min(100, ($freeFields < 25 ? 45 : 15) + ((isset($traits['expansion']) ? $traits['expansion'] : 50) * 0.30) + (max(0, 4 - $planetCount) * 15) + ($campaignScore * 0.10) + ($zoneProfitability * 0.20));
 		$scores['besoin_technologique'] = min(100, ((isset($traits['technologie']) ? $traits['technologie'] : 50) * 0.45) + (max(0, 100 - ((int) $snapshot['bot']['computer_tech'] * 8)) * 0.30) + ($queuePressure * 0.10) + ($deficit * 0.15));
 		$scores['besoin_communication'] =
 			$this->weightedScore(isset($weights['communication']) ? $weights['communication'] : array(), array(
@@ -94,7 +103,10 @@ class BotStrategicPlanner
 		$scores['besoin_diplomatique_social'] = min(100, ($communicationReadiness * 0.30) + ($relationshipPressure * 0.25) + ($memoryPressure * 0.15) + ($allianceSupport * 0.15) + ((isset($traits['sociabilite']) ? $traits['sociabilite'] : 50) * 0.15));
 		$scores['besoin_recrutement'] = min(100, ((isset($traits['aptitude_communication']) ? $traits['aptitude_communication'] : 50) * 0.25) + ($communicationReadiness * 0.25) + ($allianceSupport * 0.20) + (max(0, 100 - min(100, $subordinateCount * 18)) * 0.30));
 		$scores['besoin_discretion'] = min(100, ((isset($dynamic['peur']) ? $dynamic['peur'] : 0) * 0.35) + ($incomingThreat * 0.25) + ((100 - $communicationReadiness) * 0.20) + ((isset($traits['prudence']) ? $traits['prudence'] : 50) * 0.20));
-		$scores['besoin_militaire'] = min(100, ($opportunity * 0.35) + ((isset($traits['intensite_offensive']) ? $traits['intensite_offensive'] : 50) * 0.25) + ($campaignScore * 0.20) + ((isset($dynamic['superiorite_locale']) ? $dynamic['superiorite_locale'] : 50) * 0.20));
+		$scores['besoin_militaire'] = min(100, (max($opportunity, $territorialControl) * 0.35) + ((isset($traits['intensite_offensive']) ? $traits['intensite_offensive'] : 50) * 0.25) + ($campaignScore * 0.20) + ((isset($dynamic['superiorite_locale']) ? $dynamic['superiorite_locale'] : 50) * 0.20));
+		$scores['besoin_surveillance_active'] = min(100, ($zoneCoverage * 0.35) + ($zonePressure * 0.20) + ($psychologicalPressure * 0.15) + ((isset($traits['espionnage']) ? $traits['espionnage'] : 50) * 0.20) + ((isset($dynamic['vigilance']) ? $dynamic['vigilance'] : 50) * 0.10));
+		$scores['besoin_presence_continue'] = min(100, ($relayNeed * 0.35) + ($campaignScore * 0.20) + ($communicationReadiness * 0.15) + ((isset($traits['coordination']) ? $traits['coordination'] : 50) * 0.15) + ((isset($traits['discipline']) ? $traits['discipline'] : 50) * 0.15));
+		$scores['besoin_pression_psychologique'] = min(100, ($psychologicalPressure * 0.40) + ($campaignScore * 0.20) + ($zonePressure * 0.15) + ($communicationReadiness * 0.10) + ((isset($traits['aptitude_communication']) ? $traits['aptitude_communication'] : 50) * 0.15));
 
 		return $scores;
 	}
@@ -152,6 +164,9 @@ class BotStrategicPlanner
 			'besoin_soutien_coordonne' => 'soutien_alliance',
 			'besoin_discretion' => 'camouflage_discret',
 			'besoin_recrutement' => 'recrutement',
+			'besoin_surveillance_active' => 'surveillance_active',
+			'besoin_presence_continue' => 'relai_offensif',
+			'besoin_pression_psychologique' => 'pression_psychologique',
 		);
 
 		if (!empty($hierarchy['state']['current_target_json']) && in_array($needKey, array('besoin_pression_offensive', 'besoin_soutien_coordonne', 'besoin_militaire'), true)) {
