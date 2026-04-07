@@ -1283,6 +1283,41 @@
         });
     },
 
+    normalizeAjaxPayload: function(payload) {
+      if (!payload) {
+        return null;
+      }
+
+      if (typeof payload === 'string') {
+        try {
+          return JSON.parse(payload);
+        } catch (error) {
+          return {
+            status: 'error',
+            message: String(payload || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+          };
+        }
+      }
+
+      return payload;
+    },
+
+    extractAjaxErrorMessage: function(payload, fallback, xhrText) {
+      var normalized = this.normalizeAjaxPayload(payload);
+      var rawText = '';
+
+      if (normalized && (normalized.responseText || normalized.message)) {
+        return normalized.responseText || normalized.message;
+      }
+
+      rawText = String(xhrText || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (rawText) {
+        return rawText.substring(0, 240);
+      }
+
+      return fallback;
+    },
+
     getSlashSuggestions: function(query) {
       var normalized = this.normalizeSearchTerm(query);
       return (this.botCommandCatalog || []).filter(function(item) {
@@ -1380,8 +1415,10 @@
       $.post('game.php?page=realtime&mode=submitBotCommand&ajax=1', {
         command: commandText
       }).done(function(payload) {
+        payload = self.normalizeAjaxPayload(payload);
+
         if (!payload || payload.status !== 'ok') {
-          self.showChatError(payload && (payload.responseText || payload.message) ? (payload.responseText || payload.message) : 'La commande bots a été rejetée.');
+          self.showChatError(self.extractAjaxErrorMessage(payload, 'La commande bots a été rejetée.'));
           return;
         }
 
@@ -1426,8 +1463,8 @@
           self.showChatError('La commande bots a été enregistrée, mais le dispatch immédiat a échoué.');
           self.requestChatHistory('bots');
         });
-      }).fail(function() {
-        self.showChatError('Échec de l’enregistrement de la commande bots.');
+      }).fail(function(xhr) {
+        self.showChatError(self.extractAjaxErrorMessage(null, 'Échec de l’enregistrement de la commande bots.', xhr && xhr.responseText ? xhr.responseText : ''));
       });
     },
 

@@ -233,7 +233,7 @@ $(function() {
 }
 </style>
 <script src="scripts/game/topnav.js?v={$VERSION}-mission2"></script>
-<script src="scripts/game/realtime.js?v={$VERSION}-realtime3"></script>
+<script src="scripts/game/realtime.js?v={$VERSION}-realtime4"></script>
 {if $hasGate}<script src="scripts/game/gate.js"></script>{/if}
 {/if}
 
