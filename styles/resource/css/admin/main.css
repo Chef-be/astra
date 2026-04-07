@@ -569,6 +569,13 @@ a {
 	font-weight: 700;
 }
 
+.bots-summary-strip {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 0.5rem;
+}
+
 .bots-mini-table {
 	display: grid;
 	gap: 0.65rem;
@@ -816,6 +823,11 @@ a {
 	.bots-mini-table__row,
 	.admin-fold__summary {
 		flex-direction: column;
+	}
+
+	.bots-summary-strip {
+		width: 100%;
+		justify-content: flex-start;
 	}
 
 	.admin-pagination__link {

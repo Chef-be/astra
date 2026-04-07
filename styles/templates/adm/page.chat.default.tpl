@@ -40,27 +40,33 @@
 
 	<section class="admin-panel-grid">
 		<div class="admin-panel-grid__side admin-stack">
-			<div class="admin-card">
-				<div class="card-body admin-stack">
-					<div class="d-flex justify-content-between align-items-start gap-3">
+			<details class="admin-fold admin-fold--compact">
+				<summary class="admin-fold__summary">
+					<div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 						<div>
 							<h2 class="h5 mb-1">État du relais</h2>
-							<p class="text-white-50 small mb-0">Vérification immédiate du point d’entrée et de l’URL de santé.</p>
+							<p class="text-white-50 small mb-0">Endpoint et sonde de santé, repliés par défaut.</p>
 						</div>
 						<span class="badge {if $realtimeStatus.available}admin-badge-success{else}admin-badge-danger{/if}">
 							{if $realtimeStatus.available}Disponible{else}Indisponible{/if}
 						</span>
 					</div>
-					<div class="admin-surface">
-						<div class="small text-white-50 mb-2">Point d’entrée WebSocket</div>
-						<div class="text-break">{$realtimeStatus.endpoint}</div>
-					</div>
-					<div class="admin-surface">
-						<div class="small text-white-50 mb-2">Point de contrôle</div>
-						<div class="text-break">{$realtimeStatus.healthUrl}</div>
+				</summary>
+				<div class="admin-fold__body">
+					<div class="admin-card">
+						<div class="card-body admin-stack">
+							<div class="admin-surface">
+								<div class="small text-white-50 mb-2">Point d’entrée WebSocket</div>
+								<div class="text-break">{$realtimeStatus.endpoint}</div>
+							</div>
+							<div class="admin-surface">
+								<div class="small text-white-50 mb-2">Point de contrôle</div>
+								<div class="text-break">{$realtimeStatus.healthUrl}</div>
+							</div>
+						</div>
 					</div>
 				</div>
-			</div>
+			</details>
 
 			<div class="admin-card">
 				<div class="card-body">

@@ -78,96 +78,105 @@
 
   <section class="row g-4 mb-4">
     <div class="col-12 col-xxl-8">
-      <div class="admin-card h-100">
-        <div class="admin-card__body">
-          <div class="bots-section-heading">
+      <details class="admin-fold admin-fold--compact" id="bots-presence-fold">
+        <summary class="admin-fold__summary">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
-              <h2 class="bots-section-title">Permanence et relève</h2>
-              <p class="bots-section-text">Vue opérationnelle de la continuité réelle : noyau d’ancrage, bots en relais, bots au repos et sessions à relever.</p>
+              <h2 class="bots-section-title mb-0">Permanence et relève</h2>
+              <p class="bots-section-text mb-0">Continuité réelle, ancrage, rotation et prochaines reprises.</p>
             </div>
-            <span class="bots-pill">Cible courante {$botSnapshot.metrics.target_online_current}</span>
-          </div>
-
-          <div class="bots-presence-overview">
-            <div class="bots-presence-stat">
-              <span class="bots-presence-stat__label">En ligne</span>
-              <strong class="bots-presence-stat__value">{$botSnapshot.metrics.logical_connected}</strong>
-              <span class="bots-presence-stat__meta">sur {$botSnapshot.metrics.target_online_current}</span>
-            </div>
-            <div class="bots-presence-stat">
-              <span class="bots-presence-stat__label">Ancrage permanent</span>
-              <strong class="bots-presence-stat__value">{$botSnapshot.metrics.forced_online}</strong>
-              <span class="bots-presence-stat__meta">chefs, campagnes, profils forcés</span>
-            </div>
-            <div class="bots-presence-stat">
-              <span class="bots-presence-stat__label">Relève active</span>
-              <strong class="bots-presence-stat__value">{$botSnapshot.metrics.rotation_online}</strong>
-              <span class="bots-presence-stat__meta">bots tournants actuellement connectés</span>
-            </div>
-            <div class="bots-presence-stat">
-              <span class="bots-presence-stat__label">Repos</span>
-              <strong class="bots-presence-stat__value">{$botSnapshot.metrics.resting_bots}</strong>
-              <span class="bots-presence-stat__meta">fenêtres de repos en cours</span>
+            <div class="bots-summary-strip">
+              <span class="bots-pill">En ligne {$botSnapshot.metrics.logical_connected}/{$botSnapshot.metrics.target_online_current}</span>
+              <span class="bots-pill">Relève {$botSnapshot.metrics.rotation_online}</span>
+              <span class="bots-pill">Repos {$botSnapshot.metrics.resting_bots}</span>
             </div>
           </div>
-
-          <div class="row g-3">
-            <div class="col-12 col-xl-6">
-              <div class="bots-panel">
-                <div class="bots-panel__head">
-                  <h3 class="bots-panel__title">Bots actuellement en ligne</h3>
-                  <span class="small text-white-50">Aperçu compact, limité aux 5 plus urgents</span>
+        </summary>
+        <div class="admin-fold__body">
+          <div class="admin-card h-100">
+            <div class="admin-card__body">
+              <div class="bots-presence-overview">
+                <div class="bots-presence-stat">
+                  <span class="bots-presence-stat__label">En ligne</span>
+                  <strong class="bots-presence-stat__value">{$botSnapshot.metrics.logical_connected}</strong>
+                  <span class="bots-presence-stat__meta">sur {$botSnapshot.metrics.target_online_current}</span>
                 </div>
-                <div class="bots-mini-table">
-                  {foreach from=$botSnapshot.online_roster item=bot name=onlinePreview}
-                    {if $smarty.foreach.onlinePreview.iteration <= 5}
-                    <div class="bots-mini-table__row">
-                      <div>
-                        <div class="fw-bold">{$bot.username}</div>
-                        <div class="small text-white-50">{$bot.profile_name|default:'Sans profil'} · {$bot.presence_logical_label|default:'En veille'}</div>
-                      </div>
-                      <div class="text-end">
-                        <div class="bots-pill">{if $bot.is_online_forced}ancrage{else}{$bot.session_target_in_label}{/if}</div>
-                        <div class="small text-white-50 mt-1">{$bot.session_target_until_formatted|default:'session ouverte'}</div>
-                      </div>
-                    </div>
-                    {/if}
-                  {foreachelse}
-                    <div class="text-white-50">Aucun bot en ligne.</div>
-                  {/foreach}
+                <div class="bots-presence-stat">
+                  <span class="bots-presence-stat__label">Ancrage permanent</span>
+                  <strong class="bots-presence-stat__value">{$botSnapshot.metrics.forced_online}</strong>
+                  <span class="bots-presence-stat__meta">chefs, campagnes, profils forcés</span>
+                </div>
+                <div class="bots-presence-stat">
+                  <span class="bots-presence-stat__label">Relève active</span>
+                  <strong class="bots-presence-stat__value">{$botSnapshot.metrics.rotation_online}</strong>
+                  <span class="bots-presence-stat__meta">bots tournants actuellement connectés</span>
+                </div>
+                <div class="bots-presence-stat">
+                  <span class="bots-presence-stat__label">Repos</span>
+                  <strong class="bots-presence-stat__value">{$botSnapshot.metrics.resting_bots}</strong>
+                  <span class="bots-presence-stat__meta">fenêtres de repos en cours</span>
                 </div>
               </div>
-            </div>
 
-            <div class="col-12 col-xl-6">
-              <div class="bots-panel">
-                <div class="bots-panel__head">
-                  <h3 class="bots-panel__title">Prochaine relève disponible</h3>
-                  <span class="small text-white-50">Aperçu compact, limité aux 5 plus proches</span>
-                </div>
-                <div class="bots-mini-table">
-                  {foreach from=$botSnapshot.relay_candidates item=bot name=relayPreview}
-                    {if $smarty.foreach.relayPreview.iteration <= 5}
-                    <div class="bots-mini-table__row">
-                      <div>
-                        <div class="fw-bold">{$bot.username}</div>
-                        <div class="small text-white-50">{$bot.profile_name|default:'Sans profil'} · {$bot.presence_logical_label|default:'En veille'}</div>
-                      </div>
-                      <div class="text-end">
-                        <div class="bots-pill">{$bot.session_rest_in_label}</div>
-                        <div class="small text-white-50 mt-1">{$bot.session_rest_until_formatted|default:'immédiatement prêt'}</div>
-                      </div>
+              <div class="row g-3">
+                <div class="col-12 col-xl-6">
+                  <div class="bots-panel">
+                    <div class="bots-panel__head">
+                      <h3 class="bots-panel__title">Bots actuellement en ligne</h3>
+                      <span class="small text-white-50">Aperçu compact, limité aux 5 plus urgents</span>
                     </div>
-                    {/if}
-                  {foreachelse}
-                    <div class="text-white-50">Aucun relais disponible.</div>
-                  {/foreach}
+                    <div class="bots-mini-table">
+                      {foreach from=$botSnapshot.online_roster item=bot name=onlinePreview}
+                        {if $smarty.foreach.onlinePreview.iteration <= 5}
+                        <div class="bots-mini-table__row">
+                          <div>
+                            <div class="fw-bold">{$bot.username}</div>
+                            <div class="small text-white-50">{$bot.profile_name|default:'Sans profil'} · {$bot.presence_logical_label|default:'En veille'}</div>
+                          </div>
+                          <div class="text-end">
+                            <div class="bots-pill">{if $bot.is_online_forced}ancrage{else}{$bot.session_target_in_label}{/if}</div>
+                            <div class="small text-white-50 mt-1">{$bot.session_target_until_formatted|default:'session ouverte'}</div>
+                          </div>
+                        </div>
+                        {/if}
+                      {foreachelse}
+                        <div class="text-white-50">Aucun bot en ligne.</div>
+                      {/foreach}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-xl-6">
+                  <div class="bots-panel">
+                    <div class="bots-panel__head">
+                      <h3 class="bots-panel__title">Prochaine relève disponible</h3>
+                      <span class="small text-white-50">Aperçu compact, limité aux 5 plus proches</span>
+                    </div>
+                    <div class="bots-mini-table">
+                      {foreach from=$botSnapshot.relay_candidates item=bot name=relayPreview}
+                        {if $smarty.foreach.relayPreview.iteration <= 5}
+                        <div class="bots-mini-table__row">
+                          <div>
+                            <div class="fw-bold">{$bot.username}</div>
+                            <div class="small text-white-50">{$bot.profile_name|default:'Sans profil'} · {$bot.presence_logical_label|default:'En veille'}</div>
+                          </div>
+                          <div class="text-end">
+                            <div class="bots-pill">{$bot.session_rest_in_label}</div>
+                            <div class="small text-white-50 mt-1">{$bot.session_rest_until_formatted|default:'immédiatement prêt'}</div>
+                          </div>
+                        </div>
+                        {/if}
+                      {foreachelse}
+                        <div class="text-white-50">Aucun relais disponible.</div>
+                      {/foreach}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </details>
     </div>
 
     <div class="col-12 col-xxl-4">
