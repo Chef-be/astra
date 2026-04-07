@@ -317,6 +317,19 @@
 		font-size: 0.84rem;
 	}
 
+	.tech-tree-search-state {
+		padding: 0.95rem 1rem;
+		border-radius: 1rem;
+		border: 1px dashed rgba(255, 214, 102, 0.2);
+		background: rgba(255, 255, 255, 0.03);
+		color: rgba(255, 255, 255, 0.7);
+		font-size: 0.84rem;
+	}
+
+	.tech-tree-search-state.is-hidden {
+		display: none !important;
+	}
+
 	.tech-tree-section.is-hidden,
 	.tech-tree-entry.is-hidden {
 		display: none !important;
@@ -436,6 +449,10 @@
 		</details>
 		{/foreach}
 	</div>
+
+	<div class="tech-tree-search-state is-hidden" id="techTreeSearchState">
+		Aucun élément ne correspond aux filtres actuels.
+	</div>
 </div>
 {/block}
 
@@ -445,18 +462,30 @@ document.addEventListener('DOMContentLoaded', function() {
 	const searchInput = document.getElementById('techTreeSearch');
 	const filterSelect = document.getElementById('techTreeFilter');
 	const sections = Array.from(document.querySelectorAll('.tech-tree-section'));
+	const searchState = document.getElementById('techTreeSearchState');
+
+	function normalizeTechTreeText(value) {
+		return (value || '')
+			.toString()
+			.normalize('NFD')
+			.replace(/[\u0300-\u036f]/g, '')
+			.toLowerCase()
+			.trim();
+	}
 
 	function applyTechTreeFilters() {
-		const query = (searchInput.value || '').trim().toLowerCase();
+		const query = normalizeTechTreeText(searchInput.value || '');
 		const filter = filterSelect.value;
+		const hasActiveFilter = query !== '' || filter !== 'all';
+		let visibleSections = 0;
 
 		sections.forEach((section) => {
 			let visibleCount = 0;
 			const entries = Array.from(section.querySelectorAll('.tech-tree-entry'));
 
 			entries.forEach((entry) => {
-				const name = (entry.dataset.name || '').toLowerCase();
-				const description = (entry.dataset.description || '').toLowerCase();
+				const name = normalizeTechTreeText(entry.dataset.name || '');
+				const description = normalizeTechTreeText(entry.dataset.description || '');
 				const isReady = entry.dataset.ready === '1';
 
 				const queryMatch = query === '' || name.includes(query) || description.includes(query);
@@ -466,15 +495,30 @@ document.addEventListener('DOMContentLoaded', function() {
 				entry.classList.toggle('is-hidden', !visible);
 				if (visible) {
 					visibleCount++;
+					if (query !== '') {
+						entry.open = true;
+					}
 				}
 			});
 
-			section.classList.toggle('is-hidden', visibleCount === 0);
+			const isVisibleSection = visibleCount > 0;
+			section.classList.toggle('is-hidden', !isVisibleSection);
+			if (isVisibleSection) {
+				visibleSections++;
+				if (hasActiveFilter) {
+					section.open = true;
+				}
+			}
 		});
+
+		if (searchState) {
+			searchState.classList.toggle('is-hidden', visibleSections > 0);
+		}
 	}
 
 	searchInput.addEventListener('input', applyTechTreeFilters);
 	filterSelect.addEventListener('change', applyTechTreeFilters);
+	applyTechTreeFilters();
 });
 </script>
 {/block}
