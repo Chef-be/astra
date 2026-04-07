@@ -28,43 +28,79 @@ class BotPresenceService
 			prestige = 50,
 			obedience_modifier = 50,
 			bonus_score = 0,
+			session_started_at = NULL,
+			session_target_until = NULL,
+			session_rest_until = NULL,
 			action_queue_size = 0,
 			is_online_forced = 0,
 			is_socially_visible = 0,
+			last_presence_change_at = :updatedAt,
 			updated_at = :updatedAt;', array(
 				':botUserId' => (int) $botUserId,
 				':universe' => (int) $universe,
 				':rolePrimary' => 'economiste',
 				':hierarchyStatus' => 'membre',
 				':doctrine' => 'equilibre',
-				':updatedAt' => TIMESTAMP,
-			));
+			':updatedAt' => TIMESTAMP,
+		));
 	}
 
-	public function applyPresence($botUserId, $logicalPresence, $socialPresence, $reason, $forceOnline = false)
+	public function applyPresence($botUserId, $logicalPresence, $socialPresence, $reason, $forceOnline = false, array $sessionMeta = array())
 	{
 		$this->ensureState($botUserId);
+		$current = $this->getState($botUserId);
+		$logicalPresence = (string) $logicalPresence;
+		$socialPresence = (string) $socialPresence;
+		$isSociallyVisible = in_array($socialPresence, array('visible', 'chef', 'campagne', 'chat'), true) ? 1 : 0;
+		$presenceChanged = empty($current)
+			|| $current['presence_logical'] !== $logicalPresence
+			|| $current['presence_social'] !== $socialPresence
+			|| (int) $current['is_online_forced'] !== ($forceOnline ? 1 : 0)
+			|| (int) $current['is_socially_visible'] !== $isSociallyVisible;
+
+		$fields = array(
+			'presence_logical = :logicalPresence',
+			'presence_social = :socialPresence',
+			'is_online_forced = :forceOnline',
+			'is_socially_visible = :isSociallyVisible',
+			'updated_at = :updatedAt',
+		);
+		$params = array(
+			':logicalPresence' => $logicalPresence,
+			':socialPresence' => $socialPresence,
+			':forceOnline' => $forceOnline ? 1 : 0,
+			':isSociallyVisible' => $isSociallyVisible,
+			':updatedAt' => TIMESTAMP,
+			':botUserId' => (int) $botUserId,
+		);
+
+		foreach (array('session_started_at', 'session_target_until', 'session_rest_until', 'last_presence_change_at') as $column) {
+			if (!array_key_exists($column, $sessionMeta)) {
+				continue;
+			}
+
+			$fields[] = $column.' = :'.$column;
+			$params[':'.$column] = $sessionMeta[$column];
+		}
+
+		if ($presenceChanged && !array_key_exists('last_presence_change_at', $sessionMeta)) {
+			$fields[] = 'last_presence_change_at = :lastPresenceChangeAt';
+			$params[':lastPresenceChangeAt'] = TIMESTAMP;
+		}
 
 		Database::get()->update('UPDATE %%BOT_STATE%% SET
-			presence_logical = :logicalPresence,
-			presence_social = :socialPresence,
-			is_online_forced = :forceOnline,
-			is_socially_visible = :isSociallyVisible,
-			updated_at = :updatedAt
-			WHERE bot_user_id = :botUserId;', array(
-				':logicalPresence' => (string) $logicalPresence,
-				':socialPresence' => (string) $socialPresence,
-				':forceOnline' => $forceOnline ? 1 : 0,
-				':isSociallyVisible' => in_array($socialPresence, array('visible', 'chef', 'campagne', 'chat'), true) ? 1 : 0,
-				':updatedAt' => TIMESTAMP,
-				':botUserId' => (int) $botUserId,
-			));
+			'.implode(",\n\t\t\t", $fields).'
+			WHERE bot_user_id = :botUserId;', $params);
 
 		if ($forceOnline || in_array($logicalPresence, array('connecte', 'engage', 'alerte', 'coordination', 'campagne', 'harcelement'), true)) {
 			Database::get()->update('UPDATE %%USERS%% SET onlinetime = :onlineTime WHERE id = :userId;', array(
 				':onlineTime' => TIMESTAMP,
 				':userId' => (int) $botUserId,
 			));
+		}
+
+		if (!$presenceChanged && empty($sessionMeta['force_snapshot'])) {
+			return;
 		}
 
 		Database::get()->insert('INSERT INTO %%BOT_PRESENCE_SNAPSHOTS%% SET

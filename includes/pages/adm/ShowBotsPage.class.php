@@ -23,6 +23,23 @@ class ShowBotsPage extends AbstractAdminPage
 
 		foreach ($snapshot['bot_roster'] as &$row) {
 			$row['onlinetime_formatted'] = _date($LNG['php_tdformat'], $row['onlinetime'], $USER['timezone']);
+			$row['session_target_until_formatted'] = !empty($row['session_target_until']) ? _date($LNG['php_tdformat'], $row['session_target_until'], $USER['timezone']) : '';
+			$row['session_rest_until_formatted'] = !empty($row['session_rest_until']) ? _date($LNG['php_tdformat'], $row['session_rest_until'], $USER['timezone']) : '';
+			$row['session_target_in_label'] = $this->formatDeltaLabel(!empty($row['session_target_until']) ? ((int) $row['session_target_until'] - TIMESTAMP) : null, 'fin');
+			$row['session_rest_in_label'] = $this->formatDeltaLabel(!empty($row['session_rest_until']) ? ((int) $row['session_rest_until'] - TIMESTAMP) : null, 'relève');
+		}
+		unset($row);
+
+		foreach ($snapshot['online_roster'] as &$row) {
+			$row['session_started_at_formatted'] = !empty($row['session_started_at']) ? _date($LNG['php_tdformat'], $row['session_started_at'], $USER['timezone']) : '';
+			$row['session_target_until_formatted'] = !empty($row['session_target_until']) ? _date($LNG['php_tdformat'], $row['session_target_until'], $USER['timezone']) : '';
+			$row['session_target_in_label'] = $this->formatDeltaLabel(!empty($row['session_target_until']) ? ((int) $row['session_target_until'] - TIMESTAMP) : null, 'relève');
+		}
+		unset($row);
+
+		foreach ($snapshot['relay_candidates'] as &$row) {
+			$row['session_rest_until_formatted'] = !empty($row['session_rest_until']) ? _date($LNG['php_tdformat'], $row['session_rest_until'], $USER['timezone']) : '';
+			$row['session_rest_in_label'] = $this->formatDeltaLabel(!empty($row['session_rest_until']) ? ((int) $row['session_rest_until'] - TIMESTAMP) : null, 'disponible');
 		}
 		unset($row);
 
@@ -217,5 +234,30 @@ class ShowBotsPage extends AbstractAdminPage
 
 		$decoded = json_decode($json, true);
 		return is_array($decoded) ? $decoded : $fallback;
+	}
+
+	protected function formatDeltaLabel($seconds, $readyLabel)
+	{
+		if ($seconds === null) {
+			return '-';
+		}
+
+		$seconds = (int) $seconds;
+		if ($seconds <= 0) {
+			return $readyLabel.' maintenant';
+		}
+
+		$minutes = (int) ceil($seconds / 60);
+		if ($minutes >= 60) {
+			$hours = floor($minutes / 60);
+			$remainingMinutes = $minutes % 60;
+			if ($remainingMinutes === 0) {
+				return sprintf('%s dans %dh', $readyLabel, $hours);
+			}
+
+			return sprintf('%s dans %dh%02d', $readyLabel, $hours, $remainingMinutes);
+		}
+
+		return sprintf('%s dans %d min', $readyLabel, $minutes);
 	}
 }

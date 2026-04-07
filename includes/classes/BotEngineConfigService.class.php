@@ -91,6 +91,10 @@ class BotEngineConfigService
 			$row[$column] = $this->decodeJsonColumn(isset($row[$column]) ? $row[$column] : null);
 		}
 
+		$row['global_presence_rules_json'] = array_replace_recursive($this->getDefaultPresenceRules(), $row['global_presence_rules_json']);
+		$row['decision_weights_json'] = array_replace_recursive($this->getDefaultDecisionWeights(), $row['decision_weights_json']);
+		$row['profile_quotas_json'] = is_array($row['profile_quotas_json']) ? $row['profile_quotas_json'] : array();
+
 		return $row;
 	}
 
@@ -159,6 +163,15 @@ class BotEngineConfigService
 				'06-12' => 0.65,
 				'12-18' => 0.85,
 				'18-24' => 1.00,
+			),
+			'sessions' => array(
+				'min_minutes' => 18,
+				'max_minutes' => 75,
+				'min_rest_minutes' => 12,
+				'max_rest_minutes' => 90,
+				'rest_ratio' => 0.55,
+				'commander_bonus_minutes' => 40,
+				'campaign_bonus_minutes' => 55,
 			),
 			'always_visible_roles' => array('chef', 'animateur'),
 		);

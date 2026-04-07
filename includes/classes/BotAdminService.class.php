@@ -89,6 +89,7 @@ class BotAdminService
 
 		$botRoster = $db->select('SELECT u.id, u.username, u.email, u.onlinetime, p.name AS profile_name,
 				pl.galaxy, pl.`system`, pl.planet, bs.hierarchy_status, bs.presence_logical, bs.presence_social,
+				bs.session_started_at, bs.session_target_until, bs.session_rest_until, bs.is_online_forced,
 				bac.compliance_status, bmv.validation_status, a.ally_tag
 			FROM %%USERS%% u
 			LEFT JOIN %%BOT_PROFILES%% p ON p.id = u.bot_profile_id
@@ -101,6 +102,38 @@ class BotAdminService
 			ORDER BY u.onlinetime DESC, u.id ASC
 			LIMIT 100;', array(
 				':universe' => Universe::getEmulated(),
+			));
+
+		$onlineRoster = $db->select('SELECT u.id, u.username, p.name AS profile_name, bs.hierarchy_status, bs.presence_logical,
+				bs.presence_social, bs.session_started_at, bs.session_target_until, bs.current_campaign_id, bs.is_online_forced
+			FROM %%USERS%% u
+			INNER JOIN %%BOT_STATE%% bs ON bs.bot_user_id = u.id
+			LEFT JOIN %%BOT_PROFILES%% p ON p.id = u.bot_profile_id
+			WHERE u.universe = :universe
+			  AND u.is_bot = 1
+			  AND bs.presence_logical IN (\'connecte\', \'engage\', \'alerte\', \'coordination\', \'campagne\', \'harcelement\')
+			ORDER BY COALESCE(bs.session_target_until, 2147483647) ASC, bs.is_online_forced DESC, u.id ASC
+			LIMIT 20;', array(
+				':universe' => Universe::getEmulated(),
+			));
+
+		$relayCandidates = $db->select('SELECT u.id, u.username, p.name AS profile_name, bs.hierarchy_status, bs.presence_logical,
+				bs.presence_social, bs.session_rest_until, bs.last_presence_change_at, bs.current_campaign_id
+			FROM %%USERS%% u
+			INNER JOIN %%BOT_STATE%% bs ON bs.bot_user_id = u.id
+			LEFT JOIN %%BOT_PROFILES%% p ON p.id = u.bot_profile_id
+			WHERE u.universe = :universe
+			  AND u.is_bot = 1
+			  AND (bs.paused_until IS NULL OR bs.paused_until <= :now)
+			  AND bs.presence_logical NOT IN (\'connecte\', \'engage\', \'alerte\', \'coordination\', \'campagne\', \'harcelement\')
+			ORDER BY
+				CASE WHEN bs.session_rest_until IS NULL OR bs.session_rest_until <= :now THEN 0 ELSE 1 END ASC,
+				COALESCE(bs.session_rest_until, 0) ASC,
+				COALESCE(bs.last_presence_change_at, 0) ASC,
+				u.id ASC
+			LIMIT 20;', array(
+				':universe' => Universe::getEmulated(),
+				':now' => TIMESTAMP,
 			));
 
 		$orders = $db->select('SELECT *
@@ -172,6 +205,8 @@ class BotAdminService
 			'profiles' => $profiles,
 			'activity' => $activity,
 			'bot_roster' => $botRoster,
+			'online_roster' => $onlineRoster,
+			'relay_candidates' => $relayCandidates,
 			'orders' => $orders,
 			'campaigns' => $campaigns,
 			'queued_actions' => $queuedActions,
