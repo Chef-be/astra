@@ -232,8 +232,8 @@ $(function() {
   animation: astraMissionPulse 1.15s ease-in-out infinite;
 }
 </style>
-<script src="scripts/game/topnav.js"></script>
-<script src="scripts/game/realtime.js?v={$VERSION}"></script>
+<script src="scripts/game/topnav.js?v={$VERSION}-mission2"></script>
+<script src="scripts/game/realtime.js?v={$VERSION}-realtime3"></script>
 {if $hasGate}<script src="scripts/game/gate.js"></script>{/if}
 {/if}
 

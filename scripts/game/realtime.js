@@ -1381,7 +1381,22 @@
         command: commandText
       }).done(function(payload) {
         if (!payload || payload.status !== 'ok') {
-          self.showChatError(payload && payload.message ? payload.message : 'La commande bots a été rejetée.');
+          self.showChatError(payload && (payload.responseText || payload.message) ? (payload.responseText || payload.message) : 'La commande bots a été rejetée.');
+          return;
+        }
+
+        if (payload.commandStatus && payload.commandStatus !== 'done') {
+          self.showChatError(payload.responseText || 'La commande bots a été rejetée à l’exécution.');
+          self.requestChatHistory('bots');
+          return;
+        }
+
+        if (payload.commandStatus === 'done') {
+          input.val('');
+          self.chatDrafts[self.getChatDraftKey(rootId)] = '';
+          self.hideSlashSuggestions(rootId);
+          self.hideChatError(rootId);
+          self.requestChatHistory('bots');
           return;
         }
 
