@@ -139,7 +139,7 @@
 			});
 </script>
 
-<script src="scripts/game/overview.js"></script>
+<script src="scripts/game/overview.js?v={$VERSION}-overview2"></script>
 
 </head>
 <body id="{if isset($smarty.get.page)}{$smarty.get.page|htmlspecialchars|default:'overview'}{/if}" class="{$bodyclass}">

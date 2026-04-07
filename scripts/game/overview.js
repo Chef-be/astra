@@ -1,5 +1,22 @@
 $(document).ready(function()
 {
+	function updateTemporaryBonusPanel() {
+		var entries = $('.temporary-bonus-entry');
+		var remaining = entries.length;
+		var panel = $('.temporary-bonus-panel');
+		var countNode = $('.temporary-bonus-count');
+
+		if (!countNode.length) {
+			return;
+		}
+
+		countNode.text(remaining + ' actif' + (remaining > 1 ? 's' : ''));
+
+		if (remaining <= 0 && panel.length) {
+			panel.remove();
+		}
+	}
+
 	window.setInterval(function() {
 		$('.fleets').each(function() {
 			var s		= $(this).data('fleet-time') - (serverTime.getTime() - startTime) / 1000;
@@ -26,10 +43,13 @@ $(document).ready(function()
 		$('.temporary-bonus-timer').each(function() {
 			var s = $(this).data('time') - (serverTime.getTime() - startTime) / 1000;
 			if (s <= 0) {
-				$(this).text('Expiré');
+				$(this).closest('.temporary-bonus-entry').remove();
+				updateTemporaryBonusPanel();
 			} else {
 				$(this).text(GetRestTimeFormat(s));
 			}
 		});
 	}, 1000);
+
+	updateTemporaryBonusPanel();
 });

@@ -13,14 +13,14 @@
   </div>
 
   {if !empty($activeTemporaryBonuses)}
-    <div class="mt-2 px-2 py-2" style="border-radius:12px;background:rgba(255,214,102,0.08);border:1px solid rgba(255,214,102,0.14);">
+    <div class="temporary-bonus-panel mt-2 px-2 py-2" style="border-radius:12px;background:rgba(255,214,102,0.08);border:1px solid rgba(255,214,102,0.14);">
       <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
         <span class="fs-11 fw-bold" style="color:#ffe29c;">Bonus temporaires actifs</span>
-        <span class="fs-11" style="color:rgba(255,255,255,0.72);">{$activeTemporaryBonusCount} actif{if $activeTemporaryBonusCount > 1}s{/if}</span>
+        <span class="temporary-bonus-count fs-11" style="color:rgba(255,255,255,0.72);">{$activeTemporaryBonusCount} actif{if $activeTemporaryBonusCount > 1}s{/if}</span>
       </div>
       <div class="d-flex flex-column gap-1">
         {foreach from=$activeTemporaryBonuses item=bonus}
-          <div class="d-flex justify-content-between align-items-start gap-2 fs-11">
+          <div class="temporary-bonus-entry d-flex justify-content-between align-items-start gap-2 fs-11">
             <div class="d-flex flex-column">
               <span style="color:#f8fbff;font-weight:700;">{$bonus.name}</span>
               {if $bonus.bonus_summary ne ''}
