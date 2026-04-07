@@ -1,468 +1,221 @@
 <?php
 
-/**
- *
- */
 class ShowBotsPage extends AbstractAdminPage
 {
-  protected $allNames = array();
-
-  protected $title = ['Marshal', 'Czar', 'Governor', 'Technocrat', 'Geologist', 'Commander',
-      'Lord', 'Commodore', 'Chancellor', 'Emperor', 'Mogul', 'Sovereign', 'Proconsul',
-      'Stadtholder', 'Renegade', 'Lieutenant', 'Admiral', 'Vice', 'Consul', 'Chief',
-      'President', 'Procurator', 'Engineer', 'Constable', 'Bandit', 'Senator', 'Viceregent',
-      'Captain', 'Director', 'Kualla', 'Padme'];
-
-  protected $name = ['Yakini', 'Astra', 'Cosmos', 'Skat', 'Nemesis', 'Mars', 'Icarus', 'Helix', 'Cetus',
-      'Hydra', 'Genesis', 'Octans', 'Remus', 'Sigma', 'Pavo', 'Navi', 'Rocket', 'Erdemas',
-      'Europa', 'Ceres', 'Ferret', 'Cupid', 'Sirius', 'Antimatter', 'Centauri', 'Midas',
-      'Quantum', 'Dorado', 'Deimos', 'Keid', 'Andromeda', 'Apollo',
-      'Saturn', 'Spica', 'Majoris', 'Vega', 'Pathfinder', 'Kuma', 'Cosmo',
-      'Gravity', 'Uranus', 'Ares', 'Janus', 'Transit', 'Uriel',
-      'Scorpius', 'Omicron', 'Sol', 'Mimas', 'Euler', 'Castor',
-      'Probe', 'Neso', 'Retina', 'Io', 'Leda', 'Ceti', 'Moon', 'Herschel',
-      'Varilla', 'Tarvos', 'Pollux', 'Sunspot', 'Mariner', 'Zuben', 'Nestor',
-      'Grus', 'Themis', 'Klio', 'Puck', 'Japetus', 'Scout', 'Solar', 'Kale', 'Lambda',
-      'Leto', 'Amidala', 'Zagadra', 'Seti', 'Tycho', 'Sputnik', 'Navi', 'Starburst',
-      'Comet', 'Sagan', 'Atik', 'Gamma', 'Dorado', 'Jones', 'Lepus', 'Taurus', 'Owl',
-      'Zenith', 'Auriga', 'Jericho', 'Mimas', 'Voyager', 'Spirit', 'Explorer', 'Palma',
-      'Gliese', 'Cassini', 'Pan', 'Neptune', 'Discory', 'Polaris', 'Barym', 'Spacewalk',
-      'Ganimed', 'Forma', 'Pulsar', 'Holmes', 'Rhea', 'Deneb',
-      'Nova', 'Omega', 'Zagadra', 'Hunter', 'Ranger', 'Zibal', 'Asteroid'];
-
-    protected $titleCount;
-    protected $nameCount;
-
-  function __construct()
-  {
-    parent::__construct();
-    require_once ROOT_PATH.'includes/classes/BotAdminService.class.php';
-  }
-
-  function show(){
-    $service = new BotAdminService();
-    $service->ensureDefaults();
-
-    $snapshot = $service->getSnapshot();
-    global $USER, $LNG;
-    foreach ($snapshot['activity'] as &$activityRow) {
-      $activityRow['created_at_formatted'] = _date($LNG['php_tdformat'], $activityRow['created_at'], $USER['timezone']);
-    }
-    unset($activityRow);
-
-    foreach ($snapshot['botRoster'] as &$botRow) {
-      $botRow['onlinetime_formatted'] = _date($LNG['php_tdformat'], $botRow['onlinetime'], $USER['timezone']);
-    }
-    unset($botRow);
-
-    $this->assign(array(
-      'botSnapshot' => $snapshot,
-      'botProfiles' => $service->getActiveProfiles(),
-    ));
-
-    $this->display('page.bots.default.tpl');
-  }
-
-  function saveProfile()
-  {
-    $service = new BotAdminService();
-    $service->saveProfile(array(
-      'name' => HTTP::_GP('name', '', true),
-      'description' => HTTP::_GP('description', '', true),
-      'target_online' => HTTP::_GP('target_online', 0),
-      'aggression' => HTTP::_GP('aggression', 0),
-      'economy_focus' => HTTP::_GP('economy_focus', 0),
-      'expansion_focus' => HTTP::_GP('expansion_focus', 0),
-      'is_active' => HTTP::_GP('is_active', 'off') === 'on' ? 1 : 0,
-    ));
-
-    $this->redirectTo('admin.php?page=bots');
-  }
-
-  function create(){
-    $service = new BotAdminService();
-    $service->ensureDefaults();
-
-    $this->assign(array(
-      'botProfiles' => $service->getActiveProfiles(),
-    ));
-
-    $this->display('page.bots.create.tpl');
-  }
-
-  function runEngine()
-  {
-    $service = new BotAdminService();
-    $result = $service->runEngine(max(1, HTTP::_GP('limit', 12)));
-
-    $buttons = array(
-      array(
-        'url' => 'admin.php?page=bots',
-        'label' => 'Retour à la gestion des bots',
-      ),
-    );
-
-    $this->printMessage(
-      sprintf(
-        'Moteur bots exécuté : %d bot(s) maintenu(s) en ligne, %d action(s) journalisée(s), %d profil(s) actif(s).',
-        $result['onlineBots'],
-        $result['actionsLogged'],
-        $result['profiles']
-      ),
-      $buttons
-    );
-  }
-
-  function generateName(){
-
-      $randomName = $this->title[rand(0,($this->titleCount - 1))] . ' ' . $this->name[rand(0,($this->nameCount - 1))];
-
-      $i = 0;
-  		foreach ($this->allNames as $userName) {
-  			if (strpos($userName,$randomName) !== false) {
-  				$i++;
-  			}
-  		}
-
-  		if ($i > 0) {
-  			$randomName = $randomName . ' (' . ($i + 1) . ')';
-  		}
-
-
-    return $randomName;
-
-  }
-
-  function getAllNames(){
-
-    $db = Database::get();
-
-    $sql = "SELECT username FROM %%USERS%%";
-
-    $userNames = $db->select($sql);
-
-    foreach ($userNames as $currentName) {
-      $this->allNames[] = $currentName['username'];
-    }
-
-  }
-
-  function createSend(){
-    global $LNG;
-
-    $config = Config::get(Universe::getEmulated());
-    $db = Database::get();
-
-    $target_galaxy = HTTP::_GP('target_galaxy',1);
-
-    $bots_number = HTTP::_GP('bots_number',0);
-
-    $bot_name_type = HTTP::_GP('bot_name_type', 0);
-
-    $bots_dm = HTTP::_GP('bots_dm', 0);
-
-    $bots_password = HTTP::_GP('bots_password', '', true);
-    $bot_profile_id = HTTP::_GP('bot_profile_id', 0);
-
-    $planetMetal = HTTP::_GP('planet_metal', 0);
-    $planetCrystal = HTTP::_GP('planet_crystal', 0);
-    $planetDeuterium = HTTP::_GP('planet_deuterium', 0);
-    $planetFieldMax = HTTP::_GP('planet_field_max', 163);
-
-    if ($bots_number == 0) {
-      $this->printMessage('Indiquez le nombre de bots à créer.');
-    }
-
-    if (empty($bots_password)) {
-      $this->printMessage('Renseignez un mot de passe pour les bots.');
-    }
-
-    if ($target_galaxy > $config->max_galaxy || $target_galaxy < 1) {
-      $this->printMessage('La galaxie cible est invalide.');
-    }
-
-    if ($bot_name_type == 0) {
-      $this->getAllNames();
-      $this->nameCount = count($this->name);
-      $this->titleCount = count($this->title);
-    }
-
-
-    $numberOfPossiblePlanets = $config->max_system * $config->max_planets;
-
-    $sql = "SELECT COUNT(*) as planet_number FROM %%PLANETS%% WHERE galaxy = :target_galaxy AND universe = :universe;";
-
-    $usedPlanetSlots = $db->selectSingle($sql,array(
-      ':target_galaxy' => $target_galaxy,
-      ':universe' => Universe::getEmulated()
-    ),'planet_number');
-
-    $numberOfPossiblePlanets -= $usedPlanetSlots;
-
-
-
-    if ($bots_number > $numberOfPossiblePlanets) {
-      $this->printMessage('L’univers ne dispose pas d’assez d’emplacements libres pour créer autant de bots.');
-    }
-
-
-    $sql = "SELECT galaxy,`system`,planet FROM %%PLANETS%% WHERE universe = :universe AND galaxy = :target_galaxy";
-
-    $currentPlanets = $db->select($sql,array(
-      ':universe' => Universe::getEmulated(),
-      ':target_galaxy' => $target_galaxy
-    ));
-
-    $coordinatesNotAvailable = array();
-    foreach ($currentPlanets as $cPlanet) {
-      $coordinatesNotAvailable[] = $cPlanet['galaxy'] . ":" . $cPlanet['system'] . ":" . $cPlanet['planet'];
-    }
-
-    $allCoordinates = array();
-
-    for ($i=1; $i <= $config->max_system; $i++) {
-
-      for ($j=1; $j <= $config->max_planets ; $j++) {
-        $allCoordinates[] = $target_galaxy . ":" . $i . ":" . $j;
-      }
-
-    }
-
-    $possibleCoordinates = array_diff($allCoordinates,$coordinatesNotAvailable);
-
-
-    $botInfo = array();
-    $universeCurrent = Universe::getEmulated();
-
-    $sql = "SELECT COUNT(*) as count FROM %%USERS%% WHERE is_bot = 1;";
-    $numberOfBots = $db->selectSingle($sql,array(),'count');
-
-
-    //generate main planet coordinates for bots
-    for ($i=1; $i <= $bots_number; $i++) {
-
-      $randomNumber = mt_rand(0, count($possibleCoordinates) - 1);
-      $coordinate = explode(':',$possibleCoordinates[$randomNumber]);
-
-      $botInfo[] = array(
-        'galaxy' => $coordinate[0],
-        'system' => $coordinate[1],
-        'planet' => $coordinate[2],
-        'username' => ($bot_name_type == 1) ? 'bot ' . $i : $this->generateName(),
-        'email' => 'bot' . ($i + $numberOfBots) . '@bots.astra.local',
-        'lang' => 'fr',
-        'darkmatter' => $bots_dm
-      );
-
-      unset($possibleCoordinates[$randomNumber]);
-      $possibleCoordinates = array_values($possibleCoordinates);
-    }
-
-
-
-    $sql_user = $save_sql_user = "INSERT INTO %%USERS%% (username, `password`, email, email_2, lang, universe, galaxy, `system`, planet, darkmatter, register_time, onlinetime, is_bot, bot_profile_id) VALUES ";
-
-    $bots_password = PlayerUtil::cryptPassword($bots_password);
-
-    $i = 0;
-    foreach ($botInfo as $currentBotInfo) {
-      $sql_user .= "('" . $currentBotInfo['username'] . "', '" . $bots_password . "', '"
-      . $currentBotInfo['email'] . "', '" . $currentBotInfo['email'] . "', 'fr', "
-      . $universeCurrent . ", " . $currentBotInfo['galaxy'] . ", " . $currentBotInfo['system'] . ", "
-      . $currentBotInfo['planet'] . ", " . $currentBotInfo['darkmatter'] . ", " . TIMESTAMP . ", " . TIMESTAMP . ", 1, "
-      . (!empty($bot_profile_id) ? (int) $bot_profile_id : 'NULL') . "), ";
-
-      $i++;
-
-      if ($i == 50) {
-        $i = 0;
-
-        $sql_user = substr($sql_user,0,-2) . ";" ;
-        $db->insert($sql_user);
-        $sql_user = $save_sql_user;
-      }
-
-    }
-
-    if ($sql_user != $save_sql_user) {
-      $sql_user = substr($sql_user,0,-2) . ";" ;
-      $db->insert($sql_user);
-      $sql_user = $save_sql_user;
-    }
-
-    $sql_planets = $save_sql_planets = "INSERT INTO %%PLANETS%% (`name`, universe, galaxy, `system`, planet, last_update, planet_type, `image`, field_max, temp_min, temp_max, metal, crystal, deuterium, is_bot) VALUES ";
-
-    $planetData	= array();
-    require 'includes/PlanetData.php';
-    $diameter			= (int) floor(1000 * sqrt($planetFieldMax));
-
-    $i = 0;
-    foreach ($botInfo as $currentBotInfo) {
-
-      $dataIndex		= (int) ceil($currentBotInfo['planet'] / ($config->max_planets / count($planetData)));
-      $planetTempMax	= $planetData[$dataIndex]['temp'];
-      $planetTempMin	= $planetTempMax - 40;
-
-
-      $imageNames			= array_keys($planetData[$dataIndex]['image']);
-      $imageNameType		= $imageNames[array_rand($imageNames)];
-      $imageName			= $imageNameType;
-      $imageName			.= 'planet';
-      $imageName			.= $planetData[$dataIndex]['image'][$imageNameType] < 10 ? '0' : '';
-      $imageName			.= $planetData[$dataIndex]['image'][$imageNameType];
-
-      $sql_planets .= "('" . $LNG['fcm_mainplanet'] . "', " . $universeCurrent . ", " . $currentBotInfo['galaxy'] . ", "
-      . $currentBotInfo['system'] . ", " . $currentBotInfo['planet'] . ", " . TIMESTAMP . ", " . "1" . ", '"
-      . $imageName . "', " . $planetFieldMax . ", " . $planetTempMin . ", " . $planetTempMax . ", "
-      . $planetMetal . ", " . $planetCrystal . ", " . $planetDeuterium . ", " . "1" . "), ";
-
-      $i++;
-
-      if ($i == 50) {
-        $i = 0;
-
-        $sql_planets = substr($sql_planets,0,-2) . ";" ;
-        $db->insert($sql_planets);
-        $sql_planets = $save_sql_planets;
-      }
-
-    }
-
-    if ($sql_planets != $save_sql_planets) {
-      $sql_planets = substr($sql_planets,0,-2) . ";" ;
-      $db->insert($sql_planets);
-      $sql_planets = $save_sql_planets;
-    }
-
-    $sql = "SELECT id,galaxy,`system`,planet FROM %%USERS%% WHERE is_bot = 1 AND id_planet = 0 AND universe = :universe ORDER BY id ASC;";
-    $newBots = $db->select($sql,array(
-      ':universe' => Universe::getEmulated()
-    ));
-
-    $sql = "SELECT id,galaxy,`system`,planet FROM %%PLANETS%% WHERE is_bot = 1 AND id_owner IS NULL AND universe = :universe ORDER BY id ASC;";
-
-    $newBotPlanets = $db->select($sql,array(
-      ':universe' => Universe::getEmulated()
-    ));
-
-    //refresh bot users
-
-    $sql_refresh_bot_users = $save_sql_refresh_bot_users = "INSERT INTO %%USERS%% (id,universe,id_planet) VALUES ";
-
-    $i = 0;
-    foreach ($newBots as $currentNewBot) {
-
-      foreach ($newBotPlanets as $currentNewBotPlanet) {
-
-        if ($currentNewBot['galaxy'] == $currentNewBotPlanet['galaxy'] &&
-            $currentNewBot['system'] == $currentNewBotPlanet['system'] &&
-            $currentNewBot['planet'] == $currentNewBotPlanet['planet']
-          ) {
-          $i++;
-          $sql_refresh_bot_users .= "(" . $currentNewBot['id'] . ", " . $universeCurrent . ", " . $currentNewBotPlanet['id'] . "), ";
-
-          if ($i == 50) {
-            $sql_refresh_bot_users = substr($sql_refresh_bot_users,0,-2) . " ON DUPLICATE KEY UPDATE
-            id = VALUES(id),
-            universe = VALUES(universe),
-            id_planet = VALUES(id_planet);";
-
-            $i = 0;
-
-            $db->insert($sql_refresh_bot_users);
-
-            $sql_refresh_bot_users = $save_sql_refresh_bot_users;
-
-          }
-
-          break;
-        }
-
-      }
-
-    }
-
-    if ($sql_refresh_bot_users != $save_sql_refresh_bot_users) {
-      $sql_refresh_bot_users = substr($sql_refresh_bot_users,0,-2) . " ON DUPLICATE KEY UPDATE
-      id = VALUES(id),
-      universe = VALUES(universe),
-      id_planet = VALUES(id_planet);";
-      $db->insert($sql_refresh_bot_users);
-    }
-
-
-    //refresh planets
-
-    $sql_refresh_bot_planets = $save_sql_refresh_bot_planets = "INSERT INTO %%PLANETS%% (id,universe,id_owner) VALUES ";
-
-    $i = 0;
-    foreach ($newBots as $currentNewBot) {
-
-      foreach ($newBotPlanets as $currentNewBotPlanet) {
-
-        if ($currentNewBot['galaxy'] == $currentNewBotPlanet['galaxy'] &&
-            $currentNewBot['system'] == $currentNewBotPlanet['system'] &&
-            $currentNewBot['planet'] == $currentNewBotPlanet['planet']
-          ) {
-          $i++;
-          $sql_refresh_bot_planets .= "(" . $currentNewBotPlanet['id'] . ", " . $universeCurrent . ", " . $currentNewBot['id']  . "), ";
-
-          if ($i == 50) {
-            $sql_refresh_bot_planets = substr($sql_refresh_bot_planets,0,-2) . " ON DUPLICATE KEY UPDATE
-            id = VALUES(id),
-            universe = VALUES(universe),
-            id_owner = VALUES(id_owner);";
-
-            $i = 0;
-
-            $db->insert($sql_refresh_bot_planets);
-
-            $sql_refresh_bot_planets = $save_sql_refresh_bot_planets;
-          }
-
-          break;
-        }
-
-      }
-
-    }
-
-    if ($sql_refresh_bot_planets != $save_sql_refresh_bot_planets) {
-      $sql_refresh_bot_planets = substr($sql_refresh_bot_planets,0,-2) . " ON DUPLICATE KEY UPDATE
-      id = VALUES(id),
-      universe = VALUES(universe),
-      id_owner = VALUES(id_owner);";
-      $db->insert($sql_refresh_bot_planets);
-    }
-
-
-    if (!empty($bot_profile_id)) {
-      $service = new BotAdminService();
-      $service->logAdministrativeAction(
-        null,
-        'création',
-        sprintf('%d bot(s) créés et rattachés au profil #%d.', $bots_number, $bot_profile_id),
-        array(
-          'count' => (int) $bots_number,
-          'profile_id' => (int) $bot_profile_id,
-          'galaxy' => (int) $target_galaxy,
-        )
-      );
-    }
-
-    $this->printMessage('Les bots ont été créés avec succès.');
-
-  }
-
+	protected $service;
+
+	public function __construct()
+	{
+		parent::__construct();
+		require_once ROOT_PATH.'includes/classes/BotAdminService.class.php';
+		$this->service = new BotAdminService();
+	}
+
+	public function show()
+	{
+		global $USER, $LNG;
+
+		$snapshot = $this->service->getSnapshot();
+		foreach ($snapshot['activity'] as &$row) {
+			$row['created_at_formatted'] = _date($LNG['php_tdformat'], $row['created_at'], $USER['timezone']);
+		}
+		unset($row);
+
+		foreach ($snapshot['bot_roster'] as &$row) {
+			$row['onlinetime_formatted'] = _date($LNG['php_tdformat'], $row['onlinetime'], $USER['timezone']);
+		}
+		unset($row);
+
+		foreach ($snapshot['orders'] as &$row) {
+			$row['created_at_formatted'] = _date($LNG['php_tdformat'], $row['created_at'], $USER['timezone']);
+			$row['executed_at_formatted'] = !empty($row['executed_at']) ? _date($LNG['php_tdformat'], $row['executed_at'], $USER['timezone']) : '';
+		}
+		unset($row);
+
+		foreach ($snapshot['campaigns'] as &$row) {
+			$row['updated_at_formatted'] = _date($LNG['php_tdformat'], $row['updated_at'], $USER['timezone']);
+		}
+		unset($row);
+
+		foreach ($snapshot['queued_actions'] as &$row) {
+			$row['planned_at_formatted'] = !empty($row['planned_at']) ? _date($LNG['php_tdformat'], $row['planned_at'], $USER['timezone']) : '';
+			$row['due_at_formatted'] = !empty($row['due_at']) ? _date($LNG['php_tdformat'], $row['due_at'], $USER['timezone']) : '';
+			$row['finished_at_formatted'] = !empty($row['finished_at']) ? _date($LNG['php_tdformat'], $row['finished_at'], $USER['timezone']) : '';
+		}
+		unset($row);
+
+		foreach ($snapshot['upcoming'] as &$row) {
+			$row['due_at_formatted'] = !empty($row['due_at']) ? _date($LNG['php_tdformat'], $row['due_at'], $USER['timezone']) : '';
+		}
+		unset($row);
+
+		foreach ($snapshot['metrics']['latest_runs'] as &$run) {
+			$run['started_at_formatted'] = _date($LNG['php_tdformat'], $run['started_at'], $USER['timezone']);
+			$run['finished_at_formatted'] = !empty($run['finished_at']) ? _date($LNG['php_tdformat'], $run['finished_at'], $USER['timezone']) : '';
+		}
+		unset($run);
+
+		$this->assign(array(
+			'botSnapshot' => $snapshot,
+			'botProfiles' => $snapshot['profiles'],
+		));
+
+		$this->display('page.bots.default.tpl');
+	}
+
+	public function saveConfig()
+	{
+		$current = $this->service->getConfig();
+		$presenceRules = $this->decodeJsonInput(HTTP::_GP('global_presence_rules_json', '', true), $current['global_presence_rules_json']);
+		$decisionWeights = $this->decodeJsonInput(HTTP::_GP('decision_weights_json', '', true), $current['decision_weights_json']);
+
+		$this->service->saveConfig(array(
+			'engine_enabled' => HTTP::_GP('engine_enabled', 'off') === 'on' ? 1 : 0,
+			'target_online_total' => HTTP::_GP('target_online_total', 24),
+			'target_social_total' => HTTP::_GP('target_social_total', 8),
+			'action_budget_per_cycle' => HTTP::_GP('action_budget_per_cycle', 24),
+			'max_bots_per_cycle' => HTTP::_GP('max_bots_per_cycle', 12),
+			'max_actions_per_bot' => HTTP::_GP('max_actions_per_bot', 3),
+			'enable_bot_alliances' => HTTP::_GP('enable_bot_alliances', 'off') === 'on' ? 1 : 0,
+			'enable_command_hierarchy' => HTTP::_GP('enable_command_hierarchy', 'off') === 'on' ? 1 : 0,
+			'enable_bonuses' => HTTP::_GP('enable_bonuses', 'off') === 'on' ? 1 : 0,
+			'enable_private_messages' => HTTP::_GP('enable_private_messages', 'off') === 'on' ? 1 : 0,
+			'enable_social_messages' => HTTP::_GP('enable_social_messages', 'off') === 'on' ? 1 : 0,
+			'enable_campaigns' => HTTP::_GP('enable_campaigns', 'off') === 'on' ? 1 : 0,
+			'shared_email' => HTTP::_GP('shared_email', '', true),
+			'password_policy' => HTTP::_GP('password_policy', 'rotation_mensuelle', true),
+			'multiaccount_policy' => HTTP::_GP('multiaccount_policy', 'bots_valides', true),
+			'default_bot_alliance_tag' => HTTP::_GP('default_bot_alliance_tag', 'ASTRA', true),
+			'default_bot_alliance_name' => HTTP::_GP('default_bot_alliance_name', 'Commandement Astra', true),
+			'global_presence_rules_json' => $presenceRules,
+			'decision_weights_json' => $decisionWeights,
+		));
+
+		$this->redirectTo('admin.php?page=bots');
+	}
+
+	public function saveProfile()
+	{
+		$this->service->saveProfile(array(
+			'name' => HTTP::_GP('name', '', true),
+			'description' => HTTP::_GP('description', '', true),
+			'profile_code' => HTTP::_GP('profile_code', '', true),
+			'doctrine' => HTTP::_GP('doctrine', 'equilibre', true),
+			'role_primary' => HTTP::_GP('role_primary', 'economiste', true),
+			'role_secondary' => HTTP::_GP('role_secondary', '', true),
+			'communication_style' => HTTP::_GP('communication_style', 'mesure', true),
+			'target_online' => HTTP::_GP('target_online', 0),
+			'target_social_online' => HTTP::_GP('target_social_online', 0),
+			'target_presence_min' => HTTP::_GP('target_presence_min', 15),
+			'target_presence_max' => HTTP::_GP('target_presence_max', 90),
+			'aggression' => HTTP::_GP('aggression', 0),
+			'economy_focus' => HTTP::_GP('economy_focus', 0),
+			'expansion_focus' => HTTP::_GP('expansion_focus', 0),
+			'always_active' => HTTP::_GP('always_active', 'off') === 'on' ? 1 : 0,
+			'is_visible_socially' => HTTP::_GP('is_visible_socially', 'off') === 'on' ? 1 : 0,
+			'is_commander_profile' => HTTP::_GP('is_commander_profile', 'off') === 'on' ? 1 : 0,
+			'is_active' => HTTP::_GP('is_active', 'off') === 'on' ? 1 : 0,
+			'traits_json' => HTTP::_GP('traits_json', '', true),
+		));
+
+		$this->redirectTo('admin.php?page=bots');
+	}
+
+	public function create()
+	{
+		$this->service->ensureDefaults();
+		$this->assign(array(
+			'botProfiles' => $this->service->getActiveProfiles(),
+			'botConfig' => $this->service->getConfig(),
+		));
+		$this->display('page.bots.create.tpl');
+	}
+
+	public function createSend()
+	{
+		$created = $this->service->createBots(array(
+			'count' => HTTP::_GP('bots_number', 0),
+			'name_mode' => HTTP::_GP('bot_name_type', 'random', true) === '1' ? 'numbered' : 'random',
+			'profile_id' => HTTP::_GP('bot_profile_id', 0),
+			'target_galaxy' => HTTP::_GP('target_galaxy', 1),
+			'darkmatter' => HTTP::_GP('bots_dm', 0),
+			'metal' => HTTP::_GP('planet_metal', 10000),
+			'crystal' => HTTP::_GP('planet_crystal', 10000),
+			'deuterium' => HTTP::_GP('planet_deuterium', 10000),
+			'field_max' => HTTP::_GP('planet_field_max', 163),
+		));
+
+		$this->printMessage(sprintf('%d bot(s) créé(s) avec mots de passe aléatoires distincts et conformité multi-compte appliquée.', count($created)));
+	}
+
+	public function runEngine()
+	{
+		$phase = HTTP::_GP('phase', 'cycle', true);
+		$result = $this->service->runEngine(max(1, HTTP::_GP('limit', 12)), $phase);
+
+		$this->printMessage(sprintf(
+			'Phase bots « %s » exécutée. Statut : %s. Bots planifiés : %d. Actions exécutées : %d.',
+			$phase,
+			$result['status'],
+			!empty($result['selectedBots']) ? (int) $result['selectedBots'] : 0,
+			!empty($result['executedActions']) ? (int) $result['executedActions'] : 0
+		), array(
+			array(
+				'url' => 'admin.php?page=bots',
+				'label' => 'Retour à l’administration bots',
+			),
+		));
+	}
+
+	public function massAction()
+	{
+		$botIds = HTTP::_GP('bot_ids', array());
+		if (!is_array($botIds) || empty($botIds)) {
+			$this->printMessage('Sélectionnez au moins un bot.');
+		}
+
+		$action = HTTP::_GP('mass_action', '', true);
+		switch ($action) {
+			case 'resume':
+				$count = Database::get()->update('UPDATE %%BOT_STATE%% SET paused_until = NULL, updated_at = :updatedAt WHERE bot_user_id IN ('.implode(',', array_map('intval', $botIds)).');', array(
+					':updatedAt' => TIMESTAMP,
+				));
+				$this->printMessage('Bots relancés.');
+				break;
+			case 'pause':
+				Database::get()->update('UPDATE %%BOT_STATE%% SET paused_until = :pausedUntil, updated_at = :updatedAt WHERE bot_user_id IN ('.implode(',', array_map('intval', $botIds)).');', array(
+					':pausedUntil' => TIMESTAMP + 1800,
+					':updatedAt' => TIMESTAMP,
+				));
+				$this->printMessage('Bots mis en pause pour 30 minutes.');
+				break;
+			case 'promote':
+				foreach ($botIds as $botId) {
+					$this->service->promoteCommander((int) $botId);
+				}
+				$this->printMessage('Promotion chef appliquée.');
+				break;
+			case 'rotate-passwords':
+				$result = $this->service->rotateBotPasswords(array_map('intval', $botIds));
+				$this->printMessage(sprintf('%d mot(s) de passe bots régénéré(s).', count($result)));
+				break;
+			case 'validate-multi':
+				$count = $this->service->validateBotsAsMulti(array_map('intval', $botIds));
+				$this->printMessage(sprintf('%d validation(s) multi-compte bots enregistrée(s).', $count));
+				break;
+			default:
+				$this->printMessage('Action de masse inconnue.');
+		}
+	}
+
+	protected function decodeJsonInput($json, array $fallback)
+	{
+		$json = trim((string) $json);
+		if ($json === '') {
+			return $fallback;
+		}
+
+		$decoded = json_decode($json, true);
+		return is_array($decoded) ? $decoded : $fallback;
+	}
 }
-
-
-
-
-
-
-
-
-
-
- ?>

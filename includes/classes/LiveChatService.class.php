@@ -296,25 +296,40 @@ class LiveChatService
 
 	public static function createBotFeedEntry($username, $messageText, $userId = 0, $universe = null)
 	{
+		return self::createChannelMessage('bots', $username, $messageText, $userId, $universe, 0);
+	}
+
+	public static function createChannelMessage($channelKey, $username, $messageText, $userId = 0, $universe = null, $allianceId = 0)
+	{
 		if ($universe === null) {
 			$universe = Universe::getEmulated();
+		}
+
+		$channelKey = trim((string) $channelKey);
+		if ($channelKey === 'alliance' && !empty($allianceId)) {
+			$channelKey = 'alliance:'.(int) $allianceId;
 		}
 
 		Database::get()->insert("INSERT INTO %%LIVE_CHAT_MESSAGES%% SET
 			user_id = :userId,
 			username = :username,
-			alliance_id = 0,
-			channel_key = 'bots',
+			alliance_id = :allianceId,
+			channel_key = :channelKey,
 			message_text = :messageText,
 			universe = :universe,
 			created_at = :createdAt,
 			is_deleted = 0;", array(
 			':userId' => (int) $userId,
 			':username' => (string) $username,
+			':allianceId' => (int) $allianceId,
+			':channelKey' => (string) $channelKey,
 			':messageText' => (string) $messageText,
 			':universe' => (int) $universe,
 			':createdAt' => TIMESTAMP,
 		));
+
+		$messageId = (int) Database::get()->lastInsertId();
+		return self::getMessageById($messageId);
 	}
 
 	public static function getActiveMutes()

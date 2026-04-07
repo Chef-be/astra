@@ -17,7 +17,7 @@
  * @link https://github.com/ultimateXnova/ultimateXnova
  */
 
-define('DB_VERSION_REQUIRED', 8);
+define('DB_VERSION_REQUIRED', 11);
 define('DB_NAME'			, $database['databasename']);
 define('DB_PREFIX'			, $database['tableprefix']);
 
@@ -29,8 +29,30 @@ $dbTableNames	= array(
 	'ALLIANCE_REQUEST'	=> DB_PREFIX.'alliance_request',
 	'BANNED'			=> DB_PREFIX.'banned',
 	'BOT_ACTIVITY'		=> DB_PREFIX.'bot_activity',
+	'BOT_ACCOUNT_COMPLIANCE' => DB_PREFIX.'bot_account_compliance',
+	'BOT_ACTION_QUEUE'	=> DB_PREFIX.'bot_action_queue',
+	'BOT_ACTION_RESULTS' => DB_PREFIX.'bot_action_results',
+	'BOT_ALLIANCE_META' => DB_PREFIX.'bot_alliance_meta',
+	'BOT_BONUS_ASSIGNMENTS' => DB_PREFIX.'bot_bonus_assignments',
+	'BOT_BONUS_RULES'	=> DB_PREFIX.'bot_bonus_rules',
+	'BOT_CAMPAIGNS'		=> DB_PREFIX.'bot_campaigns',
+	'BOT_CAMPAIGN_MEMBERS' => DB_PREFIX.'bot_campaign_members',
+	'BOT_COMMAND_CATALOG' => DB_PREFIX.'bot_command_catalog',
 	'BOT_COMMANDS'		=> DB_PREFIX.'bot_commands',
+	'BOT_DYNAMIC_STATE' => DB_PREFIX.'bot_dynamic_state',
+	'BOT_ENGINE_CONFIG' => DB_PREFIX.'bot_engine_config',
+	'BOT_ENGINE_RUNS'	=> DB_PREFIX.'bot_engine_runs',
+	'BOT_MEMORY'		=> DB_PREFIX.'bot_memory',
+	'BOT_MULTIACCOUNT_VALIDATION' => DB_PREFIX.'bot_multiaccount_validation',
+	'BOT_PRESENCE_SNAPSHOTS' => DB_PREFIX.'bot_presence_snapshots',
 	'BOT_PROFILES'		=> DB_PREFIX.'bot_profiles',
+	'BOT_PRIVATE_MESSAGES' => DB_PREFIX.'bot_private_messages',
+	'BOT_RELATIONSHIPS' => DB_PREFIX.'bot_relationships',
+	'BOT_SOCIAL_MESSAGES' => DB_PREFIX.'bot_social_messages',
+	'BOT_SQUADS'		=> DB_PREFIX.'bot_squads',
+	'BOT_SQUAD_MEMBERS' => DB_PREFIX.'bot_squad_members',
+	'BOT_STATE'			=> DB_PREFIX.'bot_state',
+	'BOT_TRAITS'		=> DB_PREFIX.'bot_traits',
 	'BUDDY'				=> DB_PREFIX.'buddy',
 	'BUDDY_REQUEST'		=> DB_PREFIX.'buddy_request',
 	'CHAT_BAN'			=> DB_PREFIX.'chat_bans',

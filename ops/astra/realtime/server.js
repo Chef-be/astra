@@ -181,43 +181,213 @@ async function insertStoredChatMessage({ userId, username, allianceId, channelKe
     [result.insertId]
   );
 
-  return rows[0] || null;
+  const item = rows[0] || null;
+  if (item && item.id) {
+    rememberChatCursor(universe, item.id);
+  }
+
+  return item;
+}
+
+function tokenizeBotCommand(input) {
+  const tokens = [];
+  const regex = /"([^"]+)"|'([^']+)'|(\S+)/gu;
+  let match;
+
+  while ((match = regex.exec(String(input || ''))) !== null) {
+    tokens.push(match[1] || match[2] || match[3] || '');
+  }
+
+  return tokens;
+}
+
+function normalizeBotTargetType(token) {
+  const normalized = String(token || '').trim().toLowerCase();
+  const map = {
+    bots: 'all',
+    bot: 'bot',
+    chef: 'chef',
+    'alliance-bots': 'alliance',
+    alliance: 'alliance',
+    escouade: 'escouade',
+    'system-bots': 'systeme',
+    systeme: 'systeme',
+    'galaxy-bots': 'galaxie',
+    galaxie: 'galaxie',
+    'profil-bots': 'profil',
+    profil: 'profil',
+    campagne: 'campagne'
+  };
+
+  return map[normalized] || normalized;
+}
+
+function extractBotPayload(tokens) {
+  const payload = { arguments: tokens.slice() };
+
+  tokens.forEach((token, index) => {
+    const normalized = String(token || '').trim().toLowerCase();
+
+    if (/^\d+:\d+(?::\d+)?$/.test(token)) {
+      payload.coordinates = token;
+      payload.target_coordinates = token;
+      if ((token.match(/:/g) || []).length === 1) {
+        payload.zone_reference = token;
+      }
+    }
+
+    if (/^\d+[mh]$/.test(token)) {
+      payload.duration = token;
+    }
+
+    if ((normalized === 'vers' || normalized === 'cible') && tokens[index + 1]) {
+      payload.target_player = tokens[index + 1];
+      payload.target_username = String(tokens[index + 1]).replace(/^@/, '');
+    }
+
+    if (normalized === 'mention' && tokens[index + 1]) {
+      payload.target_username = String(tokens[index + 1]).replace(/^@/, '');
+    }
+
+    if (normalized === 'message' && tokens[index + 1]) {
+      payload.message = tokens.slice(index + 1).join(' ');
+    }
+
+    if (normalized === 'intervalle' && tokens[index + 1]) {
+      payload.interval = tokens[index + 1];
+    }
+
+    if (normalized === 'mode' && tokens[index + 1]) {
+      payload.mode = tokens[index + 1];
+    }
+
+    if (normalized === 'doctrine' && tokens[index + 1]) {
+      payload.doctrine = tokens[index + 1];
+    }
+  });
+
+  if (!payload.verb && tokens[0]) {
+    payload.verb = String(tokens[0]).trim().toLowerCase();
+  }
+
+  return payload;
+}
+
+function parseBotCommand(content) {
+  const command = String(content || '').trim();
+  if (!command.startsWith('/')) {
+    return null;
+  }
+
+  const tokens = tokenizeBotCommand(command.slice(1));
+  if (!tokens.length) {
+    return null;
+  }
+
+  const family = String(tokens.shift() || '').trim().toLowerCase();
+  if (family === 'bots') {
+    return {
+      commandFamily: 'bots',
+      commandName: tokens[0] ? String(tokens[0]).trim().toLowerCase() : 'statut',
+      targetType: 'all',
+      targetReference: 'all',
+      payload: extractBotPayload(tokens.slice(1))
+    };
+  }
+
+  if (['bot', 'chef', 'alliance-bots', 'escouade', 'system-bots', 'galaxy-bots', 'profil-bots'].includes(family)) {
+    return {
+      commandFamily: 'bots',
+      commandName: tokens[1] ? String(tokens[1]).trim().toLowerCase() : 'statut',
+      targetType: normalizeBotTargetType(family),
+      targetReference: tokens[0] || '',
+      payload: extractBotPayload(tokens.slice(2))
+    };
+  }
+
+  if (['message-prive', 'message-chat'].includes(family)) {
+    return {
+      commandFamily: 'communication',
+      commandName: family,
+      targetType: normalizeBotTargetType(tokens[0] || 'bot'),
+      targetReference: tokens[1] || '',
+      payload: extractBotPayload(tokens.slice(2))
+    };
+  }
+
+  if (['campagne', 'harcelement', 'rotation-attaque', 'vague', 'siege'].includes(family)) {
+    return {
+      commandFamily: 'campagnes',
+      commandName: family,
+      targetType: normalizeBotTargetType(tokens[0] || 'alliance'),
+      targetReference: tokens[1] || '',
+      payload: extractBotPayload(tokens.slice(2))
+    };
+  }
+
+  return {
+    commandFamily: 'bots',
+    commandName: family,
+    targetType: 'all',
+    targetReference: 'all',
+    payload: extractBotPayload(tokens)
+  };
+}
+
+async function resolvePrimaryBotId(session, parsed) {
+  if (!parsed || !parsed.targetReference) {
+    return null;
+  }
+
+  if (!['bot', 'chef'].includes(parsed.targetType)) {
+    return null;
+  }
+
+  let sql = `SELECT u.id
+    FROM ${dbPrefix}users u`;
+  const params = [session.universe, parsed.targetReference];
+
+  if (parsed.targetType === 'chef') {
+    sql += ` INNER JOIN ${dbPrefix}bot_state bs ON bs.bot_user_id = u.id`;
+  }
+
+  sql += ` WHERE u.universe = ? AND u.is_bot = 1 AND u.username = ?`;
+  if (parsed.targetType === 'chef') {
+    sql += ` AND bs.hierarchy_status = 'chef'`;
+  }
+  sql += ' LIMIT 1';
+
+  const [rows] = await pool.query(sql, params);
+  return rows[0] ? rows[0].id : null;
 }
 
 async function queueBotInstruction(session, content) {
   const cleanContent = String(content || '').trim();
-  let targetSelector = 'all';
-  let targetBotUserId = null;
-  let commandText = cleanContent;
-
-  if (cleanContent.toLowerCase().startsWith('/bot ')) {
-    const segments = cleanContent.split(/\s+/);
-    if (segments.length >= 3) {
-      targetSelector = segments[1];
-      commandText = segments.slice(2).join(' ');
-
-      const [rows] = await pool.query(
-        `SELECT id
-         FROM ${dbPrefix}users
-         WHERE universe = ? AND is_bot = 1 AND username = ?
-         LIMIT 1`,
-        [session.universe, targetSelector]
-      );
-
-      if (rows[0]) {
-        targetBotUserId = rows[0].id;
-      }
-    }
-  } else if (cleanContent.toLowerCase().startsWith('/bots ')) {
-    targetSelector = 'all';
-    commandText = cleanContent.substring(6).trim();
-  }
+  const parsed = parseBotCommand(cleanContent);
+  const targetSelector = parsed ? `${parsed.targetType}:${parsed.targetReference}` : 'all:all';
+  const targetBotUserId = await resolvePrimaryBotId(session, parsed);
+  const priority = ['raid', 'recon', 'reconnaissance', 'campagne', 'siege', 'harcelement', 'rotation-attaque', 'vague'].includes(parsed && parsed.commandName ? parsed.commandName : '')
+    ? 85
+    : 60;
 
   const [result] = await pool.query(
     `INSERT INTO ${dbPrefix}bot_commands
-      (universe, issued_by_user_id, target_bot_user_id, target_selector, command_text, status, created_at)
-     VALUES (?, ?, ?, ?, ?, 'pending', UNIX_TIMESTAMP())`,
-    [session.universe, session.userId, targetBotUserId, targetSelector, commandText]
+      (universe, issued_by_user_id, target_bot_user_id, target_selector, command_text, command_family, command_name, target_type, target_reference, scope_mode, priority, payload_json, parsed_command_json, status, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'direct', ?, ?, ?, 'parsed', UNIX_TIMESTAMP())`,
+    [
+      session.universe,
+      session.userId,
+      targetBotUserId,
+      targetSelector,
+      cleanContent,
+      parsed ? parsed.commandFamily : 'bots',
+      parsed ? parsed.commandName : 'statut',
+      parsed ? parsed.targetType : 'all',
+      parsed ? parsed.targetReference : 'all',
+      priority,
+      JSON.stringify(parsed ? parsed.payload : {}),
+      JSON.stringify(parsed || {})
+    ]
   );
 
   await pool.query(
@@ -227,15 +397,15 @@ async function queueBotInstruction(session, content) {
     [
       targetBotUserId || 0,
       session.universe,
-      `Instruction de ${session.username} vers ${targetSelector} : ${commandText}`,
+      `Instruction structurée de ${session.username} vers ${targetSelector} : ${cleanContent}`,
       JSON.stringify({
         source: 'chat',
         commandId: result.insertId,
         issued_by: session.username,
         target: targetSelector,
-        command: commandText,
+        command: cleanContent,
         next_action_type: 'instruction',
-        next_action_summary: commandText,
+        next_action_summary: cleanContent,
         next_action_at: Math.floor(Date.now() / 1000) + 180
       })
     ]
@@ -244,7 +414,7 @@ async function queueBotInstruction(session, content) {
   return {
     commandId: result.insertId,
     targetSelector,
-    commandText
+    commandText: cleanContent
   };
 }
 
@@ -296,11 +466,54 @@ const server = http.createServer(async (req, res) => {
 });
 
 const wss = new WebSocketServer({ noServer: true });
+const chatPollCursor = {};
 
 function send(ws, payload) {
   if (ws.readyState === 1) {
     ws.send(JSON.stringify(payload));
   }
+}
+
+function rememberChatCursor(universe, messageId) {
+  if (!messageId) {
+    return;
+  }
+
+  const key = String(universe);
+  const current = parseInt(chatPollCursor[key] || '0', 10) || 0;
+  if (messageId > current) {
+    chatPollCursor[key] = messageId;
+  }
+}
+
+async function ensureChatCursor(universe) {
+  const key = String(universe);
+  if (typeof chatPollCursor[key] !== 'undefined') {
+    return chatPollCursor[key];
+  }
+
+  const [rows] = await pool.query(
+    `SELECT MAX(id) AS max_id
+     FROM ${dbPrefix}live_chat_messages
+     WHERE universe = ?`,
+    [universe]
+  );
+
+  chatPollCursor[key] = rows[0] && rows[0].max_id ? rows[0].max_id : 0;
+  return chatPollCursor[key];
+}
+
+async function fetchChatMessagesAfterId(universe, afterId) {
+  const [rows] = await pool.query(
+    `SELECT id, user_id, username, alliance_id, channel_key, message_text, created_at
+     FROM ${dbPrefix}live_chat_messages
+     WHERE universe = ? AND id > ? AND is_deleted = 0
+     ORDER BY id ASC
+     LIMIT 100`,
+    [universe, afterId]
+  );
+
+  return rows;
 }
 
 function getPresenceSnapshot(universe) {
@@ -419,10 +632,37 @@ function broadcastToChannel(channelKey, universe, payload) {
   });
 }
 
+async function pollStoredChatMessages() {
+  const universes = new Set();
+
+  wss.clients.forEach((client) => {
+    if (client.readyState !== 1 || !client.session) {
+      return;
+    }
+
+    universes.add(parseInt(client.session.universe, 10));
+  });
+
+  for (const universe of universes) {
+    const cursor = await ensureChatCursor(universe);
+    const rows = await fetchChatMessagesAfterId(universe, cursor);
+
+    rows.forEach((row) => {
+      rememberChatCursor(universe, row.id);
+      broadcastToChannel(row.channel_key, universe, {
+        type: 'chat:message',
+        channel: publicChannel(row.channel_key),
+        item: row
+      });
+    });
+  }
+}
+
 wss.on('connection', async (ws, request, session) => {
   ws.session = session;
   ws.channels = new Set();
   await syncSocketChannels(ws);
+  await ensureChatCursor(session.universe);
 
   ws.lastNotificationId = 0;
   await sendNotificationSnapshot(ws);
@@ -564,3 +804,9 @@ server.on('upgrade', (request, socket, head) => {
 server.listen(port, () => {
   console.log('Astra realtime server listening on', port);
 });
+
+setInterval(() => {
+  pollStoredChatMessages().catch((error) => {
+    console.error('Stored chat polling failed:', error.message);
+  });
+}, 2000);

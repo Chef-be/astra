@@ -114,6 +114,41 @@ class ShowRealtimePage extends AbstractGamePage
 		));
 	}
 
+	public function botCommandCatalog()
+	{
+		global $USER;
+		require_once ROOT_PATH.'includes/classes/BotCommandParser.class.php';
+
+		if ((int) $USER['authlevel'] < AUTH_ADM) {
+			$this->sendJSON(array('status' => 'error', 'message' => 'Accès refusé.'));
+		}
+
+		$parser = new BotCommandParser();
+		$this->sendJSON(array(
+			'status' => 'ok',
+			'items' => $parser->getCatalog(),
+		));
+	}
+
+	public function submitBotCommand()
+	{
+		global $USER;
+		require_once ROOT_PATH.'includes/classes/BotAdminService.class.php';
+
+		if ((int) $USER['authlevel'] < AUTH_ADM) {
+			$this->sendJSON(array('status' => 'error', 'message' => 'Accès refusé.'));
+		}
+
+		$command = trim(HTTP::_GP('command', '', true));
+		if ($command === '') {
+			$this->sendJSON(array('status' => 'error', 'message' => 'Commande vide.'));
+		}
+
+		$service = new BotAdminService();
+		$result = $service->createStructuredCommand($command, (int) $USER['id']);
+		$this->sendJSON($result);
+	}
+
 	public function notifications()
 	{
 		global $USER;

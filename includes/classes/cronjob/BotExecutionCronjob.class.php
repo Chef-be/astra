@@ -1,6 +1,6 @@
 <?php
 
-class BotActivityCronjob implements CronjobTask
+class BotExecutionCronjob implements CronjobTask
 {
 	public function run()
 	{
@@ -9,7 +9,7 @@ class BotActivityCronjob implements CronjobTask
 		foreach (Universe::availableUniverses() as $universeId) {
 			Universe::setEmulated($universeId);
 			$service = new BotEngineService();
-			$service->runCycle('cycle', 18);
+			$service->runCycle('execution', 24);
 		}
 	}
 }

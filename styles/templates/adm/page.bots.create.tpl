@@ -4,7 +4,7 @@
 		<div>
 			<span class="admin-hero__eyebrow">Population automatisée</span>
 			<h1 class="admin-hero__title">Création de bots</h1>
-			<p class="admin-hero__subtitle">Préparez une vague cohérente de bots avec profil d’activité, dotation initiale et galaxie cible.</p>
+			<p class="admin-hero__subtitle">Préparez une vague cohérente de bots avec profil, dotation initiale, galaxie cible, adresse mail commune et mots de passe aléatoires distincts.</p>
 		</div>
 	</section>
 
@@ -39,8 +39,8 @@
 				<input id="bots_dm" class="form-control bg-dark text-white border-secondary" type="number" name="bots_dm" value="0">
 			</label>
 			<label class="admin-field-card">
-				<span>Mot de passe des bots</span>
-				<input id="bots_password" class="form-control bg-dark text-white border-secondary" type="password" name="bots_password" value="">
+				<span>Adresse mail commune</span>
+				<input class="form-control bg-dark text-white border-secondary" type="text" value="{$botConfig.shared_email|escape}" readonly="readonly">
 			</label>
 		</div>
 

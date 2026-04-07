@@ -50,29 +50,33 @@ class Cronjob
 		));
 
 		$cronjobPath		= 'includes/classes/cronjob/'.$cronjobClassName.'.class.php';
+		$interfacePath		= 'includes/classes/cronjob/CronjobTask.interface.php';
 
-		// die hard, if file not exists.
+		require_once($interfacePath);
 		require_once($cronjobPath);
 
-		/** @var $cronjobObj CronjobTask */
-		$cronjobObj			= new $cronjobClassName;
-		$cronjobObj->run();
+		try {
+			/** @var $cronjobObj CronjobTask */
+			$cronjobObj = new $cronjobClassName;
+			$cronjobObj->run();
 
-		self::reCalculateCronjobs($cronjobID);
-		$sql = 'UPDATE %%CRONJOBS%% SET `lock` = NULL WHERE cronjobID = :cronjobId;';
+			self::reCalculateCronjobs($cronjobID);
 
-		$db->update($sql, array(
-			':cronjobId'	=> $cronjobID
-		));
+			$sql = 'INSERT INTO %%CRONJOBS_LOG%% SET `cronjobId` = :cronjobId,
+			`executionTime` = :executionTime, `lockToken` = :lockToken';
 
-		$sql = 'INSERT INTO %%CRONJOBS_LOG%% SET `cronjobId` = :cronjobId,
-		`executionTime` = :executionTime, `lockToken` = :lockToken';
+			$db->insert($sql, array(
+				':cronjobId'		=> $cronjobID,
+				':executionTime'	=> Database::formatDate(TIMESTAMP),
+				':lockToken'		=> $lockToken
+			));
+		} finally {
+			$sql = 'UPDATE %%CRONJOBS%% SET `lock` = NULL WHERE cronjobID = :cronjobId;';
 
-		$db->insert($sql, array(
-			':cronjobId'		=> $cronjobID,
-			':executionTime'	=> Database::formatDate(TIMESTAMP),
-			':lockToken'		=> $lockToken
-		));
+			$db->update($sql, array(
+				':cronjobId'	=> $cronjobID
+			));
+		}
 	}
 
 	static function getNeedTodoExecutedJobs()

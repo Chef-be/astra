@@ -8,6 +8,7 @@ backups
 *.sql.gz
 *.sql
 !install/*.sql
+!install/migrations/*.sql
 *.zip
 *.tar
 *.tar.gz

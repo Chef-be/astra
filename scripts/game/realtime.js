@@ -17,6 +17,7 @@
     isNavigatingAway: false,
     chatMounts: {},
     chatChannels: [],
+    botCommandCatalog: [],
     chatHistories: {},
     chatHistorySignatures: {},
     chatDrafts: {},
@@ -305,6 +306,7 @@
           self.chatChannels = payload.channels || [];
           self.notifications = payload.notifications || [];
           self.unreadCount = payload.unreadCount || 0;
+          self.loadBotCommandCatalog();
           self.loadMentionCount();
           self.renderNotifications();
           self.updateChatMentionBadge();
@@ -861,12 +863,13 @@
       html += '        <textarea id="' + rootId + '-input" class="form-control bg-dark text-white border-secondary" rows="4" maxlength="500" placeholder="Rédiger un message, une consigne ou une information…"></textarea>';
       html += '      </div>';
       html += '      <div id="' + rootId + '-mention-panel" class="mt-2 d-none rounded-3 overflow-hidden" style="background:rgba(8,15,26,0.98);border:1px solid rgba(255,255,255,0.10);"></div>';
+      html += '      <div id="' + rootId + '-slash-panel" class="mt-2 d-none rounded-3 overflow-hidden" style="background:rgba(8,15,26,0.98);border:1px solid rgba(255,255,255,0.10);"></div>';
       html += '      <div class="mt-2 d-flex justify-content-between align-items-center gap-3 flex-wrap">';
       html += '        <div class="small text-white-50">Entrée pour envoyer. Maj + Entrée ajoute une nouvelle ligne. Le brouillon est conservé automatiquement.</div>';
       html += '        <button type="button" class="btn btn-primary" data-chat-send="' + rootId + '">Envoyer</button>';
       html += '      </div>';
       if (mount.activeChannel === 'bots') {
-        html += '      <div class="small text-info mt-2">Consignes rapides : <code>/bots économie</code>, <code>/bots raid</code>, <code>/bot NomDuBot expansion</code>.</div>';
+        html += '      <div class="small text-info mt-2">Console de commandement bots : tapez <code>/</code> pour afficher l’autocomplétion.</div>';
       }
       html += '    </div>';
       html += '  </div>';
@@ -899,10 +902,12 @@
         self.replaceEmojiShortcodesInInput(rootId);
         self.saveChatDraft(rootId);
         self.updateMentionSuggestions(rootId);
+        self.updateSlashSuggestions(rootId);
       });
 
       $(document).off('click.chatInput' + rootId).on('click.chatInput' + rootId, '#' + rootId + '-input', function() {
         self.updateMentionSuggestions(rootId);
+        self.updateSlashSuggestions(rootId);
       });
 
       $(document).off('click.chatChannel' + rootId).on('click.chatChannel' + rootId, '[data-chat-root="' + rootId + '"][data-chat-channel]', function() {
@@ -943,9 +948,14 @@
       });
 
       $(document).off('click.chatMentionOutside' + rootId).on('click.chatMentionOutside' + rootId, function(event) {
-        if (!$(event.target).closest('#' + rootId + '-input, #' + rootId + '-mention-panel, [data-chat-mention-username]').length) {
+        if (!$(event.target).closest('#' + rootId + '-input, #' + rootId + '-mention-panel, #' + rootId + '-slash-panel, [data-chat-mention-username], [data-chat-slash-command]').length) {
           self.hideMentionSuggestions(rootId);
+          self.hideSlashSuggestions(rootId);
         }
+      });
+
+      $(document).off('click.chatSlashChoice' + rootId).on('click.chatSlashChoice' + rootId, '[data-chat-root="' + rootId + '"][data-chat-slash-command]', function() {
+        self.insertSlashCommand(rootId, $(this).data('chat-slash-command'));
       });
     },
 
@@ -1110,6 +1120,7 @@
       }
 
       this.updateMentionSuggestions(rootId);
+      this.updateSlashSuggestions(rootId);
     },
 
     insertChatText: function(rootId, content) {
@@ -1202,6 +1213,115 @@
     hideMentionSuggestions: function(rootId) {
       $('#' + rootId + '-mention-panel').addClass('d-none').empty();
       delete this.mentionStates[rootId];
+    },
+
+    loadBotCommandCatalog: function() {
+      var self = this;
+
+      $.getJSON('game.php?page=realtime&mode=botCommandCatalog&ajax=1')
+        .done(function(payload) {
+          if (!payload || payload.status !== 'ok') {
+            return;
+          }
+
+          self.botCommandCatalog = payload.items || [];
+        });
+    },
+
+    getSlashSuggestions: function(query) {
+      var normalized = this.normalizeSearchTerm(query);
+      return (this.botCommandCatalog || []).filter(function(item) {
+        if (!item) {
+          return false;
+        }
+
+        var haystack = [
+          item.command_key || '',
+          item.family_key || '',
+          item.label || '',
+          item.help_text || '',
+          item.syntax_example || ''
+        ].join(' ');
+
+        return AstraRealtime.normalizeSearchTerm(haystack).indexOf(normalized) !== -1;
+      }).slice(0, 8);
+    },
+
+    updateSlashSuggestions: function(rootId) {
+      var mount = this.chatMounts[rootId];
+      var input = document.getElementById(rootId + '-input');
+      var panel = $('#' + rootId + '-slash-panel');
+      var value;
+      var suggestions;
+      var html = '';
+
+      if (!mount || mount.activeChannel !== 'bots' || !input || !panel.length) {
+        return;
+      }
+
+      value = input.value || '';
+      if (!value.length || value.charAt(0) !== '/') {
+        this.hideSlashSuggestions(rootId);
+        return;
+      }
+
+      suggestions = this.getSlashSuggestions(value.substring(1));
+      if (!suggestions.length) {
+        this.hideSlashSuggestions(rootId);
+        return;
+      }
+
+      suggestions.forEach(function(item) {
+        var syntax = item.syntax_example || '';
+        html += '<button type="button" class="btn w-100 text-start rounded-0 border-0 btn-dark" data-chat-root="' + rootId + '" data-chat-slash-command="' + AstraRealtime.escapeHtml(syntax) + '">';
+        html += '<div class="fw-semibold text-info">/' + AstraRealtime.escapeHtml(item.family_key || '') + ' ' + AstraRealtime.escapeHtml(item.command_key || '') + '</div>';
+        html += '<div class="small text-white-50 mt-1">' + AstraRealtime.escapeHtml(item.help_text || '') + '</div>';
+        if (syntax) {
+          html += '<div class="small text-white-50 mt-1"><code>' + AstraRealtime.escapeHtml(syntax) + '</code></div>';
+        }
+        html += '</button>';
+      });
+
+      panel.html(html).removeClass('d-none');
+    },
+
+    hideSlashSuggestions: function(rootId) {
+      $('#' + rootId + '-slash-panel').addClass('d-none').empty();
+    },
+
+    insertSlashCommand: function(rootId, commandText) {
+      var input = document.getElementById(rootId + '-input');
+
+      if (!input) {
+        return;
+      }
+
+      input.value = commandText || '';
+      this.focusWithoutScroll(input);
+      this.saveChatDraft(rootId);
+      this.updateSlashSuggestions(rootId);
+    },
+
+    submitBotCommand: function(rootId, commandText) {
+      var self = this;
+
+      $.post('game.php?page=realtime&mode=submitBotCommand&ajax=1', {
+        command: commandText
+      }).done(function(payload) {
+        if (!payload || payload.status !== 'ok') {
+          self.showChatError(payload && payload.message ? payload.message : 'La commande bots a été rejetée.');
+          return;
+        }
+
+        $.post('game.php?page=realtime&mode=dispatchBotCommands&ajax=1', {
+          limit: 8
+        }).always(function() {
+          self.hideChatError(rootId);
+          self.requestChatHistory('bots');
+        });
+      }).fail(function() {
+        self.showChatError('Échec de l’enregistrement de la commande bots.');
+      });
     },
 
     handleMentionKeydown: function(rootId, event) {
@@ -1321,6 +1441,14 @@
       normalizedContent = String(content || '').toLowerCase();
 
       this.hideChatError(rootId);
+
+      if (mount.activeChannel === 'bots' && normalizedContent.indexOf('/') === 0) {
+        this.submitBotCommand(rootId, content);
+        input.val('');
+        this.chatDrafts[this.getChatDraftKey(rootId)] = '';
+        this.hideSlashSuggestions(rootId);
+        return;
+      }
 
       if (!this.sendSocket({
         action: 'chat:send',

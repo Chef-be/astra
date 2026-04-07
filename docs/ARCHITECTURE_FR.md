@@ -89,6 +89,27 @@ Le temps réel repose sur :
 - [`ops/astra/realtime/server.js`](../ops/astra/realtime/server.js)
 - [`scripts/game/realtime.js`](../scripts/game/realtime.js)
 
+### Moteur bots
+
+Le moteur bots est réparti entre :
+
+- des services PHP dans `includes/classes/` ;
+- des pages d'administration dans `includes/pages/adm/` ;
+- des templates Smarty dans `styles/templates/adm/` ;
+- le relais Node.js du chat pour la saisie temps réel des ordres ;
+- des cronjobs spécialisés dans `includes/classes/cronjob/`.
+
+Les services cœur incluent notamment :
+
+- orchestration moteur ;
+- gouvernance de présence ;
+- mémoire et traits ;
+- hiérarchie chefs, alliances et escouades ;
+- génération et scoring d'actions ;
+- exécution réelle ;
+- messagerie privée et sociale ;
+- conformité multi-comptes.
+
 ### Contenu public
 
 Le contenu public et certains réglages éditoriaux sont pilotés côté administration via des services dédiés, notamment pour :

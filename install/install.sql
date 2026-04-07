@@ -108,12 +108,31 @@ CREATE TABLE `%PREFIX%bot_profiles` (
   `universe` int(11) unsigned NOT NULL,
   `name` varchar(80) NOT NULL,
   `description` text NOT NULL,
+  `profile_code` varchar(64) NOT NULL DEFAULT '',
+  `doctrine` varchar(64) NOT NULL DEFAULT 'equilibre',
+  `role_primary` varchar(64) NOT NULL DEFAULT 'economiste',
+  `role_secondary` varchar(64) NOT NULL DEFAULT '',
+  `communication_style` varchar(64) NOT NULL DEFAULT 'mesure',
   `target_online` int(11) unsigned NOT NULL DEFAULT '0',
+  `target_social_online` int(11) unsigned NOT NULL DEFAULT '0',
+  `target_presence_min` int(11) unsigned NOT NULL DEFAULT '15',
+  `target_presence_max` int(11) unsigned NOT NULL DEFAULT '90',
   `aggression` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `economy_focus` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `expansion_focus` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `always_active` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `is_visible_socially` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `is_commander_profile` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `traits_json` mediumtext,
+  `weights_json` mediumtext,
+  `hourly_schedule_json` mediumtext,
+  `bonus_json` mediumtext,
+  `doctrine_json` mediumtext,
   `is_active` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `created_by_user_id` int(11) unsigned DEFAULT NULL,
   `created_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `archived_at` int(11) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `universe` (`universe`,`is_active`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -205,11 +224,25 @@ CREATE TABLE `%PREFIX%bot_commands` (
   `issued_by_user_id` int(11) unsigned NOT NULL DEFAULT '0',
   `target_bot_user_id` int(11) unsigned DEFAULT NULL,
   `target_selector` varchar(64) NOT NULL DEFAULT 'all',
+  `command_family` varchar(64) NOT NULL DEFAULT '',
+  `command_name` varchar(64) NOT NULL DEFAULT '',
+  `target_type` varchar(64) NOT NULL DEFAULT '',
+  `target_reference` varchar(190) NOT NULL DEFAULT '',
+  `scope_mode` varchar(32) NOT NULL DEFAULT 'direct',
+  `priority` tinyint(3) unsigned NOT NULL DEFAULT '50',
   `command_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload_json` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `parsed_command_json` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `status` varchar(16) NOT NULL DEFAULT 'pending',
   `response_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `result_json` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `scheduled_at` int(11) unsigned DEFAULT NULL,
+  `locked_at` int(11) unsigned DEFAULT NULL,
+  `lock_token` varchar(64) DEFAULT NULL,
   `executed_at` int(11) unsigned DEFAULT NULL,
+  `engine_run_id` int(11) unsigned DEFAULT NULL,
+  `failure_reason` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `status` (`status`,`universe`,`created_at`),
   KEY `target_bot_user_id` (`target_bot_user_id`)
@@ -256,6 +289,401 @@ CREATE TABLE `%PREFIX%notifications` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`,`is_read`,`id`),
   KEY `universe` (`universe`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_engine_config` (
+  `universe` int(11) unsigned NOT NULL,
+  `engine_enabled` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `target_online_total` int(11) unsigned NOT NULL DEFAULT '24',
+  `target_social_total` int(11) unsigned NOT NULL DEFAULT '8',
+  `action_budget_per_cycle` int(11) unsigned NOT NULL DEFAULT '24',
+  `max_bots_per_cycle` int(11) unsigned NOT NULL DEFAULT '12',
+  `max_actions_per_bot` tinyint(3) unsigned NOT NULL DEFAULT '3',
+  `enable_bot_alliances` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `enable_command_hierarchy` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `enable_bonuses` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `enable_private_messages` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `enable_social_messages` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `enable_campaigns` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `shared_email` varchar(190) NOT NULL DEFAULT 'bots@astra.local',
+  `password_policy` varchar(64) NOT NULL DEFAULT 'rotation_mensuelle',
+  `multiaccount_policy` varchar(64) NOT NULL DEFAULT 'bots_valides',
+  `default_bot_alliance_tag` varchar(12) NOT NULL DEFAULT 'ASTRA',
+  `default_bot_alliance_name` varchar(80) NOT NULL DEFAULT 'Commandement Astra',
+  `global_presence_rules_json` mediumtext,
+  `profile_quotas_json` mediumtext,
+  `decision_weights_json` mediumtext,
+  `created_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`universe`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_state` (
+  `bot_user_id` int(11) unsigned NOT NULL,
+  `universe` int(11) unsigned NOT NULL,
+  `role_primary` varchar(64) NOT NULL DEFAULT 'economiste',
+  `role_secondary` varchar(64) NOT NULL DEFAULT '',
+  `hierarchy_status` varchar(32) NOT NULL DEFAULT 'membre',
+  `doctrine_active` varchar(64) NOT NULL DEFAULT 'equilibre',
+  `presence_logical` varchar(32) NOT NULL DEFAULT 'latent',
+  `presence_social` varchar(32) NOT NULL DEFAULT 'discret',
+  `commander_bot_user_id` int(11) unsigned DEFAULT NULL,
+  `squad_id` int(11) unsigned DEFAULT NULL,
+  `alliance_id` int(11) unsigned DEFAULT NULL,
+  `prestige` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `obedience_modifier` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `bonus_score` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `cooldown_until` int(11) unsigned DEFAULT NULL,
+  `paused_until` int(11) unsigned DEFAULT NULL,
+  `next_intention_at` int(11) unsigned DEFAULT NULL,
+  `last_decision_at` int(11) unsigned DEFAULT NULL,
+  `last_action_at` int(11) unsigned DEFAULT NULL,
+  `action_queue_size` int(11) unsigned NOT NULL DEFAULT '0',
+  `is_online_forced` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `is_socially_visible` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `current_campaign_id` int(11) unsigned DEFAULT NULL,
+  `current_target_json` mediumtext,
+  `structural_state_json` mediumtext,
+  `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`bot_user_id`),
+  KEY `universe` (`universe`,`presence_logical`,`presence_social`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_traits` (
+  `bot_user_id` int(11) unsigned NOT NULL,
+  `aggressivite` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `prudence` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `ambition` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `loyaute` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `discipline` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `sociabilite` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `opportunisme` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `expansion` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `technologie` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `economie` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `defense` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `espionnage` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `tolerance_risque` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `aptitude_commandement` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `obeissance` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `rancune` tinyint(3) unsigned NOT NULL DEFAULT '20',
+  `stabilite_emotionnelle` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `coordination` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `intensite_offensive` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `aptitude_communication` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `gout_harcelement` tinyint(3) unsigned NOT NULL DEFAULT '30',
+  `persistance_tactique` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`bot_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_dynamic_state` (
+  `bot_user_id` int(11) unsigned NOT NULL,
+  `stress` tinyint(3) unsigned NOT NULL DEFAULT '20',
+  `confiance` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `moral` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `fatigue` tinyint(3) unsigned NOT NULL DEFAULT '15',
+  `peur` tinyint(3) unsigned NOT NULL DEFAULT '10',
+  `pression_ennemie` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `appetit_raid` tinyint(3) unsigned NOT NULL DEFAULT '40',
+  `vigilance` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `satisfaction_economique` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `saturation_logistique` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `tension_diplomatique` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `superiorite_locale` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `intensite_campagne` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `envie_vengeance` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `disponibilite_sociale` tinyint(3) unsigned NOT NULL DEFAULT '40',
+  `excitation_offensive` tinyint(3) unsigned NOT NULL DEFAULT '25',
+  `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`bot_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_memory` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `bot_user_id` int(11) unsigned NOT NULL,
+  `universe` int(11) unsigned NOT NULL,
+  `memory_scope` varchar(64) NOT NULL,
+  `memory_key` varchar(190) NOT NULL,
+  `memory_value_json` mediumtext,
+  `intensity` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `expires_at` int(11) unsigned DEFAULT NULL,
+  `created_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `bot_scope` (`bot_user_id`,`memory_scope`,`memory_key`),
+  KEY `universe` (`universe`,`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_relationships` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `bot_user_id` int(11) unsigned NOT NULL,
+  `target_type` varchar(32) NOT NULL,
+  `target_reference` varchar(190) NOT NULL,
+  `stance` varchar(32) NOT NULL DEFAULT 'neutre',
+  `affinity` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `fear` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `resentment` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `trust` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `notes_json` mediumtext,
+  `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `bot_target` (`bot_user_id`,`target_type`,`target_reference`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_squads` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) unsigned NOT NULL,
+  `squad_code` varchar(64) NOT NULL,
+  `squad_name` varchar(120) NOT NULL,
+  `doctrine` varchar(64) NOT NULL DEFAULT 'equilibre',
+  `commander_bot_user_id` int(11) unsigned DEFAULT NULL,
+  `target_scope` varchar(190) NOT NULL DEFAULT '',
+  `is_temporary` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `status` varchar(32) NOT NULL DEFAULT 'active',
+  `settings_json` mediumtext,
+  `created_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `universe` (`universe`,`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_squad_members` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `squad_id` int(11) unsigned NOT NULL,
+  `bot_user_id` int(11) unsigned NOT NULL,
+  `role_name` varchar(64) NOT NULL DEFAULT 'membre',
+  `joined_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `squad_id` (`squad_id`,`bot_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_alliance_meta` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) unsigned NOT NULL,
+  `alliance_id` int(11) unsigned DEFAULT NULL,
+  `meta_tag` varchar(20) NOT NULL,
+  `meta_name` varchar(120) NOT NULL,
+  `doctrine` varchar(64) NOT NULL DEFAULT 'equilibre',
+  `territorial_core_json` mediumtext,
+  `diplomacy_json` mediumtext,
+  `objective_json` mediumtext,
+  `recruitment_policy` varchar(64) NOT NULL DEFAULT 'ouvert',
+  `communication_policy` varchar(64) NOT NULL DEFAULT 'visible',
+  `command_state_json` mediumtext,
+  `created_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `universe` (`universe`,`meta_tag`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_bonus_rules` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) unsigned NOT NULL,
+  `rule_code` varchar(64) NOT NULL,
+  `label` varchar(120) NOT NULL,
+  `bonus_type` varchar(64) NOT NULL,
+  `scope_type` varchar(32) NOT NULL DEFAULT 'bot',
+  `score_modifier` decimal(8,2) NOT NULL DEFAULT '0.00',
+  `payload_json` mediumtext,
+  `is_active` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `created_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `universe` (`universe`,`rule_code`,`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_bonus_assignments` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) unsigned NOT NULL,
+  `rule_id` int(11) unsigned DEFAULT NULL,
+  `bot_user_id` int(11) unsigned NOT NULL,
+  `source_type` varchar(32) NOT NULL DEFAULT 'manuel',
+  `source_reference` varchar(190) NOT NULL DEFAULT '',
+  `active_until` int(11) unsigned DEFAULT NULL,
+  `payload_json` mediumtext,
+  `created_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `bot_rule` (`bot_user_id`,`rule_id`,`active_until`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_action_queue` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) unsigned NOT NULL,
+  `bot_user_id` int(11) unsigned NOT NULL,
+  `source_type` varchar(32) NOT NULL DEFAULT 'engine',
+  `source_reference` varchar(190) NOT NULL DEFAULT '',
+  `action_type` varchar(64) NOT NULL,
+  `objective_type` varchar(64) NOT NULL DEFAULT '',
+  `priority` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `planned_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `due_at` int(11) unsigned DEFAULT NULL,
+  `locked_at` int(11) unsigned DEFAULT NULL,
+  `started_at` int(11) unsigned DEFAULT NULL,
+  `finished_at` int(11) unsigned DEFAULT NULL,
+  `status` varchar(16) NOT NULL DEFAULT 'queued',
+  `estimated_cost` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `estimated_risk` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `confidence` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `payload_json` mediumtext,
+  `justification` varchar(255) NOT NULL DEFAULT '',
+  `result_summary` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  KEY `queue_lookup` (`universe`,`status`,`priority`,`planned_at`),
+  KEY `bot_lookup` (`bot_user_id`,`status`,`due_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_action_results` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `action_queue_id` bigint(20) unsigned NOT NULL,
+  `universe` int(11) unsigned NOT NULL,
+  `bot_user_id` int(11) unsigned NOT NULL,
+  `status` varchar(16) NOT NULL DEFAULT 'done',
+  `result_json` mediumtext,
+  `created_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `action_queue_id` (`action_queue_id`,`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_engine_runs` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) unsigned NOT NULL,
+  `phase` varchar(32) NOT NULL DEFAULT 'cycle',
+  `status` varchar(16) NOT NULL DEFAULT 'running',
+  `lock_name` varchar(120) NOT NULL DEFAULT '',
+  `lock_token` varchar(64) NOT NULL DEFAULT '',
+  `started_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `finished_at` int(11) unsigned DEFAULT NULL,
+  `selected_bots` int(11) unsigned NOT NULL DEFAULT '0',
+  `executed_actions` int(11) unsigned NOT NULL DEFAULT '0',
+  `summary_json` mediumtext,
+  `error_summary` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `run_lookup` (`universe`,`phase`,`status`,`started_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_presence_snapshots` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) unsigned NOT NULL,
+  `bot_user_id` int(11) unsigned NOT NULL,
+  `logical_presence` varchar(32) NOT NULL,
+  `social_presence` varchar(32) NOT NULL,
+  `snapshot_reason` varchar(120) NOT NULL DEFAULT '',
+  `created_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `snapshot_lookup` (`universe`,`bot_user_id`,`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_campaigns` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) unsigned NOT NULL,
+  `campaign_code` varchar(64) NOT NULL,
+  `label` varchar(120) NOT NULL,
+  `campaign_type` varchar(64) NOT NULL,
+  `status` varchar(16) NOT NULL DEFAULT 'active',
+  `target_type` varchar(32) NOT NULL DEFAULT '',
+  `target_reference` varchar(190) NOT NULL DEFAULT '',
+  `zone_reference` varchar(190) NOT NULL DEFAULT '',
+  `responsible_alliance_meta_id` int(11) unsigned DEFAULT NULL,
+  `responsible_bot_user_id` int(11) unsigned DEFAULT NULL,
+  `rhythm_minutes` int(11) unsigned NOT NULL DEFAULT '30',
+  `interval_minutes` int(11) unsigned NOT NULL DEFAULT '15',
+  `duration_minutes` int(11) unsigned NOT NULL DEFAULT '360',
+  `budget_actions` int(11) unsigned NOT NULL DEFAULT '24',
+  `intensity` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `objective_exit` varchar(120) NOT NULL DEFAULT '',
+  `payload_json` mediumtext,
+  `created_at` int(11) unsigned NOT NULL DEFAULT '0',
+  `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `campaign_lookup` (`universe`,`status`,`campaign_type`,`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_campaign_members` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `campaign_id` int(11) unsigned NOT NULL,
+  `bot_user_id` int(11) unsigned DEFAULT NULL,
+  `squad_id` int(11) unsigned DEFAULT NULL,
+  `role_name` varchar(64) NOT NULL DEFAULT 'membre',
+  `rotation_weight` tinyint(3) unsigned NOT NULL DEFAULT '50',
+  `joined_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `campaign_id` (`campaign_id`,`bot_user_id`,`squad_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_private_messages` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) unsigned NOT NULL,
+  `bot_user_id` int(11) unsigned NOT NULL,
+  `target_user_id` int(11) unsigned NOT NULL,
+  `subject` varchar(180) NOT NULL DEFAULT '',
+  `body` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` varchar(16) NOT NULL DEFAULT 'queued',
+  `cooldown_until` int(11) unsigned DEFAULT NULL,
+  `sent_at` int(11) unsigned DEFAULT NULL,
+  `payload_json` mediumtext,
+  PRIMARY KEY (`id`),
+  KEY `message_lookup` (`universe`,`status`,`bot_user_id`,`target_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_social_messages` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) unsigned NOT NULL,
+  `bot_user_id` int(11) unsigned NOT NULL,
+  `channel_key` varchar(32) NOT NULL DEFAULT 'bots',
+  `target_user_id` int(11) unsigned DEFAULT NULL,
+  `target_username` varchar(64) NOT NULL DEFAULT '',
+  `message_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` varchar(16) NOT NULL DEFAULT 'queued',
+  `cooldown_until` int(11) unsigned DEFAULT NULL,
+  `sent_at` int(11) unsigned DEFAULT NULL,
+  `payload_json` mediumtext,
+  PRIMARY KEY (`id`),
+  KEY `social_lookup` (`universe`,`status`,`channel_key`,`bot_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_multiaccount_validation` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) unsigned NOT NULL,
+  `bot_user_id` int(11) unsigned NOT NULL,
+  `validation_status` varchar(32) NOT NULL DEFAULT 'validated_bot',
+  `validation_reason` varchar(190) NOT NULL DEFAULT '',
+  `validated_by_user_id` int(11) unsigned DEFAULT NULL,
+  `validated_at` int(11) unsigned DEFAULT NULL,
+  `notes_json` mediumtext,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `bot_user_id` (`bot_user_id`),
+  KEY `universe` (`universe`,`validation_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_account_compliance` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `universe` int(11) unsigned NOT NULL,
+  `bot_user_id` int(11) unsigned NOT NULL,
+  `shared_email` varchar(190) NOT NULL DEFAULT '',
+  `password_rotated_at` int(11) unsigned DEFAULT NULL,
+  `password_policy` varchar(64) NOT NULL DEFAULT 'rotation_mensuelle',
+  `multiaccount_sync_at` int(11) unsigned DEFAULT NULL,
+  `compliance_status` varchar(32) NOT NULL DEFAULT 'pending',
+  `details_json` mediumtext,
+  `updated_at` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `bot_user_id` (`bot_user_id`),
+  KEY `universe` (`universe`,`compliance_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `%PREFIX%bot_command_catalog` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `command_key` varchar(64) NOT NULL,
+  `family_key` varchar(64) NOT NULL,
+  `label` varchar(120) NOT NULL,
+  `help_text` varchar(255) NOT NULL DEFAULT '',
+  `syntax_example` varchar(255) NOT NULL DEFAULT '',
+  `target_types_json` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `payload_schema_json` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `is_active` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `sort_order` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `command_lookup` (`family_key`,`command_key`,`is_active`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `%PREFIX%colony_settings` (
@@ -1289,10 +1717,39 @@ INSERT INTO `%PREFIX%cronjobs` (`cronjobID`, `name`, `isActive`, `min`, `hours`,
 (NULL, 'cleaner', 1, '45', '2', '*', '*', '6', 'CleanerCronjob', 0, NULL),
 (NULL, 'inactive', 1, '30', '1', '*', '*', '0,3,6', 'InactiveMailCronjob', 0, NULL),
 (NULL, 'botactivity', 1, '*/10', '*', '*', '*', '*', 'BotActivityCronjob', 0, NULL),
+(NULL, 'botpresence', 1, '*/5', '*', '*', '*', '*', 'BotPresenceCronjob', 0, NULL),
+(NULL, 'botplanning', 1, '*/5', '*', '*', '*', '*', 'BotPlanningCronjob', 0, NULL),
+(NULL, 'botexecution', 1, '*/5', '*', '*', '*', '*', 'BotExecutionCronjob', 0, NULL),
+(NULL, 'botmessaging', 1, '*/5', '*', '*', '*', '*', 'BotMessagingCronjob', 0, NULL),
+(NULL, 'botcampaigns', 1, '*/10', '*', '*', '*', '*', 'BotCampaignCronjob', 0, NULL),
+(NULL, 'botcompliance', 1, '15', '*/2', '*', '*', '*', 'BotComplianceCronjob', 0, NULL),
+(NULL, 'botmaintenance', 1, '20,50', '*', '*', '*', '*', 'BotMaintenanceCronjob', 0, NULL),
 (NULL, 'missionprogress', 1, '*/15', '*', '*', '*', '*', 'MissionProgressCronjob', 0, NULL),
 (NULL, 'livechatretention', 1, '15', '3', '*', '*', '*', 'LiveChatRetentionCronjob', 0, NULL),
 (NULL, 'databasedump', 1, '30', '1', '*', '*', '1', 'DumpCronjob', 0, NULL),
 (NULL, 'tracking', 1, FLOOR(RAND() * 60), FLOOR(RAND() * 24), '*', '*', '0', 'TrackingCronjob', 0, NULL);
+
+INSERT INTO `%PREFIX%bot_command_catalog` (`command_key`, `family_key`, `label`, `help_text`, `syntax_example`, `target_types_json`, `payload_schema_json`, `is_active`, `sort_order`) VALUES
+('statut', 'bots', 'Statut', 'Affiche un état synthétique de la cible.', '/bots statut', '["all","bot","profil","alliance","escouade","systeme","galaxie","chef","campagne"]', '{"verb":"statut"}', 1, 10),
+('pause', 'bots', 'Pause', 'Met la cible en pause pour une durée donnée.', '/bot "Général Orion" pause 30m', '["all","bot","chef","profil","alliance","escouade"]', '{"verb":"pause","duration":true}', 1, 20),
+('reprendre', 'bots', 'Reprendre', 'Relance la cible après pause.', '/bots reprendre', '["all","bot","chef","profil","alliance","escouade"]', '{"verb":"reprendre"}', 1, 30),
+('doctrine', 'bots', 'Doctrine', 'Applique une doctrine à la cible.', '/bots doctrine opportuniste', '["all","bot","chef","profil","alliance","escouade"]', '{"verb":"doctrine","value":true}', 1, 40),
+('strategie', 'bots', 'Stratégie', 'Applique une stratégie ou doctrine opérationnelle.', '/bots strategie guerre', '["all","bot","chef","profil","alliance","escouade"]', '{"verb":"strategie","value":true}', 1, 45),
+('cible-online', 'presence', 'Cible en ligne', 'Ajuste la cible globale de présence logique.', '/bots cible-online 120', '["all"]', '{"verb":"cible-online","value":true}', 1, 47),
+('bonus', 'bots', 'Bonus', 'Attribue un bonus explicite à la cible.', '/bot "Général Orion" bonus commandement', '["all","bot","chef","profil","alliance","escouade"]', '{"verb":"bonus","value":true}', 1, 48),
+('journal', 'bots', 'Journal', 'Affiche un résumé structuré de la cible.', '/bot "Général Orion" journal', '["all","bot","chef","profil","alliance","escouade","campagne"]', '{"verb":"journal"}', 1, 49),
+('recon', 'bots', 'Reconnaissance', 'Programme une reconnaissance ciblée.', '/chef "Général Orion" lancer reconnaissance 2:145:7', '["all","bot","chef","alliance","escouade","systeme","galaxie","campagne"]', '{"verb":"recon","coordinates":true}', 1, 50),
+('surveillance', 'bots', 'Surveillance', 'Planifie une surveillance discrète ou répétée.', '/surveillance system-bots 2:145', '["all","bot","chef","alliance","escouade","systeme","galaxie","campagne"]', '{"verb":"surveillance","coordinates":true}', 1, 55),
+('raid', 'bots', 'Raid', 'Programme un raid ciblé ou opportuniste.', '/system-bots 2:145 raid opportuniste', '["all","bot","chef","alliance","escouade","systeme","galaxie","campagne"]', '{"verb":"raid","coordinates":true}', 1, 60),
+('defense', 'bots', 'Défense', 'Programme un renfort ou une posture défensive.', '/chef "Général Orion" defense 2:145', '["all","bot","chef","alliance","escouade","systeme","galaxie"]', '{"verb":"defense","coordinates":true}', 1, 65),
+('message-prive', 'communication', 'Message privé', 'Programme un message privé bot vers joueur.', '/message-prive bot "Général Orion" vers "NomJoueur" message "Nous surveillons votre système."', '["bot","chef"]', '{"target_player":true,"message":true}', 1, 70),
+('colonisation', 'bots', 'Colonisation', 'Force un plan de colonisation ou d''expansion.', '/profil-bots Colonisateur colonisation 3:112', '["all","bot","chef","profil","alliance","escouade","systeme","galaxie"]', '{"verb":"colonisation","coordinates":true}', 1, 75),
+('message-chat', 'communication', 'Message chat', 'Programme un message de chat avec mention.', '/message-chat bot "Général Orion" mention "@NomJoueur" message "Nous reviendrons."', '["bot","chef"]', '{"target_player":true,"message":true,"channel":true}', 1, 80),
+('campagne', 'campagnes', 'Campagne', 'Crée ou ajuste une campagne continue.', '/campagne alliance-bots ASTRA cible 2:145 mode pression', '["alliance","chef","campagne"]', '{"campaign":true,"coordinates":true,"mode":true}', 1, 90),
+('harcelement', 'campagnes', 'Harcèlement', 'Ouvre une campagne de harcèlement continue.', '/harcelement system-bots 2:145 cible "NomJoueur"', '["alliance","chef","escouade","systeme","galaxie","campagne"]', '{"campaign":true,"mode":"harcelement","coordinates":true}', 1, 95),
+('rotation-attaque', 'campagnes', 'Rotation d''attaque', 'Crée une rotation offensive cadencée.', '/rotation-attaque chef "Général Orion" cible 2:145:7 durée 6h', '["chef","alliance","escouade","campagne"]', '{"campaign":true,"mode":"rotation","coordinates":true,"duration":true}', 1, 100),
+('vague', 'campagnes', 'Vague', 'Cadence une vague offensive sur une cible.', '/vague alliance-bots ASTRA cible 2:145:7 intervalle 15m', '["alliance","chef","escouade","campagne"]', '{"campaign":true,"mode":"vague","coordinates":true,"interval":true}', 1, 110),
+('siege', 'campagnes', 'Siège', 'Déclenche une campagne de siège prolongé.', '/siege alliance-bots ASTRA zone 2:145', '["alliance","chef","escouade","systeme","galaxie","campagne"]', '{"campaign":true,"mode":"siege","coordinates":true}', 1, 120);
 
 INSERT INTO `%PREFIX%system` (`dbVersion`) VALUES
 (%DB_VERSION%);
