@@ -372,7 +372,6 @@
 	<section class="tech-tree-hero">
 		<div>
 			<h1>{$LNG.lm_technology}</h1>
-			<p>Repérez rapidement ce qui est déjà accessible, ce qui reste bloqué et les prérequis exacts, sans dérouler une longue suite de cartes ouvertes.</p>
 		</div>
 		<div class="tech-tree-stats">
 			<div class="tech-tree-stat">
