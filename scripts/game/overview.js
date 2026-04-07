@@ -21,4 +21,15 @@ $(document).ready(function()
 			}
 		});
 	}, 1000);
+
+	window.setInterval(function() {
+		$('.temporary-bonus-timer').each(function() {
+			var s = $(this).data('time') - (serverTime.getTime() - startTime) / 1000;
+			if (s <= 0) {
+				$(this).text('Expiré');
+			} else {
+				$(this).text(GetRestTimeFormat(s));
+			}
+		});
+	}, 1000);
 });

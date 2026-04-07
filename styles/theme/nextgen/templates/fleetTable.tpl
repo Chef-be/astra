@@ -28,7 +28,7 @@
               {/if}
             </div>
             <div class="text-end">
-              <span style="color:#9ee37d;font-weight:700;">{$bonus.time_left_formatted}</span>
+              <span class="temporary-bonus-timer" data-time="{$bonus.time_left}" style="color:#9ee37d;font-weight:700;">{$bonus.time_left_formatted}</span>
               <div style="color:rgba(255,255,255,0.55);">restant</div>
             </div>
           </div>
