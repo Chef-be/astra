@@ -123,7 +123,7 @@
                     <div class="bots-mini-table__row">
                       <div>
                         <div class="fw-bold">{$bot.username}</div>
-                        <div class="small text-white-50">{$bot.profile_name|default:'Sans profil'} · {$bot.presence_logical}</div>
+                        <div class="small text-white-50">{$bot.profile_name|default:'Sans profil'} · {$bot.presence_logical_label|default:'En veille'}</div>
                       </div>
                       <div class="text-end">
                         <div class="bots-pill">{if $bot.is_online_forced}ancrage{else}{$bot.session_target_in_label}{/if}</div>
@@ -148,7 +148,7 @@
                     <div class="bots-mini-table__row">
                       <div>
                         <div class="fw-bold">{$bot.username}</div>
-                        <div class="small text-white-50">{$bot.profile_name|default:'Sans profil'} · {$bot.presence_logical}</div>
+                        <div class="small text-white-50">{$bot.profile_name|default:'Sans profil'} · {$bot.presence_logical_label|default:'En veille'}</div>
                       </div>
                       <div class="text-end">
                         <div class="bots-pill">{$bot.session_rest_in_label}</div>
@@ -254,7 +254,7 @@
                 <div class="bots-campaign-card__meta">
                   <span>Intensité {$campaign.effective_intensity}</span>
                   <span>Membres {$campaign.member_count}</span>
-                  <span>Relève {$campaign.relay_strategy|replace:'_':' '}</span>
+                  <span>Relève {$campaign.relay_strategy_label|default:$campaign.relay_strategy}</span>
                 </div>
               </article>
             {foreachelse}
@@ -276,7 +276,7 @@
                 {foreach from=$botSnapshot.campaigns item=campaign}
                   <tr>
                     <td><span class="bots-pill">{$campaign.campaign_code}</span></td>
-                    <td>{$campaign.campaign_type}</td>
+                    <td>{$campaign.campaign_type_label|default:$campaign.campaign_type}</td>
                     <td>{$campaign.target_reference|default:$campaign.zone_reference}</td>
                     <td>{$campaign.intensity}</td>
                     <td>{$campaign.updated_at_formatted}</td>
@@ -658,12 +658,12 @@
               <article class="bots-focus-card">
                 <div class="bots-focus-card__top">
                   <strong>{$bot.username}</strong>
-                  <span class="bots-pill">{$bot.presence_logical|default:'latent'}</span>
+                  <span class="bots-pill">{$bot.presence_logical_label|default:'En veille'}</span>
                 </div>
                 <div class="bots-focus-card__meta">
                   <span>{$bot.profile_name|default:'Sans profil'}</span>
                   <span>{$bot.ally_tag|default:'Sans alliance'}</span>
-                  <span>{if $bot.hierarchy_status == 'chef'}Chef{else}Membre{/if}</span>
+                  <span>{$bot.hierarchy_status_label|default:'Membre'}</span>
                 </div>
                 <div class="bots-focus-card__campaign">
                   {if $bot.campaign_code}
@@ -675,7 +675,7 @@
                 </div>
                 <div class="bots-focus-card__text">
                   {if $bot.next_action_type}
-                    Prochaine action : {$bot.next_action_type} {if $bot.next_action_due_formatted}à {$bot.next_action_due_formatted}{/if}
+                    Prochaine action : {$bot.next_action_type_label|default:$bot.next_action_type} {if $bot.next_action_due_formatted}à {$bot.next_action_due_formatted}{/if}
                   {elseif $bot.last_activity_summary}
                     {$bot.last_activity_summary}
                   {else}
@@ -717,7 +717,7 @@
                     {foreach from=$botSnapshot.activity item=activity}
                       <tr>
                         <td>{$activity.created_at_formatted}</td>
-                        <td><span class="bots-pill">{$activity.activity_type}</span></td>
+                        <td><span class="bots-pill">{$activity.activity_type_label|default:$activity.activity_type}</span></td>
                         <td>{$activity.activity_summary}</td>
                       </tr>
                     {foreachelse}
@@ -755,8 +755,8 @@
                   <tbody>
                     {foreach from=$botSnapshot.metrics.latest_runs item=run}
                       <tr>
-                        <td>{$run.phase}</td>
-                        <td><span class="bots-pill">{$run.status}</span></td>
+                        <td>{$run.phase_label|default:$run.phase}</td>
+                        <td><span class="bots-pill">{$run.status_label|default:$run.status}</span></td>
                         <td>{$run.selected_bots}</td>
                         <td>{$run.executed_actions}</td>
                         <td>{$run.started_at_formatted}</td>
@@ -797,10 +797,10 @@
                     {foreach from=$botSnapshot.upcoming item=item}
                       <tr>
                         <td>{$item.username|default:'Bot système'}</td>
-                        <td>{$item.action_type}</td>
+                        <td>{$item.action_type_label|default:$item.action_type}</td>
                         <td>{$item.due_at_formatted}</td>
                         <td>{$item.priority}</td>
-                        <td><span class="bots-pill">{$item.status}</span></td>
+                        <td><span class="bots-pill">{$item.status_label|default:$item.status}</span></td>
                       </tr>
                     {foreachelse}
                       <tr>
@@ -838,9 +838,9 @@
                       <tr>
                         <td>
                           <div><code>{$order.command_text|escape}</code></div>
-                          <div class="small text-white-50 mt-1">{$order.response_text|default:'Sans réponse structurée'}</div>
+                          <div class="small text-white-50 mt-1">{$order.command_name_label|default:'Commande'} · {$order.target_type_label|default:'Cible'}{if $order.response_text|default:''} · {$order.response_text}{else} · Sans réponse structurée{/if}</div>
                         </td>
-                        <td><span class="bots-pill">{$order.status}</span></td>
+                        <td><span class="bots-pill">{$order.status_label|default:$order.status}</span></td>
                         <td>{$order.created_at_formatted}</td>
                       </tr>
                     {foreachelse}
@@ -955,8 +955,8 @@
                       </td>
                       <td>{$bot.profile_name|default:'Sans profil'}</td>
                       <td>
-                        <div>{$bot.presence_logical|default:'latent'}</div>
-                        <div class="small text-white-50">{$bot.presence_social|default:'discret'}</div>
+                        <div>{$bot.presence_logical_label|default:'En veille'}</div>
+                        <div class="small text-white-50">{$bot.presence_social_label|default:'Discret'}</div>
                       </td>
                       <td>
                         <div>{if $bot.is_online_forced}<span class="bots-pill">ancrage</span>{else}{$bot.session_target_in_label}{/if}</div>
@@ -964,10 +964,10 @@
                       </td>
                       <td>{$bot.ally_tag|default:'-'}</td>
                       <td>{$bot.galaxy}:{$bot.system}:{$bot.planet}</td>
-                      <td>{if $bot.hierarchy_status == 'chef'}<span class="bots-pill">Oui</span>{else}<span class="text-white-50">Non</span>{/if}</td>
+                      <td>{if $bot.hierarchy_status == 'chef'}<span class="bots-pill">{$bot.hierarchy_status_label|default:'Chef'}</span>{else}<span class="text-white-50">{$bot.hierarchy_status_label|default:'Membre'}</span>{/if}</td>
                       <td>
-                        <div>{$bot.compliance_status|default:'-'}</div>
-                        <div class="small text-white-50">{$bot.validation_status|default:'-'}</div>
+                        <div>{$bot.compliance_status_label|default:'-'}</div>
+                        <div class="small text-white-50">{$bot.validation_status_label|default:'-'}</div>
                       </td>
                     </tr>
                   {foreachelse}

@@ -167,6 +167,9 @@ class BotAdminService
 			$campaign['relay_strategy'] = !empty($campaign['payload']['relay_strategy']) ? $campaign['payload']['relay_strategy'] : 'rotation_continue';
 			$campaign['effective_intensity'] = !empty($campaign['payload']['effective_intensity']) ? (int) $campaign['payload']['effective_intensity'] : (int) $campaign['intensity'];
 			$campaign['focused_target'] = !empty($campaign['target_reference']) ? $campaign['target_reference'] : $campaign['zone_reference'];
+			$campaign['campaign_type_label'] = $this->labelCampaignType($campaign['campaign_type']);
+			$campaign['relay_strategy_label'] = $this->labelRelayStrategy($campaign['relay_strategy']);
+			$campaign['visibility_strategy_label'] = $this->labelVisibilityStrategy($campaign['visibility_strategy']);
 		}
 		unset($campaign);
 
@@ -261,8 +264,67 @@ class BotAdminService
 			$focus['campaign_payload'] = $this->decodeJson(isset($focus['campaign_payload_json']) ? $focus['campaign_payload_json'] : null);
 			$focus['campaign_phase_label'] = !empty($focus['campaign_payload']['phase']) ? ucfirst(str_replace('_', ' ', $focus['campaign_payload']['phase'])) : 'Hors campagne';
 			$focus['campaign_mode_label'] = !empty($focus['campaign_payload']['mode']) ? ucfirst(str_replace('_', ' ', $focus['campaign_payload']['mode'])) : '';
+			$focus['presence_logical_label'] = $this->labelPresenceLogical(isset($focus['presence_logical']) ? $focus['presence_logical'] : '');
+			$focus['presence_social_label'] = $this->labelPresenceSocial(isset($focus['presence_social']) ? $focus['presence_social'] : '');
+			$focus['hierarchy_status_label'] = $this->labelHierarchyStatus(isset($focus['hierarchy_status']) ? $focus['hierarchy_status'] : '');
+			$focus['next_action_type_label'] = $this->labelActionType(isset($focus['next_action_type']) ? $focus['next_action_type'] : '');
 		}
 		unset($focus);
+
+		foreach ($botRoster as &$bot) {
+			$bot['presence_logical_label'] = $this->labelPresenceLogical(isset($bot['presence_logical']) ? $bot['presence_logical'] : '');
+			$bot['presence_social_label'] = $this->labelPresenceSocial(isset($bot['presence_social']) ? $bot['presence_social'] : '');
+			$bot['hierarchy_status_label'] = $this->labelHierarchyStatus(isset($bot['hierarchy_status']) ? $bot['hierarchy_status'] : '');
+			$bot['compliance_status_label'] = $this->labelComplianceStatus(isset($bot['compliance_status']) ? $bot['compliance_status'] : '');
+			$bot['validation_status_label'] = $this->labelValidationStatus(isset($bot['validation_status']) ? $bot['validation_status'] : '');
+		}
+		unset($bot);
+
+		foreach ($onlineRoster as &$bot) {
+			$bot['presence_logical_label'] = $this->labelPresenceLogical(isset($bot['presence_logical']) ? $bot['presence_logical'] : '');
+			$bot['presence_social_label'] = $this->labelPresenceSocial(isset($bot['presence_social']) ? $bot['presence_social'] : '');
+			$bot['hierarchy_status_label'] = $this->labelHierarchyStatus(isset($bot['hierarchy_status']) ? $bot['hierarchy_status'] : '');
+		}
+		unset($bot);
+
+		foreach ($relayCandidates as &$bot) {
+			$bot['presence_logical_label'] = $this->labelPresenceLogical(isset($bot['presence_logical']) ? $bot['presence_logical'] : '');
+			$bot['presence_social_label'] = $this->labelPresenceSocial(isset($bot['presence_social']) ? $bot['presence_social'] : '');
+			$bot['hierarchy_status_label'] = $this->labelHierarchyStatus(isset($bot['hierarchy_status']) ? $bot['hierarchy_status'] : '');
+		}
+		unset($bot);
+
+		foreach ($activity as &$item) {
+			$item['activity_type_label'] = $this->labelActivityType(isset($item['activity_type']) ? $item['activity_type'] : '');
+		}
+		unset($item);
+
+		foreach ($queuedActions as &$item) {
+			$item['action_type_label'] = $this->labelActionType(isset($item['action_type']) ? $item['action_type'] : '');
+			$item['status_label'] = $this->labelQueueStatus(isset($item['status']) ? $item['status'] : '');
+		}
+		unset($item);
+
+		foreach ($upcoming as &$item) {
+			$item['action_type_label'] = $this->labelActionType(isset($item['action_type']) ? $item['action_type'] : '');
+			$item['status_label'] = $this->labelQueueStatus(isset($item['status']) ? $item['status'] : '');
+		}
+		unset($item);
+
+		foreach ($orders as &$order) {
+			$order['status_label'] = $this->labelOrderStatus(isset($order['status']) ? $order['status'] : '');
+			$order['command_name_label'] = $this->labelCommandName(isset($order['command_name']) ? $order['command_name'] : '');
+			$order['target_type_label'] = $this->labelTargetType(isset($order['target_type']) ? $order['target_type'] : '');
+		}
+		unset($order);
+
+		if (!empty($metrics['latest_runs']) && is_array($metrics['latest_runs'])) {
+			foreach ($metrics['latest_runs'] as &$run) {
+				$run['phase_label'] = $this->labelRunPhase(isset($run['phase']) ? $run['phase'] : '');
+				$run['status_label'] = $this->labelRunStatus(isset($run['status']) ? $run['status'] : '');
+			}
+			unset($run);
+		}
 
 		$allianceSummaries = $this->allianceService->getAllianceSummaries(8);
 
@@ -501,5 +563,221 @@ class BotAdminService
 
 		$decoded = json_decode($json, true);
 		return is_array($decoded) ? $decoded : array();
+	}
+
+	protected function labelPresenceLogical($value)
+	{
+		$map = array(
+			'offline' => 'Hors ligne',
+			'latent' => 'En veille',
+			'connecte' => 'Connecté',
+			'engage' => 'Engagé',
+			'alerte' => 'En alerte',
+			'coordination' => 'En coordination',
+			'repos' => 'Au repos',
+			'campagne' => 'En campagne',
+			'harcelement' => 'En harcèlement',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('_', ' ', $value)) : 'En veille');
+	}
+
+	protected function labelPresenceSocial($value)
+	{
+		$map = array(
+			'discret' => 'Discret',
+			'visible' => 'Visible',
+			'chat' => 'Actif dans le chat',
+			'chef' => 'Présence de chef',
+			'campagne' => 'Présence de campagne',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('_', ' ', $value)) : 'Discret');
+	}
+
+	protected function labelHierarchyStatus($value)
+	{
+		$map = array(
+			'chef' => 'Chef',
+			'officier' => 'Officier',
+			'membre' => 'Membre',
+			'solitaire' => 'Solitaire',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('_', ' ', $value)) : 'Membre');
+	}
+
+	protected function labelActionType($value)
+	{
+		$map = array(
+			'send_spy' => 'Envoyer une reconnaissance',
+			'send_raid' => 'Lancer un raid',
+			'presence_ping' => 'Signaler une présence',
+			'enqueue_shipyard' => 'Lancer une production',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('_', ' ', $value)) : 'Action');
+	}
+
+	protected function labelQueueStatus($value)
+	{
+		$map = array(
+			'queued' => 'En attente',
+			'running' => 'En cours',
+			'done' => 'Terminée',
+			'rejected' => 'Rejetée',
+			'failed' => 'En échec',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('_', ' ', $value)) : '-');
+	}
+
+	protected function labelOrderStatus($value)
+	{
+		return $this->labelQueueStatus($value);
+	}
+
+	protected function labelCommandName($value)
+	{
+		$map = array(
+			'statut' => 'Demande de statut',
+			'pause' => 'Mise en pause',
+			'reprendre' => 'Reprise',
+			'doctrine' => 'Changement de doctrine',
+			'priorite' => 'Priorité tactique',
+			'intensifier' => 'Intensification',
+			'strategie' => 'Ajustement stratégique',
+			'bonus' => 'Bonus',
+			'cible-online' => 'Cible de présence',
+			'coordonner' => 'Coordination',
+			'lancer' => 'Lancement d’action',
+			'recon' => 'Reconnaissance',
+			'reconnaissance' => 'Reconnaissance',
+			'surveillance' => 'Surveillance',
+			'raid' => 'Raid',
+			'defense' => 'Défense',
+			'colonisation' => 'Colonisation',
+			'message-prive' => 'Message privé',
+			'message-chat' => 'Message de chat',
+			'campagne' => 'Campagne',
+			'harcelement' => 'Harcèlement',
+			'rotation-attaque' => 'Rotation d’attaque',
+			'vague' => 'Vague offensive',
+			'siege' => 'Siège',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('-', ' ', $value)) : 'Commande');
+	}
+
+	protected function labelTargetType($value)
+	{
+		$map = array(
+			'all' => 'Tous les bots',
+			'bot' => 'Bot',
+			'chef' => 'Chef',
+			'alliance' => 'Alliance bots',
+			'escouade' => 'Escouade',
+			'systeme' => 'Système',
+			'galaxie' => 'Galaxie',
+			'profil' => 'Profil',
+			'campagne' => 'Campagne',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('_', ' ', $value)) : 'Cible');
+	}
+
+	protected function labelCampaignType($value)
+	{
+		$map = array(
+			'campagne' => 'Campagne générale',
+			'harcelement' => 'Campagne de harcèlement',
+			'rotation-attaque' => 'Rotation d’attaque',
+			'vague' => 'Vague offensive',
+			'siege' => 'Siège',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('-', ' ', $value)) : 'Campagne');
+	}
+
+	protected function labelRelayStrategy($value)
+	{
+		$map = array(
+			'rotation_continue' => 'Rotation continue',
+			'relais_chaud' => 'Relais chaud',
+			'pression_fixe' => 'Pression fixe',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('_', ' ', $value)) : 'Rotation continue');
+	}
+
+	protected function labelVisibilityStrategy($value)
+	{
+		$map = array(
+			'visible' => 'Visible',
+			'discret' => 'Discret',
+			'fluctuant' => 'Fluctuant',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('_', ' ', $value)) : 'Visible');
+	}
+
+	protected function labelActivityType($value)
+	{
+		$map = array(
+			'decision' => 'Décision',
+			'action' => 'Action',
+			'presence' => 'Présence',
+			'campaign' => 'Campagne',
+			'message' => 'Messagerie',
+			'maintenance' => 'Maintenance',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('_', ' ', $value)) : 'Activité');
+	}
+
+	protected function labelComplianceStatus($value)
+	{
+		$map = array(
+			'compliant' => 'Conforme',
+			'pending' => 'À vérifier',
+			'warning' => 'À corriger',
+			'failed' => 'Non conforme',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('_', ' ', $value)) : '-');
+	}
+
+	protected function labelValidationStatus($value)
+	{
+		$map = array(
+			'validated' => 'Validé',
+			'authorized' => 'Autorisé',
+			'pending' => 'En attente',
+			'rejected' => 'Refusé',
+			'fraud' => 'Frauduleux',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('_', ' ', $value)) : '-');
+	}
+
+	protected function labelRunPhase($value)
+	{
+		$map = array(
+			'cycle' => 'Cycle complet',
+			'presence' => 'Présence',
+			'planning' => 'Planification',
+			'execution' => 'Exécution',
+			'messaging' => 'Messagerie',
+			'campaigns' => 'Campagnes',
+			'compliance' => 'Conformité',
+			'maintenance' => 'Maintenance',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('_', ' ', $value)) : 'Run');
+	}
+
+	protected function labelRunStatus($value)
+	{
+		return $this->labelQueueStatus($value);
 	}
 }

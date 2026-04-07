@@ -336,7 +336,7 @@ class BotCommandDispatcher
 			$queued++;
 		}
 
-		return array('status' => 'done', 'responseText' => sprintf('%d action(s) %s placée(s) en file.', $queued, $actionType));
+		return array('status' => 'done', 'responseText' => sprintf('%d action(s) « %s » placée(s) en file.', $queued, $this->labelActionType($actionType)));
 	}
 
 	protected function queueDefensiveAction(array $botIds, array $payload)
@@ -700,7 +700,7 @@ class BotCommandDispatcher
 
 		$parts = array();
 		foreach ($logical as $state => $count) {
-			$parts[] = $state.'='.$count;
+			$parts[] = $this->labelPresenceLogical($state).'='.$count;
 		}
 
 		return array(
@@ -741,5 +741,34 @@ class BotCommandDispatcher
 
 		$outcome['commandId'] = (int) $command['id'];
 		return $outcome;
+	}
+
+	protected function labelPresenceLogical($value)
+	{
+		$map = array(
+			'offline' => 'hors ligne',
+			'latent' => 'en veille',
+			'connecte' => 'connecté',
+			'engage' => 'engagé',
+			'alerte' => 'en alerte',
+			'coordination' => 'en coordination',
+			'repos' => 'au repos',
+			'campagne' => 'en campagne',
+			'harcelement' => 'en harcèlement',
+		);
+
+		return isset($map[$value]) ? $map[$value] : str_replace('_', ' ', (string) $value);
+	}
+
+	protected function labelActionType($value)
+	{
+		$map = array(
+			'send_spy' => 'reconnaissance',
+			'send_raid' => 'raid',
+			'presence_ping' => 'signal de présence',
+			'enqueue_shipyard' => 'production',
+		);
+
+		return isset($map[$value]) ? $map[$value] : str_replace('_', ' ', (string) $value);
 	}
 }
