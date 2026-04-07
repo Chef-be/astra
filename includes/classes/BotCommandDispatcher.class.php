@@ -712,6 +712,8 @@ class BotCommandDispatcher
 
 	protected function dispatchAndStore(array $command)
 	{
+		require_once ROOT_PATH.'includes/classes/LiveChatService.class.php';
+
 		$outcome = $this->dispatchOne($command);
 		Database::get()->update('UPDATE %%BOT_COMMANDS%% SET
 			status = :status,
@@ -727,6 +729,15 @@ class BotCommandDispatcher
 				':failureReason' => $outcome['status'] === 'done' ? null : $outcome['responseText'],
 				':id' => (int) $command['id'],
 			));
+
+		$prefix = $outcome['status'] === 'done' ? 'Résultat' : 'Commande rejetée';
+		$message = sprintf(
+			'%s pour %s : %s',
+			$prefix,
+			trim((string) $command['command_text']),
+			trim((string) $outcome['responseText'])
+		);
+		LiveChatService::createBotFeedEntry('Orchestrateur Astra Bots', $message, 0, Universe::getEmulated());
 
 		$outcome['commandId'] = (int) $command['id'];
 		return $outcome;
