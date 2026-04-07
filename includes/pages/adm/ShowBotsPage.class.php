@@ -51,6 +51,21 @@ class ShowBotsPage extends AbstractAdminPage
 
 		foreach ($snapshot['campaigns'] as &$row) {
 			$row['updated_at_formatted'] = _date($LNG['php_tdformat'], $row['updated_at'], $USER['timezone']);
+			$row['cooldown_until_formatted'] = !empty($row['payload']['cooldown_until']) ? _date($LNG['php_tdformat'], $row['payload']['cooldown_until'], $USER['timezone']) : '';
+			$row['last_execution_at_formatted'] = !empty($row['payload']['last_execution_at']) ? _date($LNG['php_tdformat'], $row['payload']['last_execution_at'], $USER['timezone']) : '';
+		}
+		unset($row);
+
+		foreach ($snapshot['alliance_summaries'] as &$row) {
+			$row['updated_at_formatted'] = _date($LNG['php_tdformat'], $row['updated_at'], $USER['timezone']);
+		}
+		unset($row);
+
+		foreach ($snapshot['bot_focus'] as &$row) {
+			$row['next_action_due_formatted'] = !empty($row['next_action_due']) ? _date($LNG['php_tdformat'], $row['next_action_due'], $USER['timezone']) : '';
+			$row['last_activity_at_formatted'] = !empty($row['last_activity_at']) ? _date($LNG['php_tdformat'], $row['last_activity_at'], $USER['timezone']) : '';
+			$row['session_target_in_label'] = $this->formatDeltaLabel(!empty($row['session_target_until']) ? ((int) $row['session_target_until'] - TIMESTAMP) : null, 'relève');
+			$row['session_rest_in_label'] = $this->formatDeltaLabel(!empty($row['session_rest_until']) ? ((int) $row['session_rest_until'] - TIMESTAMP) : null, 'repos');
 		}
 		unset($row);
 

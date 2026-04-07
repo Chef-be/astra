@@ -104,6 +104,20 @@ class ShowRealtimePage extends AbstractGamePage
 		}
 
 		$service = new BotAdminService();
+		$commandId = HTTP::_GP('commandId', 0);
+		if ($commandId > 0) {
+			$result = $service->dispatchCommandById((int) $commandId);
+			$this->sendJSON(array(
+				'status' => 'ok',
+				'processed' => 1,
+				'done' => $result['status'] === 'done' ? 1 : 0,
+				'rejected' => $result['status'] === 'done' ? 0 : 1,
+				'commandStatus' => $result['status'],
+				'responseText' => isset($result['responseText']) ? $result['responseText'] : '',
+				'commandId' => isset($result['commandId']) ? (int) $result['commandId'] : (int) $commandId,
+			));
+		}
+
 		$result = $service->dispatchPendingCommands(max(1, HTTP::_GP('limit', 6)));
 
 		$this->sendJSON(array(

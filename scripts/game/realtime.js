@@ -1363,6 +1363,7 @@
         self.hideSlashSuggestions(rootId);
 
         $.post('game.php?page=realtime&mode=dispatchBotCommands&ajax=1', {
+          commandId: payload.commandId || 0,
           limit: 8
         }).done(function(dispatchPayload) {
           if (!dispatchPayload || dispatchPayload.status !== 'ok') {
@@ -1371,8 +1372,8 @@
             return;
           }
 
-          if ((dispatchPayload.done || 0) === 0 && (dispatchPayload.rejected || 0) > 0) {
-            self.showChatError('La commande bots a été enregistrée, mais elle a été rejetée à l’exécution.');
+          if (dispatchPayload.commandStatus && dispatchPayload.commandStatus !== 'done') {
+            self.showChatError(dispatchPayload.responseText || 'La commande bots a été rejetée à l’exécution.');
             self.requestChatHistory('bots');
             return;
           }

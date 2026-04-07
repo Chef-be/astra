@@ -58,6 +58,11 @@ class BotCommandParser
 
 	public function tokenize($input)
 	{
+		$input = str_replace(
+			array('“', '”', '„', '«', '»', '’', '‘', '‛'),
+			array('"', '"', '"', '"', '"', "'", "'", "'"),
+			(string) $input
+		);
 		preg_match_all('/"([^"]+)"|\'([^\']+)\'|(\S+)/u', (string) $input, $matches);
 		$tokens = array();
 		foreach ($matches[0] as $index => $full) {
@@ -274,7 +279,37 @@ class BotCommandParser
 
 	protected function normalizeToken($value)
 	{
-		return mb_strtolower(trim((string) $value), 'UTF-8');
+		$value = mb_strtolower(trim((string) $value), 'UTF-8');
+		$value = strtr($value, array(
+			'à' => 'a',
+			'â' => 'a',
+			'ä' => 'a',
+			'á' => 'a',
+			'è' => 'e',
+			'é' => 'e',
+			'ê' => 'e',
+			'ë' => 'e',
+			'ì' => 'i',
+			'î' => 'i',
+			'ï' => 'i',
+			'í' => 'i',
+			'ò' => 'o',
+			'ô' => 'o',
+			'ö' => 'o',
+			'ó' => 'o',
+			'ù' => 'u',
+			'û' => 'u',
+			'ü' => 'u',
+			'ú' => 'u',
+			'ÿ' => 'y',
+			'ç' => 'c',
+			'œ' => 'oe',
+			'æ' => 'ae',
+			'–' => '-',
+			'—' => '-',
+		));
+
+		return $value;
 	}
 
 	protected function normalizeTargetType($value)

@@ -110,22 +110,7 @@ class BotCommandDispatcher
 		);
 
 		foreach ($commands as $command) {
-			$outcome = $this->dispatchOne($command);
-			$db->update('UPDATE %%BOT_COMMANDS%% SET
-				status = :status,
-				response_text = :responseText,
-				result_json = :resultJson,
-				executed_at = :executedAt,
-				failure_reason = :failureReason
-				WHERE id = :id;', array(
-					':status' => $outcome['status'],
-					':responseText' => $outcome['responseText'],
-					':resultJson' => json_encode($outcome),
-					':executedAt' => TIMESTAMP,
-					':failureReason' => $outcome['status'] === 'done' ? null : $outcome['responseText'],
-					':id' => (int) $command['id'],
-				));
-
+			$outcome = $this->dispatchAndStore($command);
 			$result['processed']++;
 			if ($outcome['status'] === 'done') {
 				$result['done']++;
@@ -135,6 +120,27 @@ class BotCommandDispatcher
 		}
 
 		return $result;
+	}
+
+	public function dispatchCommandById($commandId)
+	{
+		$command = Database::get()->selectSingle('SELECT *
+			FROM %%BOT_COMMANDS%%
+			WHERE universe = :universe
+			  AND id = :id
+			LIMIT 1;', array(
+				':universe' => Universe::getEmulated(),
+				':id' => (int) $commandId,
+			));
+
+		if (empty($command)) {
+			return array(
+				'status' => 'rejected',
+				'responseText' => 'Commande bots introuvable.',
+			);
+		}
+
+		return $this->dispatchAndStore($command);
 	}
 
 	protected function dispatchOne(array $command)
@@ -480,7 +486,7 @@ class BotCommandDispatcher
 		}
 
 		if ($type === 'bot') {
-			return $this->idsFromRows($db->select('SELECT id FROM %%USERS%% WHERE universe = :universe AND is_bot = 1 AND username = :username;', array(
+			return $this->idsFromRows($db->select('SELECT id FROM %%USERS%% WHERE universe = :universe AND is_bot = 1 AND LOWER(username) = LOWER(:username);', array(
 				':universe' => Universe::getEmulated(),
 				':username' => $reference,
 			)));
@@ -491,7 +497,7 @@ class BotCommandDispatcher
 				return $this->idsFromRows($db->select('SELECT u.id
 					FROM %%USERS%% u
 					INNER JOIN %%BOT_STATE%% bs ON bs.bot_user_id = u.id
-					WHERE u.universe = :universe AND u.is_bot = 1 AND bs.hierarchy_status = \'chef\' AND u.username = :username;', array(
+					WHERE u.universe = :universe AND u.is_bot = 1 AND bs.hierarchy_status = \'chef\' AND LOWER(u.username) = LOWER(:username);', array(
 						':universe' => Universe::getEmulated(),
 						':username' => $reference,
 					)));
@@ -509,7 +515,7 @@ class BotCommandDispatcher
 			return $this->idsFromRows($db->select('SELECT u.id
 				FROM %%USERS%% u
 				INNER JOIN %%ALLIANCE%% a ON a.id = u.ally_id
-				WHERE u.universe = :universe AND u.is_bot = 1 AND (a.ally_tag = :reference OR a.ally_name = :reference);', array(
+				WHERE u.universe = :universe AND u.is_bot = 1 AND (LOWER(a.ally_tag) = LOWER(:reference) OR LOWER(a.ally_name) = LOWER(:reference));', array(
 					':universe' => Universe::getEmulated(),
 					':reference' => $reference,
 				)));
@@ -519,7 +525,7 @@ class BotCommandDispatcher
 			return $this->idsFromRows($db->select('SELECT u.id
 				FROM %%USERS%% u
 				INNER JOIN %%BOT_PROFILES%% bp ON bp.id = u.bot_profile_id
-				WHERE u.universe = :universe AND u.is_bot = 1 AND bp.name = :reference;', array(
+				WHERE u.universe = :universe AND u.is_bot = 1 AND LOWER(bp.name) = LOWER(:reference);', array(
 					':universe' => Universe::getEmulated(),
 					':reference' => $reference,
 				)));
@@ -561,7 +567,7 @@ class BotCommandDispatcher
 			return $this->idsFromRows($db->select('SELECT DISTINCT bot_user_id AS id
 				FROM %%BOT_CAMPAIGN_MEMBERS%% m
 				INNER JOIN %%BOT_CAMPAIGNS%% c ON c.id = m.campaign_id
-				WHERE c.universe = :universe AND c.campaign_code = :reference;', array(
+				WHERE c.universe = :universe AND LOWER(c.campaign_code) = LOWER(:reference);', array(
 					':universe' => Universe::getEmulated(),
 					':reference' => $reference,
 				)));
@@ -648,5 +654,27 @@ class BotCommandDispatcher
 			'responseText' => sprintf('Statut %s : %d bot(s), %d en campagne, répartition logique [%s].', $command['target_reference'] !== '' ? $command['target_reference'] : 'global', count($botIds), $campaigns, implode(', ', $parts)),
 			'targets' => $botIds,
 		);
+	}
+
+	protected function dispatchAndStore(array $command)
+	{
+		$outcome = $this->dispatchOne($command);
+		Database::get()->update('UPDATE %%BOT_COMMANDS%% SET
+			status = :status,
+			response_text = :responseText,
+			result_json = :resultJson,
+			executed_at = :executedAt,
+			failure_reason = :failureReason
+			WHERE id = :id;', array(
+				':status' => $outcome['status'],
+				':responseText' => $outcome['responseText'],
+				':resultJson' => json_encode($outcome),
+				':executedAt' => TIMESTAMP,
+				':failureReason' => $outcome['status'] === 'done' ? null : $outcome['responseText'],
+				':id' => (int) $command['id'],
+			));
+
+		$outcome['commandId'] = (int) $command['id'];
+		return $outcome;
 	}
 }

@@ -87,6 +87,9 @@ class BotEngineService
 
 		try {
 			$this->ensureBotFoundation($config);
+			if (in_array($phase, array('cycle', 'planning', 'campaigns', 'maintenance'), true)) {
+				$summary['alliances'] = $this->allianceService->refreshAllianceGovernance(10);
+			}
 
 			if (in_array($phase, array('cycle', 'presence'), true)) {
 				$summary['population'] = $this->presenceGovernor->computeAndApply($config);

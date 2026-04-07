@@ -237,9 +237,29 @@
           <div class="bots-section-heading">
             <div>
               <h2 class="bots-section-title">Campagnes en cours</h2>
-              <p class="bots-section-text">Campagnes offensives, de pression ou de siège maintenues par le moteur.</p>
+              <p class="bots-section-text">Campagnes offensives, de pression ou de siège maintenues avec phase, relais, visibilité et narration active.</p>
             </div>
             <span class="badge bg-secondary">{$botSnapshot.metrics.active_campaigns}</span>
+          </div>
+          <div class="bots-campaign-grid mb-3">
+            {foreach from=$botSnapshot.campaigns item=campaign}
+              <article class="bots-campaign-card">
+                <div class="bots-campaign-card__top">
+                  <span class="bots-pill">{$campaign.campaign_code}</span>
+                  <span class="bots-pill">{$campaign.phase_label}</span>
+                </div>
+                <h3 class="bots-campaign-card__title">{$campaign.mode_label}</h3>
+                <div class="bots-campaign-card__target">{$campaign.focused_target|default:'Sans cible précise'}</div>
+                <p class="bots-campaign-card__text">{$campaign.narrative}</p>
+                <div class="bots-campaign-card__meta">
+                  <span>Intensité {$campaign.effective_intensity}</span>
+                  <span>Membres {$campaign.member_count}</span>
+                  <span>Relève {$campaign.relay_strategy|replace:'_':' '}</span>
+                </div>
+              </article>
+            {foreachelse}
+              <div class="admin-empty">Aucune campagne active.</div>
+            {/foreach}
           </div>
           <div class="table-responsive">
             <table class="table table-dark table-hover align-middle bots-table mb-0">
@@ -278,37 +298,30 @@
         <div class="admin-card__body">
           <div class="bots-section-heading">
             <div>
-              <h2 class="bots-section-title">Ordres récents</h2>
-              <p class="bots-section-text">Derniers ordres structurés remontés par la console bots.</p>
+              <h2 class="bots-section-title">Théâtre d’alliance</h2>
+              <p class="bots-section-text">Posture des alliances bots, noyaux territoriaux et état-major courant.</p>
             </div>
-            <a class="btn btn-outline-light btn-sm" href="game.php?page=chat">Console bots</a>
           </div>
-          <div class="table-responsive">
-            <table class="table table-dark table-hover align-middle bots-table mb-0">
-              <thead>
-                <tr>
-                  <th>Commande</th>
-                  <th>État</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {foreach from=$botSnapshot.orders item=order}
-                  <tr>
-                    <td>
-                      <div><code>{$order.command_text|escape}</code></div>
-                      <div class="small text-white-50 mt-1">{$order.response_text|default:'Sans réponse structurée'}</div>
-                    </td>
-                    <td><span class="bots-pill">{$order.status}</span></td>
-                    <td>{$order.created_at_formatted}</td>
-                  </tr>
-                {foreachelse}
-                  <tr>
-                    <td colspan="3" class="text-white-50">Aucun ordre structuré enregistré.</td>
-                  </tr>
-                {/foreach}
-              </tbody>
-            </table>
+          <div class="bots-alliance-grid">
+            {foreach from=$botSnapshot.alliance_summaries item=alliance}
+              <article class="bots-alliance-card">
+                <div class="bots-alliance-card__top">
+                  <strong>{$alliance.ally_tag|default:$alliance.meta_tag}</strong>
+                  <span class="bots-pill">{$alliance.diplomacy.posture|default:'attente'}</span>
+                </div>
+                <div class="bots-alliance-card__name">{$alliance.ally_name|default:$alliance.meta_name}</div>
+                <div class="bots-alliance-card__text">
+                  Tension {$alliance.diplomacy.tension_level|default:0} · Commandants {$alliance.command_state.active_commanders|default:0} · Campagnes {$alliance.command_state.active_campaigns|default:0}
+                </div>
+                <div class="bots-alliance-card__zones">
+                  {foreach from=$alliance.territorial_core item=zone}
+                    <span class="bots-pill">{$zone.zone} · {$zone.total_bots}</span>
+                  {/foreach}
+                </div>
+              </article>
+            {foreachelse}
+              <div class="admin-empty">Aucune alliance bots pilotée.</div>
+            {/foreach}
           </div>
         </div>
       </div>
@@ -632,6 +645,55 @@
       <span class="bots-pill">Rétracté</span>
     </summary>
     <div class="bots-fold__body">
+      <div class="admin-card mb-4">
+        <div class="admin-card__body">
+          <div class="bots-section-heading">
+            <div>
+              <h3 class="bots-section-title">Bots sous tension</h3>
+              <p class="bots-section-text">Vue resserrée sur les bots à surveiller : chefs, campagnes, files en attente et prochaine action.</p>
+            </div>
+          </div>
+          <div class="bots-focus-grid">
+            {foreach from=$botSnapshot.bot_focus item=bot}
+              <article class="bots-focus-card">
+                <div class="bots-focus-card__top">
+                  <strong>{$bot.username}</strong>
+                  <span class="bots-pill">{$bot.presence_logical|default:'latent'}</span>
+                </div>
+                <div class="bots-focus-card__meta">
+                  <span>{$bot.profile_name|default:'Sans profil'}</span>
+                  <span>{$bot.ally_tag|default:'Sans alliance'}</span>
+                  <span>{if $bot.hierarchy_status == 'chef'}Chef{else}Membre{/if}</span>
+                </div>
+                <div class="bots-focus-card__campaign">
+                  {if $bot.campaign_code}
+                    <span class="bots-pill">{$bot.campaign_code}</span>
+                    <span>{$bot.campaign_phase_label}</span>
+                  {else}
+                    <span class="text-white-50">Hors campagne</span>
+                  {/if}
+                </div>
+                <div class="bots-focus-card__text">
+                  {if $bot.next_action_type}
+                    Prochaine action : {$bot.next_action_type} {if $bot.next_action_due_formatted}à {$bot.next_action_due_formatted}{/if}
+                  {elseif $bot.last_activity_summary}
+                    {$bot.last_activity_summary}
+                  {else}
+                    Aucun signal récent.
+                  {/if}
+                </div>
+                <div class="bots-focus-card__footer">
+                  <span>File {$bot.action_queue_size|default:0}</span>
+                  <span>{if $bot.session_target_until}{$bot.session_target_in_label}{elseif $bot.session_rest_until}{$bot.session_rest_in_label}{else}sans fenêtre{/if}</span>
+                </div>
+              </article>
+            {foreachelse}
+              <div class="admin-empty">Aucun bot prioritaire à afficher.</div>
+            {/foreach}
+          </div>
+        </div>
+      </div>
+
       <div class="row g-4">
         <div class="col-12 col-xl-6">
           <div class="admin-card h-100">
@@ -753,6 +815,47 @@
         </div>
 
         <div class="col-12 col-xl-6">
+          <div class="admin-card h-100">
+            <div class="admin-card__body">
+              <div class="bots-section-heading">
+                <div>
+                  <h3 class="bots-section-title">Ordres récents</h3>
+                  <p class="bots-section-text">Derniers ordres structurés remontés par la console bots.</p>
+                </div>
+                <a class="btn btn-outline-light btn-sm" href="game.php?page=chat">Console bots</a>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle bots-table mb-0">
+                  <thead>
+                    <tr>
+                      <th>Commande</th>
+                      <th>État</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {foreach from=$botSnapshot.orders item=order}
+                      <tr>
+                        <td>
+                          <div><code>{$order.command_text|escape}</code></div>
+                          <div class="small text-white-50 mt-1">{$order.response_text|default:'Sans réponse structurée'}</div>
+                        </td>
+                        <td><span class="bots-pill">{$order.status}</span></td>
+                        <td>{$order.created_at_formatted}</td>
+                      </tr>
+                    {foreachelse}
+                      <tr>
+                        <td colspan="3" class="text-white-50">Aucun ordre structuré enregistré.</td>
+                      </tr>
+                    {/foreach}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
           <div class="admin-card h-100">
             <div class="admin-card__body">
               <div class="bots-section-heading">

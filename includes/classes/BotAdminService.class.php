@@ -68,6 +68,7 @@ class BotAdminService
 		$this->ensureDefaults();
 		$db = Database::get();
 		$config = $this->getConfig();
+		$this->allianceService->refreshAllianceGovernance(10);
 		$metrics = $this->metricsService->getDashboardMetrics();
 
 		$profiles = $db->select('SELECT p.*,
@@ -152,6 +153,23 @@ class BotAdminService
 				':universe' => Universe::getEmulated(),
 			));
 
+		foreach ($campaigns as &$campaign) {
+			$campaign['payload'] = $this->decodeJson(isset($campaign['payload_json']) ? $campaign['payload_json'] : null);
+			$campaign['member_count'] = (int) $db->selectSingle('SELECT COUNT(*) AS count
+				FROM %%BOT_CAMPAIGN_MEMBERS%%
+				WHERE campaign_id = :campaignId;', array(
+					':campaignId' => (int) $campaign['id'],
+				), 'count');
+			$campaign['phase_label'] = !empty($campaign['payload']['phase']) ? ucfirst(str_replace('_', ' ', $campaign['payload']['phase'])) : 'Observation';
+			$campaign['mode_label'] = !empty($campaign['payload']['mode']) ? ucfirst(str_replace('_', ' ', $campaign['payload']['mode'])) : ucfirst($campaign['campaign_type']);
+			$campaign['narrative'] = !empty($campaign['payload']['narrative']) ? $campaign['payload']['narrative'] : 'Campagne active sans narration détaillée.';
+			$campaign['visibility_strategy'] = !empty($campaign['payload']['visibility_strategy']) ? $campaign['payload']['visibility_strategy'] : 'visible';
+			$campaign['relay_strategy'] = !empty($campaign['payload']['relay_strategy']) ? $campaign['payload']['relay_strategy'] : 'rotation_continue';
+			$campaign['effective_intensity'] = !empty($campaign['payload']['effective_intensity']) ? (int) $campaign['payload']['effective_intensity'] : (int) $campaign['intensity'];
+			$campaign['focused_target'] = !empty($campaign['target_reference']) ? $campaign['target_reference'] : $campaign['zone_reference'];
+		}
+		unset($campaign);
+
 		$queuedActions = $db->select('SELECT q.*, u.username
 			FROM %%BOT_ACTION_QUEUE%% q
 			LEFT JOIN %%USERS%% u ON u.id = q.bot_user_id
@@ -199,6 +217,55 @@ class BotAdminService
 				':universe' => Universe::getEmulated(),
 			));
 
+		$botFocus = $db->select('SELECT u.id, u.username, u.onlinetime, p.name AS profile_name, a.ally_tag,
+				bs.hierarchy_status, bs.presence_logical, bs.presence_social, bs.current_campaign_id, bs.action_queue_size,
+				bs.session_target_until, bs.session_rest_until, bs.cooldown_until, bs.paused_until,
+				c.campaign_code, c.label AS campaign_label, c.payload_json AS campaign_payload_json,
+				(SELECT q.action_type
+					FROM %%BOT_ACTION_QUEUE%% q
+					WHERE q.bot_user_id = u.id AND q.status IN (\'queued\', \'running\')
+					ORDER BY COALESCE(q.due_at, q.planned_at) ASC, q.priority DESC
+					LIMIT 1) AS next_action_type,
+				(SELECT COALESCE(q.due_at, q.planned_at)
+					FROM %%BOT_ACTION_QUEUE%% q
+					WHERE q.bot_user_id = u.id AND q.status IN (\'queued\', \'running\')
+					ORDER BY COALESCE(q.due_at, q.planned_at) ASC, q.priority DESC
+					LIMIT 1) AS next_action_due,
+				(SELECT a2.activity_summary
+					FROM %%BOT_ACTIVITY%% a2
+					WHERE a2.bot_user_id = u.id
+					ORDER BY a2.id DESC
+					LIMIT 1) AS last_activity_summary,
+				(SELECT a2.created_at
+					FROM %%BOT_ACTIVITY%% a2
+					WHERE a2.bot_user_id = u.id
+					ORDER BY a2.id DESC
+					LIMIT 1) AS last_activity_at
+			FROM %%USERS%% u
+			LEFT JOIN %%BOT_PROFILES%% p ON p.id = u.bot_profile_id
+			LEFT JOIN %%ALLIANCE%% a ON a.id = u.ally_id
+			LEFT JOIN %%BOT_STATE%% bs ON bs.bot_user_id = u.id
+			LEFT JOIN %%BOT_CAMPAIGNS%% c ON c.id = bs.current_campaign_id
+			WHERE u.universe = :universe AND u.is_bot = 1
+			ORDER BY
+				CASE WHEN bs.current_campaign_id IS NOT NULL THEN 0 ELSE 1 END ASC,
+				CASE WHEN bs.hierarchy_status = \'chef\' THEN 0 ELSE 1 END ASC,
+				bs.action_queue_size DESC,
+				COALESCE(bs.session_target_until, 2147483647) ASC,
+				u.onlinetime DESC
+			LIMIT 18;', array(
+				':universe' => Universe::getEmulated(),
+			));
+
+		foreach ($botFocus as &$focus) {
+			$focus['campaign_payload'] = $this->decodeJson(isset($focus['campaign_payload_json']) ? $focus['campaign_payload_json'] : null);
+			$focus['campaign_phase_label'] = !empty($focus['campaign_payload']['phase']) ? ucfirst(str_replace('_', ' ', $focus['campaign_payload']['phase'])) : 'Hors campagne';
+			$focus['campaign_mode_label'] = !empty($focus['campaign_payload']['mode']) ? ucfirst(str_replace('_', ' ', $focus['campaign_payload']['mode'])) : '';
+		}
+		unset($focus);
+
+		$allianceSummaries = $this->allianceService->getAllianceSummaries(8);
+
 		return array(
 			'config' => $config,
 			'metrics' => $metrics,
@@ -209,6 +276,8 @@ class BotAdminService
 			'relay_candidates' => $relayCandidates,
 			'orders' => $orders,
 			'campaigns' => $campaigns,
+			'alliance_summaries' => $allianceSummaries,
+			'bot_focus' => $botFocus,
 			'queued_actions' => $queuedActions,
 			'upcoming' => $upcoming,
 			'profile_distribution' => $profileDistribution,
@@ -278,6 +347,11 @@ class BotAdminService
 	public function dispatchPendingCommands($limit = 12)
 	{
 		return $this->commandDispatcher->dispatchPending($limit);
+	}
+
+	public function dispatchCommandById($commandId)
+	{
+		return $this->commandDispatcher->dispatchCommandById((int) $commandId);
 	}
 
 	public function createStructuredCommand($commandText, $issuedByUserId)
@@ -417,5 +491,15 @@ class BotAdminService
 		$value = strtolower(trim((string) $value));
 		$value = preg_replace('/[^a-z0-9]+/i', '-', $value);
 		return trim((string) $value, '-');
+	}
+
+	protected function decodeJson($json)
+	{
+		if (empty($json)) {
+			return array();
+		}
+
+		$decoded = json_decode($json, true);
+		return is_array($decoded) ? $decoded : array();
 	}
 }
