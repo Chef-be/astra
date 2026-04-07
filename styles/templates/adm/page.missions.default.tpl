@@ -1,22 +1,46 @@
 {block name="content"}
-<div class="container-fluid py-4 text-white">
-	<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-		<div>
-			<h1 class="h3 mb-1">Missions et récompenses</h1>
-			<p class="text-white-50 mb-0">Préparez les objectifs journaliers, hebdomadaires et leurs récompenses.</p>
-		</div>
-		<div class="d-flex gap-2">
-			<span class="badge bg-secondary">En cours : {$missionSnapshot.inProgress}</span>
-			<span class="badge bg-warning text-dark">À réclamer : {$missionSnapshot.claimable}</span>
-			<span class="badge bg-success">Réclamées : {$missionSnapshot.completed}</span>
-			<span class="badge bg-info text-dark">Joueurs suivis : {$missionSnapshot.assignedUsers}</span>
-			<a class="btn btn-outline-light btn-sm" href="?page=missions&mode=refresh">Synchroniser les joueurs</a>
-		</div>
-	</div>
+<div class="container-fluid py-4 text-white admin-stack">
+	<section class="admin-kpi-grid">
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Missions en cours</span>
+			<strong class="admin-kpi-card__value">{$missionSnapshot.inProgress}</strong>
+			<span class="admin-kpi-card__meta">joueurs actuellement engagés</span>
+		</article>
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Réclamables</span>
+			<strong class="admin-kpi-card__value">{$missionSnapshot.claimable}</strong>
+			<span class="admin-kpi-card__meta">prêtes à être collectées</span>
+		</article>
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Réclamées</span>
+			<strong class="admin-kpi-card__value">{$missionSnapshot.completed}</strong>
+			<span class="admin-kpi-card__meta">progression déjà validée</span>
+		</article>
+		<article class="admin-kpi-card">
+			<span class="admin-kpi-card__label">Joueurs suivis</span>
+			<strong class="admin-kpi-card__value">{$missionSnapshot.assignedUsers}</strong>
+			<span class="admin-kpi-card__meta">population missionnée</span>
+		</article>
+	</section>
 
-	<div class="row g-3">
-		<div class="col-12 col-xl-5">
-			<div class="card bg-dark border-secondary h-100">
+	<section class="admin-card">
+		<div class="card-body admin-stack">
+			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+				<div>
+					<h2 class="h4 mb-1">Pilotage des missions</h2>
+					<p class="text-white-50 mb-0">Définissez les objectifs, cadence et récompenses depuis un catalogue centralisé, puis resynchronisez la population si nécessaire.</p>
+				</div>
+				<div class="admin-cluster">
+					<a class="admin-shell-action admin-shell-action--light" href="?page=overview">Vue d’ensemble</a>
+					<a class="admin-shell-action admin-shell-action--accent" href="?page=missions&mode=refresh">Synchroniser les joueurs</a>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="admin-panel-grid">
+		<div class="admin-panel-grid__side">
+			<div class="admin-card h-100">
 				<div class="card-body">
 					<h2 class="h5 mb-3">Nouvelle mission</h2>
 					<form action="?page=missions&mode=saveDefinition" method="post" class="d-flex flex-column gap-3">
@@ -76,48 +100,70 @@
 							<input id="is_active" class="form-check-input" type="checkbox" name="is_active" checked="checked">
 							<label class="form-check-label" for="is_active">Mission active</label>
 						</div>
-						<div>
+						<div class="d-flex gap-2 flex-wrap">
 							<button class="btn btn-primary" type="submit">Enregistrer la mission</button>
+							<a class="btn btn-outline-light" href="?page=missions&mode=refresh">Rafraîchir les affectations</a>
 						</div>
 					</form>
 				</div>
 			</div>
 		</div>
-		<div class="col-12 col-xl-7">
-			<div class="card bg-dark border-secondary h-100">
-				<div class="card-body">
-					<h2 class="h5 mb-3">Catalogue</h2>
-					<div class="table-responsive">
-						<table class="table table-dark table-striped align-middle mb-0">
-							<thead>
-								<tr>
-									<th>Titre</th>
-									<th>Fréquence</th>
-									<th>Récompense</th>
-									<th>État</th>
-								</tr>
-							</thead>
-							<tbody>
-								{foreach from=$missionSnapshot.definitions item=mission}
+
+		<div class="admin-panel-grid__wide">
+			<div class="admin-card h-100">
+				<div class="card-body admin-stack">
+					<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+						<div>
+							<h2 class="h5 mb-1">Catalogue des missions</h2>
+							<p class="text-white-50 mb-0">Vue condensée du catalogue actif pour contrôler le cycle, l’objectif et la récompense sans relecture technique.</p>
+						</div>
+						<span class="admin-pill">{$missionSnapshot.definitions|@count} définition(s)</span>
+					</div>
+
+					<div class="admin-table-shell">
+						<div class="table-responsive">
+							<table class="table table-dark table-striped align-middle mb-0">
+								<thead>
 									<tr>
-										<td>
-											<div class="fw-bold">{$mission.title}</div>
-											<div class="small text-white-50">{$mission.description}</div>
-										</td>
-										<td>
-											<div>{$mission.frequency}</div>
-											<div class="small text-white-50">{$mission.objective_type} / {$mission.objective_key} / {$mission.target_value}</div>
-										</td>
-										<td>{$mission.reward_type} / {$mission.reward_key} / {$mission.reward_value}</td>
-										<td><span class="badge {if $mission.is_active}bg-success{else}bg-secondary{/if}">{if $mission.is_active}Activée{else}Inactive{/if}</span></td>
+										<th>Titre</th>
+										<th>Cadence</th>
+										<th>Objectif</th>
+										<th>Récompense</th>
+										<th>État</th>
 									</tr>
-								{/foreach}
-							</tbody>
-						</table>
+								</thead>
+								<tbody>
+									{foreach from=$missionSnapshot.definitions item=mission}
+										<tr>
+											<td>
+												<div class="fw-bold">{$mission.title}</div>
+												<div class="small text-white-50">{$mission.description}</div>
+											</td>
+											<td>
+												{if $mission.frequency == 'daily'}Quotidienne{elseif $mission.frequency == 'weekly'}Hebdomadaire{elseif $mission.frequency == 'event'}Événementielle{else}{$mission.frequency}{/if}
+											</td>
+											<td>
+												<div>{if $mission.objective_type == 'building_level'}Niveau de bâtiment{elseif $mission.objective_type == 'ship_total'}Total de vaisseaux{elseif $mission.objective_type == 'resource_total'}Stock de ressources{else}{$mission.objective_type}{/if}</div>
+												<div class="small text-white-50">Clé {$mission.objective_key} · Cible {$mission.target_value}</div>
+											</td>
+											<td>
+												<div>{if $mission.reward_type == 'resource'}Ressource{elseif $mission.reward_type == 'darkmatter'}Matière noire{elseif $mission.reward_type == 'ship'}Vaisseau{else}{$mission.reward_type}{/if}</div>
+												<div class="small text-white-50">{$mission.reward_key} · {$mission.reward_value}</div>
+											</td>
+											<td><span class="badge {if $mission.is_active}admin-badge-success{else}admin-badge-info{/if}">{if $mission.is_active}Activée{else}Inactive{/if}</span></td>
+										</tr>
+									{foreachelse}
+										<tr>
+											<td colspan="5"><div class="admin-empty">Aucune mission n’est encore définie.</div></td>
+										</tr>
+									{/foreach}
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+	</section>
 </div>
 {/block}
