@@ -242,12 +242,14 @@ class BotCommandDispatcher
 			return array('status' => 'rejected', 'responseText' => 'Aucun bot correspondant à reconfigurer.');
 		}
 
+		$resolvedDoctrine = trim((string) $doctrine) !== '' ? trim((string) $doctrine) : 'equilibre';
+
 		Database::get()->update('UPDATE %%BOT_STATE%% SET doctrine_active = :doctrine, updated_at = :updatedAt WHERE bot_user_id IN ('.implode(',', array_map('intval', $botIds)).');', array(
-			':doctrine' => trim((string) $doctrine) !== '' ? trim((string) $doctrine) : 'equilibre',
+			':doctrine' => $resolvedDoctrine,
 			':updatedAt' => TIMESTAMP,
 		));
 
-		return array('status' => 'done', 'responseText' => sprintf('Doctrine « %s » appliquée à %d bot(s).', $doctrine, count($botIds)));
+		return array('status' => 'done', 'responseText' => sprintf('Doctrine « %s » appliquée à %d bot(s).', $this->labelDoctrine($resolvedDoctrine), count($botIds)));
 	}
 
 	protected function applyBonus(array $botIds, $bonusValue)
@@ -298,7 +300,7 @@ class BotCommandDispatcher
 			$this->commanderService->assignCurrentTarget((int) $botId, $target);
 		}
 
-		return array('status' => 'done', 'responseText' => sprintf('Priorité hiérarchique appliquée à %d bot(s) sur %s.', count($botIds), $target['reference']));
+		return array('status' => 'done', 'responseText' => sprintf('Priorité hiérarchique appliquée à %d bot(s) sur %s %s.', count($botIds), $this->labelTargetType($target['type']), $target['reference']));
 	}
 
 	protected function dispatchLaunchedAction(array $botIds, array $payload)
@@ -336,7 +338,7 @@ class BotCommandDispatcher
 			$queued++;
 		}
 
-		return array('status' => 'done', 'responseText' => sprintf('%d action(s) « %s » placée(s) en file.', $queued, $this->labelActionType($actionType)));
+		return array('status' => 'done', 'responseText' => sprintf('%d action(s) « %s » placée(s) en file d’exécution.', $queued, $this->labelActionType($actionType)));
 	}
 
 	protected function queueDefensiveAction(array $botIds, array $payload)
@@ -408,20 +410,20 @@ class BotCommandDispatcher
 			$this->messagingService->queuePrivateMessage((int) $botId, (int) $targetUser['id'], 'Transmission Astra', isset($payload['message']) ? $payload['message'] : '', $payload);
 		}
 
-		return array('status' => 'done', 'responseText' => sprintf('Message privé mis en file pour %d bot(s).', count($botIds)));
+		return array('status' => 'done', 'responseText' => sprintf('Message privé préparé pour %d bot(s).', count($botIds)));
 	}
 
 	protected function queueSocialMessage(array $botIds, array $payload)
 	{
 		if (empty($botIds)) {
-			return array('status' => 'rejected', 'responseText' => 'Bot source manquant pour le message social.');
+			return array('status' => 'rejected', 'responseText' => 'Bot source introuvable pour le message de chat.');
 		}
 
 		foreach ($botIds as $botId) {
 			$this->messagingService->queueSocialMessage((int) $botId, 'bots', isset($payload['message']) ? $payload['message'] : '', null, isset($payload['target_username']) ? $payload['target_username'] : '', $payload);
 		}
 
-		return array('status' => 'done', 'responseText' => sprintf('Message social mis en file pour %d bot(s).', count($botIds)));
+		return array('status' => 'done', 'responseText' => sprintf('Message de chat préparé pour %d bot(s).', count($botIds)));
 	}
 
 	protected function createCampaign(array $command, array $payload, array $targetBotIds)
@@ -451,7 +453,7 @@ class BotCommandDispatcher
 
 		$campaign = $this->campaignService->createCampaign(array(
 			'campaign_code' => 'campagne-'.substr(md5($command['command_text'].'-'.TIMESTAMP), 0, 12),
-			'label' => 'Campagne '.$command['command_name'],
+			'label' => $this->labelCampaignType($command['command_name']),
 			'campaign_type' => $command['command_name'],
 			'target_type' => !empty($payload['target_coordinates']) ? 'coordonnees' : 'zone',
 			'target_reference' => !empty($payload['target_coordinates']) ? $payload['target_coordinates'] : (isset($payload['target_player']) ? $payload['target_player'] : $command['target_reference']),
@@ -470,7 +472,11 @@ class BotCommandDispatcher
 			return array('status' => 'rejected', 'responseText' => 'Impossible de créer la campagne demandée.');
 		}
 
-		return array('status' => 'done', 'responseText' => sprintf('Campagne enregistrée : %s (%d membre(s)).', $campaign['campaign_code'], count($targetBotIds)), 'campaign_id' => $campaign['id']);
+		return array(
+			'status' => 'done',
+			'responseText' => sprintf('%s enregistrée sous le code %s avec %d membre(s).', $this->labelCampaignType($command['command_name']), $campaign['campaign_code'], count($targetBotIds)),
+			'campaign_id' => $campaign['id']
+		);
 	}
 
 	protected function resolveBotTargets($targetType, $targetReference)
@@ -705,7 +711,14 @@ class BotCommandDispatcher
 
 		return array(
 			'status' => 'done',
-			'responseText' => sprintf('Statut %s : %d bot(s), %d en campagne, répartition logique [%s].', $command['target_reference'] !== '' ? $command['target_reference'] : 'global', count($botIds), $campaigns, implode(', ', $parts)),
+			'responseText' => sprintf(
+				'Statut du ciblage %s %s : %d bot(s), %d en campagne, répartition logique [%s].',
+				$this->labelTargetType(isset($command['target_type']) ? $command['target_type'] : ''),
+				$command['target_reference'] !== '' && $command['target_reference'] !== 'all' ? $command['target_reference'] : 'global',
+				count($botIds),
+				$campaigns,
+				implode(', ', $parts)
+			),
 			'targets' => $botIds,
 		);
 	}
@@ -770,5 +783,66 @@ class BotCommandDispatcher
 		);
 
 		return isset($map[$value]) ? $map[$value] : str_replace('_', ' ', (string) $value);
+	}
+
+	protected function labelDoctrine($value)
+	{
+		$map = array(
+			'equilibre' => 'Équilibre',
+			'guerre' => 'Guerre',
+			'expansion' => 'Expansion',
+			'opportuniste' => 'Opportuniste',
+			'fortification' => 'Fortification',
+			'recherche' => 'Recherche',
+			'soutien' => 'Soutien',
+			'recon' => 'Reconnaissance',
+			'pression_continue' => 'Pression continue',
+			'influence' => 'Influence',
+			'presence' => 'Présence',
+			'predation' => 'Prédation',
+			'protection' => 'Protection',
+			'raid' => 'Raid',
+			'autonomie' => 'Autonomie',
+			'vengeance' => 'Vengeance',
+			'coordination' => 'Coordination',
+			'harcelement' => 'Harcèlement',
+			'siege' => 'Siège',
+			'recrutement' => 'Recrutement',
+			'pression_sociale' => 'Pression sociale',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ucfirst(str_replace('_', ' ', (string) $value));
+	}
+
+	protected function labelTargetType($value)
+	{
+		$map = array(
+			'all' => 'ensemble',
+			'bot' => 'bot',
+			'chef' => 'chef',
+			'alliance' => 'alliance',
+			'escouade' => 'escouade',
+			'systeme' => 'système',
+			'galaxie' => 'galaxie',
+			'profil' => 'profil',
+			'campagne' => 'campagne',
+			'coordonnees' => 'coordonnées',
+			'zone' => 'zone',
+		);
+
+		return isset($map[$value]) ? $map[$value] : str_replace('_', ' ', (string) $value);
+	}
+
+	protected function labelCampaignType($value)
+	{
+		$map = array(
+			'campagne' => 'Campagne générale',
+			'harcelement' => 'Campagne de harcèlement',
+			'rotation-attaque' => 'Rotation d’attaque',
+			'vague' => 'Vague offensive',
+			'siege' => 'Siège',
+		);
+
+		return isset($map[$value]) ? $map[$value] : 'Campagne';
 	}
 }
