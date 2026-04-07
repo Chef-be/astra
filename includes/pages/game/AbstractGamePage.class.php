@@ -272,7 +272,7 @@ abstract class AbstractGamePage
 
 	protected function getPageData()
 	{
-		global $USER, $THEME, $config, $PLANET, $LNG;
+		global $USER, $THEME, $config, $PLANET, $LNG, $resource, $reslist;
 
 		if($this->getWindow() === 'full') {
 			$this->getNavigationData();
@@ -366,6 +366,47 @@ abstract class AbstractGamePage
 		}
 		unset($currentPlanet);
 
+		$activeTemporaryBonuses = array();
+		if (isModuleAvailable(MODULE_DMEXTRAS) && !empty($reslist['dmfunc'])) {
+			foreach ($reslist['dmfunc'] as $elementId) {
+				$expiryTimestamp = !empty($USER[$resource[$elementId]]) ? (int) $USER[$resource[$elementId]] : 0;
+				if ($expiryTimestamp <= TIMESTAMP) {
+					continue;
+				}
+
+				$bonusSummary = array();
+				$elementBonus = BuildFunctions::getAvalibleBonus($elementId);
+				foreach ($elementBonus as $bonusName => $bonus) {
+					if (!isset($bonus[0], $bonus[1])) {
+						continue;
+					}
+
+					$bonusValue = ((int) $bonus[1] === 0)
+						? abs((float) $bonus[0] * 100).'%'
+						: abs((float) $bonus[0]);
+
+					$bonusSummary[] = sprintf(
+						'%s%s %s',
+						((float) $bonus[0] < 0 ? '-' : '+'),
+						$bonusValue,
+						isset($LNG['bonus'][$bonusName]) ? $LNG['bonus'][$bonusName] : ucfirst(str_replace('_', ' ', $bonusName))
+					);
+				}
+
+				$activeTemporaryBonuses[] = array(
+					'element_id' => $elementId,
+					'name' => isset($LNG['tech'][$elementId]) ? $LNG['tech'][$elementId] : ('Bonus '.$elementId),
+					'time_left' => $expiryTimestamp - TIMESTAMP,
+					'time_left_formatted' => pretty_time($expiryTimestamp - TIMESTAMP),
+					'bonus_summary' => implode(' · ', $bonusSummary),
+				);
+			}
+		}
+
+		usort($activeTemporaryBonuses, function ($left, $right) {
+			return (int) $left['time_left'] <=> (int) $right['time_left'];
+		});
+
 
 		// MultiUniverse Support
 		// Get all available user ids, that the current user can access
@@ -412,6 +453,8 @@ abstract class AbstractGamePage
 			'fleets'					=> $this->GetFleets(),
 			'show_fleets_active' => $USER['show_fleets_active'],
 			'attackListenTime' => ATTACK_LISTEN_TIME,
+			'activeTemporaryBonuses' => $activeTemporaryBonuses,
+			'activeTemporaryBonusCount' => count($activeTemporaryBonuses),
 		));
 	}
 	protected function printMessage($message, $redirectButtons = NULL, $redirect = NULL, $fullSide = true)
