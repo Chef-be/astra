@@ -118,6 +118,10 @@ class AdminOverviewService
             $alerts[] = array('level' => 'danger', 'message' => 'L’installateur reste actif via includes/ENABLE_INSTALL_TOOL.');
         }
 
+        if (defined('DB_UPGRADE_REQUIRED') && DB_UPGRADE_REQUIRED) {
+            $alerts[] = array('level' => 'danger', 'message' => 'Le schéma de base est en retard. Le web-upgrader est désactivé : appliquer les migrations SQL localement.');
+        }
+
         if (!is_writable(ROOT_PATH.'cache')) {
             $alerts[] = array('level' => 'danger', 'message' => 'Le dossier cache/ n’est pas accessible en écriture.');
         }

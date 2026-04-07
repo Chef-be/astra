@@ -99,7 +99,14 @@ try {
 }
 
 if ($dbNeedsUpgrade) {
-    HTTP::redirectTo('install/index.php?mode=upgrade');
+	define('DB_UPGRADE_REQUIRED', true);
+	error_log(sprintf(
+		'[Astra] Écart de schéma détecté : base=%s, requis=%s. La mise à niveau web est désactivée ; appliquer les migrations localement.',
+		isset($dbVersion) ? (string) $dbVersion : 'inconnu',
+		(string) DB_VERSION_REQUIRED
+	));
+} else {
+	define('DB_UPGRADE_REQUIRED', false);
 }
 
 if(defined('DATABASE_VERSION') && DATABASE_VERSION === 'OLD')

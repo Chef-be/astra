@@ -41,6 +41,11 @@ $template->assign(array(
 	'canUpgrade' => file_exists('includes/config.php') && filesize('includes/config.php') !== 0
 ));
 
+if (file_exists('includes/config.php') && filesize('includes/config.php') !== 0) {
+	$template->message('L’outil d’installation et de mise à niveau web est désactivé sur cette instance Astra. Les montées de schéma doivent être appliquées localement par exploitation.', false, 0, true);
+	exit;
+}
+
 $enableInstallToolFile = 'includes/ENABLE_INSTALL_TOOL';
 $quickStartFile        = 'includes/FIRST_INSTALL';
 // If include/FIRST_INSTALL is present and can be deleted, automatically create include/ENABLE_INSTALL_TOOL
