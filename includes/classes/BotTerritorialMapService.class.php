@@ -26,11 +26,11 @@ class BotTerritorialMapService
 			  AND p.planet_type = 1
 			GROUP BY p.galaxy, p.`system`
 			ORDER BY p.galaxy ASC, p.`system` ASC
-			LIMIT :limitZones;', array(
+			LIMIT :limit;', array(
 				':universe' => $universe,
 				':activeSince' => $activeSince,
 				':idleSince' => $idleSince,
-				':limitZones' => max(50, (int) $limitZones),
+				':limit' => max(50, (int) $limitZones),
 			));
 
 		$botPresence = $db->select('SELECT
@@ -107,7 +107,7 @@ class BotTerritorialMapService
 				'average_resources' => (int) round((float) $zone['average_resources']),
 			);
 
-			$db->insert('INSERT INTO %%BOT_TERRITORIAL_ZONES%% SET
+			$db->replace('REPLACE INTO %%BOT_TERRITORIAL_ZONES%% SET
 				universe = :universe,
 				zone_reference = :zoneReference,
 				galaxy = :galaxy,

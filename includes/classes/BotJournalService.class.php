@@ -67,6 +67,7 @@ class BotJournalService
 
 	public function closeRun($runId, $status, array $summary = array(), $selectedBots = 0, $executedActions = 0, $errorSummary = null)
 	{
+		$errorSummary = $this->truncateText($errorSummary, 245);
 		Database::get()->update('UPDATE %%BOT_ENGINE_RUNS%% SET
 			status = :status,
 			finished_at = :finishedAt,
@@ -83,5 +84,19 @@ class BotJournalService
 				':errorSummary' => $errorSummary,
 				':id' => (int) $runId,
 			));
+	}
+
+	protected function truncateText($value, $maxLength)
+	{
+		if ($value === null) {
+			return null;
+		}
+
+		$value = (string) $value;
+		if (strlen($value) <= (int) $maxLength) {
+			return $value;
+		}
+
+		return substr($value, 0, max(0, (int) $maxLength - 3)).'...';
 	}
 }
