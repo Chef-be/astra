@@ -284,6 +284,27 @@ class LiveChatService
 		return Database::get()->select($sql, array(':limit' => (int) $limit));
 	}
 
+	public static function countAdminMessages()
+	{
+		return (int) Database::get()->selectSingle('SELECT COUNT(*) AS count FROM %%LIVE_CHAT_MESSAGES%%;', array(), 'count');
+	}
+
+	public static function getRecentAdminMessagesPage($page = 1, $limit = 40)
+	{
+		$page = max(1, (int) $page);
+		$limit = max(1, min(100, (int) $limit));
+		$offset = ($page - 1) * $limit;
+
+		$sql = "SELECT m.id, m.channel_key, m.user_id, m.username, m.message_text, m.created_at, m.is_deleted,
+				IFNULL(u.authlevel, 0) AS authlevel
+			 FROM %%LIVE_CHAT_MESSAGES%% m
+			 LEFT JOIN %%USERS%% u ON u.id = m.user_id
+			 ORDER BY m.id DESC
+			 LIMIT ".(int) $offset.", ".(int) $limit.';';
+
+		return Database::get()->select($sql);
+	}
+
 	public static function getMessageById($messageId)
 	{
 		return Database::get()->selectSingle('SELECT *
@@ -342,6 +363,30 @@ class LiveChatService
 			ORDER BY m.expires_at ASC;";
 
 		return Database::get()->select($sql, array(':now' => TIMESTAMP));
+	}
+
+	public static function countActiveMutes()
+	{
+		return (int) Database::get()->selectSingle('SELECT COUNT(*) AS count FROM %%LIVE_CHAT_MUTES%% WHERE expires_at > :now;', array(
+			':now' => TIMESTAMP,
+		), 'count');
+	}
+
+	public static function getActiveMutesPage($page = 1, $limit = 20)
+	{
+		$page = max(1, (int) $page);
+		$limit = max(1, min(100, (int) $limit));
+		$offset = ($page - 1) * $limit;
+
+		$sql = "SELECT m.id, m.user_id, m.reason, m.expires_at, m.created_at, u.username, a.username AS moderator_name
+			 FROM %%LIVE_CHAT_MUTES%% m
+			 LEFT JOIN %%USERS%% u ON u.id = m.user_id
+			 LEFT JOIN %%USERS%% a ON a.id = m.moderator_id
+			 WHERE m.expires_at > ".TIMESTAMP."
+			 ORDER BY m.expires_at ASC
+			 LIMIT ".(int) $offset.", ".(int) $limit.';';
+
+		return Database::get()->select($sql);
 	}
 
 	public static function muteUser($userId, $moderatorId, $durationMinutes, $reason)

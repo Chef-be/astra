@@ -31,14 +31,42 @@ $(function() {
 		filterAdminNav();
 	});
 
-	$('#adminSidebarToggle').on('click', function() {
-		$('body').toggleClass('admin-sidebar-collapsed');
-		localStorage.setItem('astra-admin-sidebar-collapsed', $('body').hasClass('admin-sidebar-collapsed') ? '1' : '0');
-	});
+       $('#adminSidebarToggle').on('click', function() {
+               if (window.matchMedia('(max-width: 1199px)').matches) {
+                       $('body').toggleClass('admin-sidebar-open');
+                       return;
+               }
 
-	if (localStorage.getItem('astra-admin-sidebar-collapsed') === '1') {
-		$('body').addClass('admin-sidebar-collapsed');
-	}
+               $('body').toggleClass('admin-sidebar-collapsed');
+               localStorage.setItem('astra-admin-sidebar-collapsed', $('body').hasClass('admin-sidebar-collapsed') ? '1' : '0');
+       });
+
+       $(document).on('click', function(event) {
+               if (!window.matchMedia('(max-width: 1199px)').matches || !$('body').hasClass('admin-sidebar-open')) {
+                       return;
+               }
+
+               var $target = $(event.target);
+               if ($target.closest('.admin-shell__sidebar, #adminSidebarToggle').length === 0) {
+                       $('body').removeClass('admin-sidebar-open');
+               }
+       });
+
+       $('.admin-nav-link').on('click', function() {
+               if (window.matchMedia('(max-width: 1199px)').matches) {
+                       $('body').removeClass('admin-sidebar-open');
+               }
+       });
+
+       if (localStorage.getItem('astra-admin-sidebar-collapsed') === '1') {
+               $('body').addClass('admin-sidebar-collapsed');
+       }
+
+       $(window).on('resize', function() {
+               if (!window.matchMedia('(max-width: 1199px)').matches) {
+                       $('body').removeClass('admin-sidebar-open');
+               }
+       });
 });
 </script>
 

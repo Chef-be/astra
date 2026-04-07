@@ -1,13 +1,5 @@
 {block name="content"}
 <div class="container-fluid py-4 text-white admin-stack">
-	{assign var="cronTotal" value=$CronjobArray|@count}
-	{assign var="cronActive" value=0}
-	{assign var="cronLocked" value=0}
-	{foreach item=CronjobInfo from=$CronjobArray}
-		{if $CronjobInfo.isActive}{assign var="cronActive" value=$cronActive+1}{/if}
-		{if $CronjobInfo.lock}{assign var="cronLocked" value=$cronLocked+1}{/if}
-	{/foreach}
-
 	<section class="admin-kpi-grid">
 		<article class="admin-kpi-card">
 			<span class="admin-kpi-card__label">Cronjobs</span>
@@ -60,7 +52,7 @@
 					{foreach item=CronjobInfo from=$CronjobArray}
 						<tr>
 							<td>#{$CronjobInfo.id}</td>
-							<td>{$LNG["cronName_{$CronjobInfo.name}"]}</td>
+							<td>{$CronjobInfo.name_label|default:$CronjobInfo.name}</td>
 							<td><code>{$CronjobInfo.min} {$CronjobInfo.hours} {$CronjobInfo.dom} {if $CronjobInfo.month == '*'}*{else}{foreach item=month from=$CronjobInfo.month}{$month}{if !$month@last},{/if}{/foreach}{/if} {if $CronjobInfo.dow == '*'}*{else}{foreach item=d from=$CronjobInfo.dow}{$d}{if !$d@last},{/if}{/foreach}{/if}</code></td>
 							<td>{$CronjobInfo.class}</td>
 							<td>{if $CronjobInfo.isActive}{date($LNG.php_tdformat, $CronjobInfo.nextTime)}{else}-{/if}</td>

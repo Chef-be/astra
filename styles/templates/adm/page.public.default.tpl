@@ -96,7 +96,7 @@
 				</div>
 				{if $public_screenshots|@count > 0}
 					<div class="row g-3" id="publicScreensAdminGrid">
-						{foreach $public_screenshots as $screen}
+						{foreach $public_screenshots as $screen name=publicScreensLoop}
 							<div class="col-12 col-md-6 col-xl-4 public-screen-admin-column" draggable="true" data-path="{$screen.path|escape:'html'}">
 								<div class="admin-card admin-screen-card h-100">
 									<div class="admin-screen-card__preview" style="background:#111 url('{$screen.path}') center center / cover no-repeat;"></div>
@@ -105,7 +105,7 @@
 										<div class="d-flex justify-content-between align-items-center gap-3 mb-3">
 											<span class="admin-pill">Déplacer</span>
 											<label class="form-check-label small text-warning">
-												<input class="form-check-input me-2" type="radio" name="public_screens_featured_path" value="{$screen.path|escape:'html'}" {if $foreach.first}checked{/if}>Mise en avant
+												<input class="form-check-input me-2" type="radio" name="public_screens_featured_path" value="{$screen.path|escape:'html'}" {if $smarty.foreach.publicScreensLoop.first}checked{/if}>Mise en avant
 											</label>
 										</div>
 										<label class="form-label small mb-1">Titre</label>

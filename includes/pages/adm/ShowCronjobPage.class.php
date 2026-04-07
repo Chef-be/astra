@@ -68,6 +68,7 @@ class ShowCronjobPage extends AbstractAdminPage
 	}
 
 	function show(){
+		global $LNG;
 
 		$db = Database::get();
 
@@ -81,16 +82,24 @@ class ShowCronjobPage extends AbstractAdminPage
 		}
 
 		$CronjobArray = array();
+		$cronActive = 0;
+		$cronLocked = 0;
 		foreach ($data as $CronjobRow)
 		{
 			if (in_array($CronjobRow['class'], $this->disabledCronjobClasses, true)) {
 				continue;
 			}
 
+			$isActive = !empty($CronjobRow['isActive']);
+			$isLocked = !empty($CronjobRow['lock']);
+			$cronActive += $isActive ? 1 : 0;
+			$cronLocked += $isLocked ? 1 : 0;
+
 			$CronjobArray[]	= array(
 				'id'			=> $CronjobRow['cronjobID'],
-				'isActive'		=> $CronjobRow['isActive'],
+				'isActive'		=> $isActive ? 1 : 0,
 				'name'			=> $CronjobRow['name'],
+				'name_label'	=> isset($LNG['cronName_'.$CronjobRow['name']]) ? $LNG['cronName_'.$CronjobRow['name']] : $CronjobRow['name'],
 				'min'			=> $CronjobRow['min'],
 				'hours'			=> $CronjobRow['hours'],
 				'dom'			=> $CronjobRow['dom'],
@@ -98,13 +107,16 @@ class ShowCronjobPage extends AbstractAdminPage
 				'dow'			=> $this->getCronjobTimes($CronjobRow['dow'],6),
 				'class'			=> $CronjobRow['class'],
 				'nextTime'		=> $CronjobRow['nextTime'],
-				'lock'			=> !empty($CronjobRow['lock']),
+				'lock'			=> $isLocked,
 			);
 		}
 
 
 		$this->assign(array(
 			'CronjobArray'	=> $CronjobArray,
+			'cronTotal'		=> count($CronjobArray),
+			'cronActive'	=> $cronActive,
+			'cronLocked'	=> $cronLocked,
 		));
 
 		$this->display("page.cronjob.overview.tpl");

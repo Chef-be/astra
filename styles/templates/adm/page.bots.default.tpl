@@ -116,10 +116,11 @@
               <div class="bots-panel">
                 <div class="bots-panel__head">
                   <h3 class="bots-panel__title">Bots actuellement en ligne</h3>
-                  <span class="small text-white-50">Sessions à relever en priorité en haut</span>
+                  <span class="small text-white-50">Aperçu compact, limité aux 5 plus urgents</span>
                 </div>
                 <div class="bots-mini-table">
-                  {foreach from=$botSnapshot.online_roster item=bot}
+                  {foreach from=$botSnapshot.online_roster item=bot name=onlinePreview}
+                    {if $smarty.foreach.onlinePreview.iteration <= 5}
                     <div class="bots-mini-table__row">
                       <div>
                         <div class="fw-bold">{$bot.username}</div>
@@ -130,6 +131,7 @@
                         <div class="small text-white-50 mt-1">{$bot.session_target_until_formatted|default:'session ouverte'}</div>
                       </div>
                     </div>
+                    {/if}
                   {foreachelse}
                     <div class="text-white-50">Aucun bot en ligne.</div>
                   {/foreach}
@@ -141,10 +143,11 @@
               <div class="bots-panel">
                 <div class="bots-panel__head">
                   <h3 class="bots-panel__title">Prochaine relève disponible</h3>
-                  <span class="small text-white-50">Bots prêts ou bientôt prêts à reprendre la main</span>
+                  <span class="small text-white-50">Aperçu compact, limité aux 5 plus proches</span>
                 </div>
                 <div class="bots-mini-table">
-                  {foreach from=$botSnapshot.relay_candidates item=bot}
+                  {foreach from=$botSnapshot.relay_candidates item=bot name=relayPreview}
+                    {if $smarty.foreach.relayPreview.iteration <= 5}
                     <div class="bots-mini-table__row">
                       <div>
                         <div class="fw-bold">{$bot.username}</div>
@@ -155,6 +158,7 @@
                         <div class="small text-white-50 mt-1">{$bot.session_rest_until_formatted|default:'immédiatement prêt'}</div>
                       </div>
                     </div>
+                    {/if}
                   {foreachelse}
                     <div class="text-white-50">Aucun relais disponible.</div>
                   {/foreach}
@@ -242,7 +246,8 @@
             <span class="badge bg-secondary">{$botSnapshot.metrics.active_campaigns}</span>
           </div>
           <div class="bots-campaign-grid mb-3">
-            {foreach from=$botSnapshot.campaigns item=campaign}
+            {foreach from=$botSnapshot.campaigns item=campaign name=campaignPreview}
+              {if $smarty.foreach.campaignPreview.iteration <= 4}
               <article class="bots-campaign-card">
                 <div class="bots-campaign-card__top">
                   <span class="bots-pill">{$campaign.campaign_code}</span>
@@ -257,37 +262,13 @@
                   <span>Relève {$campaign.relay_strategy_label|default:$campaign.relay_strategy}</span>
                 </div>
               </article>
+              {/if}
             {foreachelse}
               <div class="admin-empty">Aucune campagne active.</div>
             {/foreach}
           </div>
-          <div class="table-responsive">
-            <table class="table table-dark table-hover align-middle bots-table mb-0">
-              <thead>
-                <tr>
-                  <th>Code</th>
-                  <th>Type</th>
-                  <th>Cible</th>
-                  <th>Intensité</th>
-                  <th>Mise à jour</th>
-                </tr>
-              </thead>
-              <tbody>
-                {foreach from=$botSnapshot.campaigns item=campaign}
-                  <tr>
-                    <td><span class="bots-pill">{$campaign.campaign_code}</span></td>
-                    <td>{$campaign.campaign_type_label|default:$campaign.campaign_type}</td>
-                    <td>{$campaign.target_reference|default:$campaign.zone_reference}</td>
-                    <td>{$campaign.intensity}</td>
-                    <td>{$campaign.updated_at_formatted}</td>
-                  </tr>
-                {foreachelse}
-                  <tr>
-                    <td colspan="5" class="text-white-50">Aucune campagne active.</td>
-                  </tr>
-                {/foreach}
-              </tbody>
-            </table>
+          <div class="small text-white-50">
+            Affichage synthétique. Les détails complets restent disponibles dans la supervision avancée et les runs moteur.
           </div>
         </div>
       </div>
@@ -303,7 +284,8 @@
             </div>
           </div>
           <div class="bots-alliance-grid">
-            {foreach from=$botSnapshot.alliance_summaries item=alliance}
+            {foreach from=$botSnapshot.alliance_summaries item=alliance name=alliancePreview}
+              {if $smarty.foreach.alliancePreview.iteration <= 4}
               <article class="bots-alliance-card">
                 <div class="bots-alliance-card__top">
                   <strong>{$alliance.ally_tag|default:$alliance.meta_tag}</strong>
@@ -319,6 +301,7 @@
                   {/foreach}
                 </div>
               </article>
+              {/if}
             {foreachelse}
               <div class="admin-empty">Aucune alliance bots pilotée.</div>
             {/foreach}
@@ -328,11 +311,11 @@
     </div>
   </section>
 
-  <details id="pilotage" class="bots-fold" open="open">
+  <details id="pilotage" class="bots-fold">
     <summary class="bots-fold__summary">
       <div>
         <h2 class="bots-section-title mb-0">Pilotage et configuration</h2>
-        <p class="bots-section-text">Réglages globaux du moteur, de la présence, des budgets et des politiques de comptes bots.</p>
+        <p class="bots-section-text">Réglages globaux du moteur, de la présence, des budgets et des politiques de comptes bots. Replié par défaut pour garder une lecture compacte.</p>
       </div>
       <span class="bots-pill">Ouvert</span>
     </summary>
@@ -666,7 +649,8 @@
             </div>
           </div>
           <div class="bots-focus-grid">
-            {foreach from=$botSnapshot.bot_focus item=bot}
+            {foreach from=$botSnapshot.bot_focus item=bot name=focusPreview}
+              {if $smarty.foreach.focusPreview.iteration <= 6}
               <article class="bots-focus-card">
                 <div class="bots-focus-card__top">
                   <strong>{$bot.username}</strong>
@@ -699,10 +683,12 @@
                   <span>{if $bot.session_target_until}{$bot.session_target_in_label}{elseif $bot.session_rest_until}{$bot.session_rest_in_label}{else}sans fenêtre{/if}</span>
                 </div>
               </article>
+              {/if}
             {foreachelse}
               <div class="admin-empty">Aucun bot prioritaire à afficher.</div>
             {/foreach}
           </div>
+          <div class="small text-white-50 mt-2">Aperçu resserré sur 6 bots. Le roster complet reste disponible plus bas.</div>
         </div>
       </div>
 

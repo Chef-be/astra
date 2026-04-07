@@ -39,7 +39,11 @@ class ShowChatPage extends AbstractAdminPage
 		$config = Config::get(Universe::getEmulated());
 		LiveChatService::ensureChannelDefaults();
 
-		$recentMessages = LiveChatService::getRecentAdminMessages(120);
+		$messagePage = max(1, HTTP::_GP('message_page', 1));
+		$messagesPerPage = 30;
+		$totalMessages = LiveChatService::countAdminMessages();
+		$recentMessages = LiveChatService::getRecentAdminMessagesPage($messagePage, $messagesPerPage);
+
 		$channelMap = array();
 		foreach (LiveChatService::getChannels() as $channelRow) {
 			$channelMap[$channelRow['channel_key']] = $channelRow;
@@ -52,7 +56,10 @@ class ShowChatPage extends AbstractAdminPage
 		}
 		unset($messageRow);
 
-		$activeMutes = LiveChatService::getActiveMutes();
+		$mutePage = max(1, HTTP::_GP('mute_page', 1));
+		$mutesPerPage = 12;
+		$totalMutes = LiveChatService::countActiveMutes();
+		$activeMutes = LiveChatService::getActiveMutesPage($mutePage, $mutesPerPage);
 		foreach ($activeMutes as &$muteRow) {
 			$muteRow['created_at_formatted'] = _date($LNG['php_tdformat'], $muteRow['created_at'], $USER['timezone']);
 			$muteRow['expires_at_formatted'] = ((int) $muteRow['expires_at'] >= 4102444800)
@@ -83,7 +90,15 @@ class ShowChatPage extends AbstractAdminPage
 			'ch_botname'			=> $LNG['ch_botname'],
 			'ch_channelname'		=> $LNG['ch_channelname'],
 			'recentMessages'		=> $recentMessages,
+			'messagePagination'		=> $this->buildPagination('message_page', $messagePage, $messagesPerPage, $totalMessages, '#chat-messages', array(
+				'mute_page' => $mutePage,
+			)),
+			'messageCountTotal'		=> $totalMessages,
 			'activeMutes'			=> $activeMutes,
+			'mutePagination'		=> $this->buildPagination('mute_page', $mutePage, $mutesPerPage, $totalMutes, '#chat-mutes', array(
+				'message_page' => $messagePage,
+			)),
+			'muteCountTotal'		=> $totalMutes,
 			'channelSettings'		=> array_values($channelMap),
 			'realtimeStatus'		=> $this->getRealtimeStatus(),
 		));
@@ -334,6 +349,44 @@ class ShowChatPage extends AbstractAdminPage
 			'endpoint' => (HTTPS ? 'wss://' : 'ws://').HTTP_HOST.'/ws',
 			'healthUrl' => (HTTPS ? 'https://' : 'http://').HTTP_HOST.'/realtime-health',
 		);
+	}
+
+	private function buildPagination($parameterName, $currentPage, $perPage, $totalItems, $anchor = '', array $extraParameters = array())
+	{
+		$totalPages = max(1, (int) ceil(((int) $totalItems) / max(1, (int) $perPage)));
+		$currentPage = max(1, min((int) $currentPage, $totalPages));
+		$pages = array();
+		$start = max(1, $currentPage - 2);
+		$end = min($totalPages, $currentPage + 2);
+
+		for ($page = $start; $page <= $end; $page++) {
+			$pages[] = array(
+				'number' => $page,
+				'active' => $page === $currentPage,
+				'url' => $this->buildChatPageUrl($parameterName, $page, $anchor, $extraParameters),
+			);
+		}
+
+		return array(
+			'total_items' => (int) $totalItems,
+			'total_pages' => $totalPages,
+			'current_page' => $currentPage,
+			'has_previous' => $currentPage > 1,
+			'has_next' => $currentPage < $totalPages,
+			'previous_url' => $currentPage > 1 ? $this->buildChatPageUrl($parameterName, $currentPage - 1, $anchor, $extraParameters) : '',
+			'next_url' => $currentPage < $totalPages ? $this->buildChatPageUrl($parameterName, $currentPage + 1, $anchor, $extraParameters) : '',
+			'pages' => $pages,
+		);
+	}
+
+	private function buildChatPageUrl($parameterName, $page, $anchor = '', array $extraParameters = array())
+	{
+		$query = array_merge(array(
+			'page' => 'chat',
+			$parameterName => max(1, (int) $page),
+		), $extraParameters);
+
+		return 'admin.php?'.http_build_query($query).($anchor !== '' ? $anchor : '');
 	}
 
 }

@@ -8,7 +8,7 @@
 		</article>
 		<article class="admin-kpi-card">
 			<span class="admin-kpi-card__label">Restrictions</span>
-			<strong class="admin-kpi-card__value">{$activeMutes|@count}</strong>
+			<strong class="admin-kpi-card__value">{$muteCountTotal}</strong>
 			<span class="admin-kpi-card__meta">joueur(s) actuellement bridés</span>
 		</article>
 		<article class="admin-kpi-card">
@@ -18,7 +18,7 @@
 		</article>
 		<article class="admin-kpi-card">
 			<span class="admin-kpi-card__label">Messages inspectés</span>
-			<strong class="admin-kpi-card__value">{$recentMessages|@count}</strong>
+			<strong class="admin-kpi-card__value">{$messageCountTotal}</strong>
 			<span class="admin-kpi-card__meta">fenêtre récente de modération</span>
 		</article>
 	</section>
@@ -146,14 +146,14 @@
 				</div>
 			</div>
 
-			<div class="admin-card">
+			<div id="chat-mutes" class="admin-card">
 				<div class="card-body admin-stack">
 					<div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 						<div>
 							<h2 class="h5 mb-1">Restrictions actives</h2>
 							<p class="text-white-50 mb-0">Historique court des joueurs encore bridés avec levée manuelle immédiate.</p>
 						</div>
-						<span class="admin-pill">{$activeMutes|@count} active(s)</span>
+						<span class="admin-pill">{$muteCountTotal} active(s)</span>
 					</div>
 					{if $activeMutes|@count > 0}
 						<div class="admin-table-shell">
@@ -190,20 +190,29 @@
 								</table>
 							</div>
 						</div>
+						{if $mutePagination.total_pages > 1}
+							<nav class="admin-pagination" aria-label="Pagination des restrictions">
+								{if $mutePagination.has_previous}<a class="admin-pagination__link" href="{$mutePagination.previous_url}">Précédent</a>{/if}
+								{foreach from=$mutePagination.pages item=item}
+									<a class="admin-pagination__link {if $item.active}is-active{/if}" href="{$item.url}">{$item.number}</a>
+								{/foreach}
+								{if $mutePagination.has_next}<a class="admin-pagination__link" href="{$mutePagination.next_url}">Suivant</a>{/if}
+							</nav>
+						{/if}
 					{else}
 						<div class="admin-empty-state">Aucune restriction active sur le chat.</div>
 					{/if}
 				</div>
 			</div>
 
-			<div class="admin-card">
+			<div id="chat-messages" class="admin-card">
 				<div class="card-body admin-stack">
 					<div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 						<div>
 							<h2 class="h5 mb-1">Messages récents</h2>
 							<p class="text-white-50 mb-0">Coupe courte de modération pour suppression rapide et lecture par canal.</p>
 						</div>
-						<span class="admin-pill">{$recentMessages|@count} message(s)</span>
+						<span class="admin-pill">{$messageCountTotal} message(s)</span>
 					</div>
 					<div class="admin-table-shell">
 						<div class="table-responsive">
@@ -247,13 +256,22 @@
 							</table>
 						</div>
 					</div>
+					{if $messagePagination.total_pages > 1}
+						<nav class="admin-pagination" aria-label="Pagination des messages">
+							{if $messagePagination.has_previous}<a class="admin-pagination__link" href="{$messagePagination.previous_url}">Précédent</a>{/if}
+							{foreach from=$messagePagination.pages item=item}
+								<a class="admin-pagination__link {if $item.active}is-active{/if}" href="{$item.url}">{$item.number}</a>
+							{/foreach}
+							{if $messagePagination.has_next}<a class="admin-pagination__link" href="{$messagePagination.next_url}">Suivant</a>{/if}
+						</nav>
+					{/if}
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<section class="admin-card">
-		<div class="card-body admin-stack">
+	<details class="admin-fold">
+		<summary class="admin-fold__summary">
 			<div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 				<div>
 					<h2 class="h5 mb-1">Canaux structurés</h2>
@@ -261,91 +279,97 @@
 				</div>
 				<span class="admin-pill">{$channelSettings|@count} canal(aux)</span>
 			</div>
+		</summary>
+		<div class="admin-fold__body">
+			<section class="admin-card">
+				<div class="card-body admin-stack">
 
-			<div class="admin-card admin-channel-card">
-				<div class="card-body">
-					<h3 class="h6 mb-3">Créer un nouveau canal</h3>
-					<form action="?page=chat&mode=createChannel" method="post" class="row g-3">
-						<div class="col-md-4">
-							<label class="form-label" for="channel_key_new">Clé technique</label>
-							<input id="channel_key_new" class="form-control bg-black text-white border-secondary" type="text" name="channel_key_new" placeholder="ex. commerce-galactique">
-						</div>
-						<div class="col-md-4">
-							<label class="form-label" for="label_new">Libellé</label>
-							<input id="label_new" class="form-control bg-black text-white border-secondary" type="text" name="label_new" placeholder="ex. Commerce galactique">
-						</div>
-						<div class="col-md-4">
-							<label class="form-label" for="moderator_user_new">Modérateur référent</label>
-							<input id="moderator_user_new" class="form-control bg-black text-white border-secondary" type="text" name="moderator_user_new" placeholder="Pseudo, e-mail ou identifiant">
-						</div>
-						<div class="col-12">
-							<label class="form-label" for="description_new">Description</label>
-							<input id="description_new" class="form-control bg-black text-white border-secondary" type="text" name="description_new" placeholder="Ce canal sert à…">
-						</div>
-						<div class="col-12">
-							<label class="form-check-label"><input id="requires_admin_new" class="form-check-input me-2" type="checkbox" name="requires_admin_new">Canal réservé aux administrateurs</label>
-						</div>
-						<div class="col-12">
-							<button class="btn btn-outline-light btn-sm" type="submit">Créer le canal</button>
-						</div>
-					</form>
-				</div>
-			</div>
-
-			<div class="row g-3">
-				{foreach from=$channelSettings item=channel}
-					<div class="col-12 col-xl-6">
-						<div class="admin-card admin-channel-card h-100">
-							<div class="card-body">
-								<div class="admin-channel-card__header">
-									<div>
-										<div class="fw-bold">{$channel.label}</div>
-										<div class="small text-white-50">{$channel.description}</div>
-									</div>
-									<span class="badge {if $channel.is_active}admin-badge-success{else}admin-badge-info{/if}">{if $channel.is_active}Actif{else}Masqué{/if}</span>
+					<div class="admin-card admin-channel-card">
+						<div class="card-body">
+							<h3 class="h6 mb-3">Créer un nouveau canal</h3>
+							<form action="?page=chat&mode=createChannel" method="post" class="row g-3">
+								<div class="col-md-4">
+									<label class="form-label" for="channel_key_new">Clé technique</label>
+									<input id="channel_key_new" class="form-control bg-black text-white border-secondary" type="text" name="channel_key_new" placeholder="ex. commerce-galactique">
 								</div>
-								<form action="?page=chat&mode=saveChannel" method="post" class="row g-3">
-									<input type="hidden" name="channel_key" value="{$channel.channel_key}">
-									<div class="col-md-6">
-										<label class="form-label">Libellé</label>
-										<input class="form-control bg-black text-white border-secondary" type="text" name="label" value="{$channel.label|escape:'html'}">
-									</div>
-									<div class="col-md-6">
-										<label class="form-label">Modérateur référent</label>
-										<input class="form-control bg-black text-white border-secondary" type="text" name="moderator_user" value="{$channel.moderator_name|default:''|escape:'html'}" placeholder="Pseudo, e-mail ou identifiant">
-									</div>
-									<div class="col-12">
-										<label class="form-label">Description</label>
-										<input class="form-control bg-black text-white border-secondary" type="text" name="description" value="{$channel.description|escape:'html'}">
-									</div>
-									<div class="col-12 admin-toggle-list">
-										<label class="form-check-label">
-											<input id="channel_access_{$channel.channel_key}" class="form-check-input me-2" type="checkbox" name="requires_admin"{if $channel.requires_admin} checked="checked"{/if}{if $channel.is_system} disabled="disabled"{/if}>
-											Canal réservé aux administrateurs
-										</label>
-										<label class="form-check-label">
-											<input id="channel_{$channel.channel_key}" class="form-check-input me-2" type="checkbox" name="is_active"{if $channel.is_active} checked="checked"{/if}>
-											Canal visible et disponible
-										</label>
-									</div>
-									{if $channel.is_system}
-										<div class="col-12 small text-white-50">Les canaux système conservent leurs règles d’accès.</div>
-									{/if}
-									<div class="col-12">
-										<div class="d-flex gap-2 flex-wrap">
-											<button class="btn btn-outline-light btn-sm" type="submit">Mettre à jour le canal</button>
-											{if !$channel.is_system}
-												<a class="btn btn-outline-danger btn-sm" href="?page=chat&mode=deleteChannel&channel_key={$channel.channel_key|escape:'url'}" onclick="return confirm('Supprimer ce canal personnalisé ?');">Supprimer le canal</a>
-											{/if}
-										</div>
-									</div>
-								</form>
-							</div>
+								<div class="col-md-4">
+									<label class="form-label" for="label_new">Libellé</label>
+									<input id="label_new" class="form-control bg-black text-white border-secondary" type="text" name="label_new" placeholder="ex. Commerce galactique">
+								</div>
+								<div class="col-md-4">
+									<label class="form-label" for="moderator_user_new">Modérateur référent</label>
+									<input id="moderator_user_new" class="form-control bg-black text-white border-secondary" type="text" name="moderator_user_new" placeholder="Pseudo, e-mail ou identifiant">
+								</div>
+								<div class="col-12">
+									<label class="form-label" for="description_new">Description</label>
+									<input id="description_new" class="form-control bg-black text-white border-secondary" type="text" name="description_new" placeholder="Ce canal sert à…">
+								</div>
+								<div class="col-12">
+									<label class="form-check-label"><input id="requires_admin_new" class="form-check-input me-2" type="checkbox" name="requires_admin_new">Canal réservé aux administrateurs</label>
+								</div>
+								<div class="col-12">
+									<button class="btn btn-outline-light btn-sm" type="submit">Créer le canal</button>
+								</div>
+							</form>
 						</div>
 					</div>
-				{/foreach}
-			</div>
+
+					<div class="row g-3">
+						{foreach from=$channelSettings item=channel}
+							<div class="col-12 col-xl-6">
+								<div class="admin-card admin-channel-card h-100">
+									<div class="card-body">
+										<div class="admin-channel-card__header">
+											<div>
+												<div class="fw-bold">{$channel.label}</div>
+												<div class="small text-white-50">{$channel.description}</div>
+											</div>
+											<span class="badge {if $channel.is_active}admin-badge-success{else}admin-badge-info{/if}">{if $channel.is_active}Actif{else}Masqué{/if}</span>
+										</div>
+										<form action="?page=chat&mode=saveChannel" method="post" class="row g-3">
+											<input type="hidden" name="channel_key" value="{$channel.channel_key}">
+											<div class="col-md-6">
+												<label class="form-label">Libellé</label>
+												<input class="form-control bg-black text-white border-secondary" type="text" name="label" value="{$channel.label|escape:'html'}">
+											</div>
+											<div class="col-md-6">
+												<label class="form-label">Modérateur référent</label>
+												<input class="form-control bg-black text-white border-secondary" type="text" name="moderator_user" value="{$channel.moderator_name|default:''|escape:'html'}" placeholder="Pseudo, e-mail ou identifiant">
+											</div>
+											<div class="col-12">
+												<label class="form-label">Description</label>
+												<input class="form-control bg-black text-white border-secondary" type="text" name="description" value="{$channel.description|escape:'html'}">
+											</div>
+											<div class="col-12 admin-toggle-list">
+												<label class="form-check-label">
+													<input id="channel_access_{$channel.channel_key}" class="form-check-input me-2" type="checkbox" name="requires_admin"{if $channel.requires_admin} checked="checked"{/if}{if $channel.is_system} disabled="disabled"{/if}>
+													Canal réservé aux administrateurs
+												</label>
+												<label class="form-check-label">
+													<input id="channel_{$channel.channel_key}" class="form-check-input me-2" type="checkbox" name="is_active"{if $channel.is_active} checked="checked"{/if}>
+													Canal visible et disponible
+												</label>
+											</div>
+											{if $channel.is_system}
+												<div class="col-12 small text-white-50">Les canaux système conservent leurs règles d’accès.</div>
+											{/if}
+											<div class="col-12">
+												<div class="d-flex gap-2 flex-wrap">
+													<button class="btn btn-outline-light btn-sm" type="submit">Mettre à jour le canal</button>
+													{if !$channel.is_system}
+														<a class="btn btn-outline-danger btn-sm" href="?page=chat&mode=deleteChannel&channel_key={$channel.channel_key|escape:'url'}" onclick="return confirm('Supprimer ce canal personnalisé ?');">Supprimer le canal</a>
+													{/if}
+												</div>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						{/foreach}
+					</div>
+				</div>
+			</section>
 		</div>
-	</section>
+	</details>
 </div>
 {/block}
