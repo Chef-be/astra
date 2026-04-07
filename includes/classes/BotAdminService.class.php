@@ -334,6 +334,12 @@ class BotAdminService
 		}
 
 		$allianceSummaries = $this->allianceService->getAllianceSummaries(8);
+		foreach ($allianceSummaries as &$allianceSummary) {
+			$allianceSummary['diplomacy_posture_label'] = $this->labelAlliancePosture(
+				isset($allianceSummary['diplomacy']['posture']) ? $allianceSummary['diplomacy']['posture'] : ''
+			);
+		}
+		unset($allianceSummary);
 
 		return array(
 			'config' => $config,
@@ -421,6 +427,58 @@ class BotAdminService
 	public function dispatchCommandById($commandId)
 	{
 		return $this->commandDispatcher->dispatchCommandById((int) $commandId);
+	}
+
+	public function getProfileEditorCatalog()
+	{
+		return array(
+			'doctrines' => array(
+				array('value' => 'equilibre', 'label' => 'Équilibre'),
+				array('value' => 'guerre', 'label' => 'Guerre'),
+				array('value' => 'expansion', 'label' => 'Expansion'),
+				array('value' => 'opportuniste', 'label' => 'Opportuniste'),
+				array('value' => 'fortification', 'label' => 'Fortification'),
+				array('value' => 'recherche', 'label' => 'Recherche'),
+				array('value' => 'soutien', 'label' => 'Soutien'),
+				array('value' => 'recon', 'label' => 'Reconnaissance'),
+				array('value' => 'pression_continue', 'label' => 'Pression continue'),
+				array('value' => 'influence', 'label' => 'Influence'),
+				array('value' => 'presence', 'label' => 'Présence'),
+				array('value' => 'predation', 'label' => 'Prédation'),
+				array('value' => 'protection', 'label' => 'Protection'),
+				array('value' => 'raid', 'label' => 'Raid'),
+				array('value' => 'autonomie', 'label' => 'Autonomie'),
+				array('value' => 'vengeance', 'label' => 'Vengeance'),
+				array('value' => 'coordination', 'label' => 'Coordination'),
+				array('value' => 'harcelement', 'label' => 'Harcèlement'),
+				array('value' => 'siege', 'label' => 'Siège'),
+				array('value' => 'recrutement', 'label' => 'Recrutement'),
+				array('value' => 'pression_sociale', 'label' => 'Pression sociale'),
+			),
+			'roles' => array(
+				array('value' => 'economiste', 'label' => 'Économiste'),
+				array('value' => 'predateur', 'label' => 'Prédateur'),
+				array('value' => 'colonisateur', 'label' => 'Colonisateur'),
+				array('value' => 'raider', 'label' => 'Pillard / Raider'),
+				array('value' => 'protecteur', 'label' => 'Protecteur'),
+				array('value' => 'technologue', 'label' => 'Technologue'),
+				array('value' => 'logisticien', 'label' => 'Logisticien'),
+				array('value' => 'eclaireur', 'label' => 'Éclaireur'),
+				array('value' => 'chef', 'label' => 'Chef'),
+				array('value' => 'diplomate', 'label' => 'Diplomate'),
+				array('value' => 'animateur', 'label' => 'Animateur'),
+				array('value' => 'solitaire', 'label' => 'Solitaire'),
+				array('value' => 'loyaliste', 'label' => 'Loyaliste'),
+				array('value' => 'harceleur', 'label' => 'Harceleur'),
+				array('value' => 'recruteur', 'label' => 'Recruteur'),
+			),
+			'communication_styles' => array(
+				array('value' => 'mesure', 'label' => 'Mesuré'),
+				array('value' => 'fort', 'label' => 'Visible et affirmé'),
+				array('value' => 'discret', 'label' => 'Discret'),
+				array('value' => 'intimidant', 'label' => 'Intimidant'),
+			),
+		);
 	}
 
 	public function createStructuredCommand($commandText, $issuedByUserId)
@@ -739,6 +797,19 @@ class BotAdminService
 		);
 
 		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('-', ' ', $value)) : 'Campagne');
+	}
+
+	protected function labelAlliancePosture($value)
+	{
+		$map = array(
+			'attente' => 'En attente',
+			'territoriale' => 'Contrôle territorial',
+			'offensive' => 'Posture offensive',
+			'defensive' => 'Posture défensive',
+			'pression' => 'Sous pression',
+		);
+
+		return isset($map[$value]) ? $map[$value] : ($value !== '' ? ucfirst(str_replace('_', ' ', $value)) : 'En attente');
 	}
 
 	protected function labelCampaignPhase($value)

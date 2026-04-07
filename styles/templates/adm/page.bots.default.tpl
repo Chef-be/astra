@@ -307,7 +307,7 @@
               <article class="bots-alliance-card">
                 <div class="bots-alliance-card__top">
                   <strong>{$alliance.ally_tag|default:$alliance.meta_tag}</strong>
-                  <span class="bots-pill">{$alliance.diplomacy.posture|default:'attente'}</span>
+                  <span class="bots-pill">{$alliance.diplomacy_posture_label|default:'En attente'}</span>
                 </div>
                 <div class="bots-alliance-card__name">{$alliance.ally_name|default:$alliance.meta_name}</div>
                 <div class="bots-alliance-card__text">
@@ -495,15 +495,27 @@
                 </div>
                 <div class="col-md-3">
                   <label class="form-label" for="doctrine">Doctrine</label>
-                  <input id="doctrine" class="form-control bg-dark text-white border-secondary" name="doctrine" type="text" value="equilibre">
+                  <select id="doctrine" class="form-select bg-dark text-white border-secondary" name="doctrine">
+                    {foreach from=$botProfileEditor.doctrines item=option}
+                      <option value="{$option.value|escape}"{if $option.value == 'equilibre'} selected="selected"{/if}>{$option.label}</option>
+                    {/foreach}
+                  </select>
                 </div>
                 <div class="col-md-2">
                   <label class="form-label" for="role_primary">Rôle principal</label>
-                  <input id="role_primary" class="form-control bg-dark text-white border-secondary" name="role_primary" type="text" value="economiste">
+                  <select id="role_primary" class="form-select bg-dark text-white border-secondary" name="role_primary">
+                    {foreach from=$botProfileEditor.roles item=option}
+                      <option value="{$option.value|escape}"{if $option.value == 'economiste'} selected="selected"{/if}>{$option.label}</option>
+                    {/foreach}
+                  </select>
                 </div>
                 <div class="col-md-2">
                   <label class="form-label" for="communication_style">Style social</label>
-                  <input id="communication_style" class="form-control bg-dark text-white border-secondary" name="communication_style" type="text" value="mesure">
+                  <select id="communication_style" class="form-select bg-dark text-white border-secondary" name="communication_style">
+                    {foreach from=$botProfileEditor.communication_styles item=option}
+                      <option value="{$option.value|escape}"{if $option.value == 'mesure'} selected="selected"{/if}>{$option.label}</option>
+                    {/foreach}
+                  </select>
                 </div>
                 <div class="col-12">
                   <label class="form-label" for="description">Description</label>

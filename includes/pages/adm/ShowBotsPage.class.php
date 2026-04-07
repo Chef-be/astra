@@ -92,6 +92,7 @@ class ShowBotsPage extends AbstractAdminPage
 			'botProfiles' => $snapshot['profiles'],
 			'botPresenceEditor' => $this->buildPresenceEditor(isset($snapshot['config']['global_presence_rules_json']) ? $snapshot['config']['global_presence_rules_json'] : array()),
 			'botDecisionEditor' => $this->buildDecisionEditor(isset($snapshot['config']['decision_weights_json']) ? $snapshot['config']['decision_weights_json'] : array()),
+			'botProfileEditor' => $this->service->getProfileEditorCatalog(),
 		));
 
 		$this->display('page.bots.default.tpl');
