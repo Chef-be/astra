@@ -74,9 +74,4 @@
       <a class="w-100 d-flex align-items-center fs-10 fw-bold justify-content-center p-0 text-decoration-none" href="./admin.php" style="color:lime">{$LNG.lm_administration} ({$VERSION})</a>
     </li>
     {/if}
-    {if $commit != ''}
-    <li class="d-flex w-50  menu-button">
-      <a href="https://github.com/ultimateXnova/ultimateXnova/commit/{$commit}"  class="w-100 d-flex align-items-center fs-10 fw-bold justify-content-center p-0 text-decoration-none" target="copy">ultimateXnova {$commitShort}</a>
-    </li>
-    {/if}
 </ul>

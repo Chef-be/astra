@@ -71,6 +71,4 @@
     <li class="menu-separator"></li>
     {if $authlevel > 0}<li><a href="./admin.php" style="color:lime">{$LNG.lm_administration} ({$VERSION})</a></li>{/if}
 </ul>
-<div id="disclamer" class="no-mobile">
-    {if $commit != ''}<a href="https://github.com/ultimateXnova/ultimateXnova/commit/{$commit}" target="copy">ultimateXnova {$commitShort}</a>{/if}
-</div>
+<div id="disclamer" class="no-mobile"></div>

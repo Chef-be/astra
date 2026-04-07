@@ -58,8 +58,6 @@
     {if isModuleAvailable($smarty.const.MODULE_SIMULATOR)}<li> <a href="game.php?page=battleSimulator"><i class="fas fa-crosshairs fas-red"></i> {$LNG.lm_battlesim}</a></li>{/if}
 
    </ul>
-<div id="disclamer" class="no-mobile">
-    {if $commit != ''}<a href="https://github.com/ultimateXnova/ultimateXnova/commit/{$commit}" target="copy">ultimateXnova {$commitShort}</a>{/if}
-</div>
+<div id="disclamer" class="no-mobile"></div>
 </div>
 	</menu>

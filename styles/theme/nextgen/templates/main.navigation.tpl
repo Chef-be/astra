@@ -78,11 +78,6 @@
         <a class="blur-bg-danger" href="./admin.php" style="">{$LNG.lm_administration} ({$VERSION})</a>
       </li>
       {/if}
-      {if $commit != ''}
-      <li>
-        <a href="https://github.com/ultimateXnova/ultimateXnova/commit/{$commit}"  class="" target="copy">Révision {$commitShort}</a>
-      </li>
-      {/if}
   </ul>
   <div class="toggle-menu-button-container"> 
     <div class="toggle-menu-button dark-blur-bg" onclick="document.getElementById('main-navigation').classList.toggle('main-menu-hidden'); saveMenuStateToSession();">

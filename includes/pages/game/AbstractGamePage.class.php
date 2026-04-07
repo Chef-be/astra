@@ -219,14 +219,6 @@ abstract class AbstractGamePage
 
 		$themeSettings	= $THEME->getStyleSettings();
 
-		$commit = '';
-		$commitShort = '';
-		if(file_exists('.git/FETCH_HEAD'))
-		{
-			$commit = explode('	', file_get_contents('.git/FETCH_HEAD'))[0];
-			$commitShort = substr($commit, 0, 7);
-		}
-
 		$avatar = 'styles/resource/images/user.png';
 		if (Session::load()->data !== null)
 		{
@@ -251,8 +243,6 @@ abstract class AbstractGamePage
 		$this->assign(array(
 			'PlanetSelect'		=> $PlanetSelect,
 			'new_message' 		=> $playerUnreadMessages,
-			'commit'			=> $commit,
-			'commitShort'		=> $commitShort,
 			'vacation'			=> $USER['urlaubs_modus'] ? _date($LNG['php_tdformat'], $USER['urlaubs_until'], $USER['timezone']) : false,
 			'delete'			=> $USER['db_deaktjava'] ? sprintf($LNG['tn_delete_mode'], _date($LNG['php_tdformat'], $USER['db_deaktjava'] + ($config->del_user_manually * 86400)), $USER['timezone']) : false,
 			'darkmatter'		=> $USER['darkmatter'],
