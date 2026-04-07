@@ -398,12 +398,49 @@
             </div>
 
             <div class="col-12 col-xl-6">
-              <label class="form-label" for="global_presence_rules_json">Règles de présence JSON</label>
-              <textarea id="global_presence_rules_json" class="form-control bg-dark text-white border-secondary bots-codearea" rows="8" name="global_presence_rules_json">{$botSnapshot.config.global_presence_rules_json|@json_encode}</textarea>
+              <div class="bots-config-editor">
+                <div class="bots-config-editor__title">Règles de présence</div>
+                <div class="bots-config-editor__text">Réglage direct des multiplicateurs horaires et des fenêtres de session sans passer par du JSON.</div>
+                <div class="row g-2 mt-1">
+                  {foreach from=$botPresenceEditor.tranches item=tranche}
+                    <div class="col-md-6">
+                      <label class="form-label" for="presence_tranche_{$tranche.key}">{$tranche.label}</label>
+                      <input id="presence_tranche_{$tranche.key}" class="form-control bg-dark text-white border-secondary" type="number" min="0.10" max="3.00" step="0.05" name="presence_tranches[{$tranche.key}]" value="{$tranche.value}">
+                    </div>
+                  {/foreach}
+                </div>
+                <div class="row g-2 mt-1">
+                  {foreach from=$botPresenceEditor.sessions item=session}
+                    <div class="col-md-6">
+                      <label class="form-label" for="presence_session_{$session.key}">{$session.label}</label>
+                      <input id="presence_session_{$session.key}" class="form-control bg-dark text-white border-secondary" type="number" min="0" step="{$session.step}" name="presence_sessions[{$session.key}]" value="{$session.value}">
+                    </div>
+                  {/foreach}
+                </div>
+                <div class="mt-2">
+                  <label class="form-label" for="always_visible_roles_text">Rôles toujours visibles</label>
+                  <input id="always_visible_roles_text" class="form-control bg-dark text-white border-secondary" type="text" name="always_visible_roles_text" value="{$botPresenceEditor.always_visible_roles_text|escape}">
+                </div>
+              </div>
             </div>
             <div class="col-12 col-xl-6">
-              <label class="form-label" for="decision_weights_json">Pondérations décisionnelles JSON</label>
-              <textarea id="decision_weights_json" class="form-control bg-dark text-white border-secondary bots-codearea" rows="8" name="decision_weights_json">{$botSnapshot.config.decision_weights_json|@json_encode}</textarea>
+              <div class="bots-config-editor">
+                <div class="bots-config-editor__title">Pondérations décisionnelles</div>
+                <div class="bots-config-editor__text">Ajustement direct des familles de décision sans édition manuelle du JSON.</div>
+                {foreach from=$botDecisionEditor item=group}
+                  <div class="bots-config-editor__group">
+                    <div class="bots-config-editor__group-title">{$group.label}</div>
+                    <div class="row g-2">
+                      {foreach from=$group.fields item=field}
+                        <div class="col-md-6">
+                          <label class="form-label" for="decision_{$group.key}_{$field.key}">{$field.label}</label>
+                          <input id="decision_{$group.key}_{$field.key}" class="form-control bg-dark text-white border-secondary" type="number" min="-1.00" max="1.00" step="0.05" name="decision_weight[{$group.key}][{$field.key}]" value="{$field.value}">
+                        </div>
+                      {/foreach}
+                    </div>
+                  </div>
+                {/foreach}
+              </div>
             </div>
             <div class="col-12">
               <button class="btn btn-primary" type="submit">Enregistrer la configuration</button>

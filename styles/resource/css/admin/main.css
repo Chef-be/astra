@@ -506,6 +506,45 @@ a {
 	height: 100%;
 }
 
+.bots-config-editor {
+	height: 100%;
+	padding: 1rem;
+	border-radius: 18px;
+	border: 1px solid var(--admin-border);
+	background: rgba(255, 255, 255, 0.03);
+}
+
+.bots-config-editor__title {
+	font-size: 1rem;
+	font-weight: 700;
+	color: #f8fbff;
+}
+
+.bots-config-editor__text {
+	margin-top: 0.35rem;
+	color: var(--admin-muted);
+	font-size: 0.9rem;
+	line-height: 1.5;
+}
+
+.bots-config-editor__group {
+	margin-top: 1rem;
+	padding-top: 1rem;
+	border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.bots-config-editor__group:first-of-type {
+	margin-top: 0.85rem;
+	padding-top: 0.85rem;
+}
+
+.bots-config-editor__group-title {
+	margin-bottom: 0.65rem;
+	font-size: 0.92rem;
+	font-weight: 700;
+	color: #dff6ff;
+}
+
 .bots-panel__head {
 	display: flex;
 	flex-wrap: wrap;

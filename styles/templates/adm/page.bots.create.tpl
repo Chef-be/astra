@@ -17,8 +17,8 @@
 			<label class="admin-field-card">
 				<span>Nom des bots</span>
 				<select id="bot_name_type" class="form-select bg-dark text-white border-secondary" name="bot_name_type">
-					<option selected value="0">Nom aléatoire</option>
-					<option value="1">Bot + numéro</option>
+					<option selected value="0">Nom de personnage</option>
+					<option value="1">Nom de personnage + identifiant</option>
 				</select>
 			</label>
 			<label class="admin-field-card">

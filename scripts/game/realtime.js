@@ -18,6 +18,34 @@
     chatMounts: {},
     chatChannels: [],
     botCommandCatalog: [],
+    botCommandFamilies: [
+      'bots',
+      'bot',
+      'chef',
+      'alliance-bots',
+      'escouade',
+      'system-bots',
+      'galaxy-bots',
+      'profil-bots',
+      'presence',
+      'strategie',
+      'bonus',
+      'journal',
+      'pause',
+      'reprendre',
+      'surveillance',
+      'recon',
+      'raid',
+      'defense',
+      'colonisation',
+      'message-prive',
+      'message-chat',
+      'campagne',
+      'harcelement',
+      'rotation-attaque',
+      'vague',
+      'siege'
+    ],
     chatHistories: {},
     chatHistorySignatures: {},
     chatDrafts: {},
@@ -1302,8 +1330,25 @@
       this.updateSlashSuggestions(rootId);
     },
 
+    isBotSlashCommand: function(content) {
+      var command = $.trim(String(content || ''));
+      var family = '';
+      var separatorIndex = -1;
+
+      if (!command || command.charAt(0) !== '/') {
+        return false;
+      }
+
+      separatorIndex = command.indexOf(' ');
+      family = separatorIndex === -1 ? command.substring(1) : command.substring(1, separatorIndex);
+      family = String(family || '').toLowerCase();
+
+      return this.botCommandFamilies.indexOf(family) !== -1;
+    },
+
     submitBotCommand: function(rootId, commandText) {
       var self = this;
+      var input = $('#' + rootId + '-input');
 
       $.post('game.php?page=realtime&mode=submitBotCommand&ajax=1', {
         command: commandText
@@ -1313,10 +1358,29 @@
           return;
         }
 
+        input.val('');
+        self.chatDrafts[self.getChatDraftKey(rootId)] = '';
+        self.hideSlashSuggestions(rootId);
+
         $.post('game.php?page=realtime&mode=dispatchBotCommands&ajax=1', {
           limit: 8
-        }).always(function() {
+        }).done(function(dispatchPayload) {
+          if (!dispatchPayload || dispatchPayload.status !== 'ok') {
+            self.showChatError(dispatchPayload && dispatchPayload.message ? dispatchPayload.message : 'La commande bots a été enregistrée, mais son exécution immédiate a échoué.');
+            self.requestChatHistory('bots');
+            return;
+          }
+
+          if ((dispatchPayload.done || 0) === 0 && (dispatchPayload.rejected || 0) > 0) {
+            self.showChatError('La commande bots a été enregistrée, mais elle a été rejetée à l’exécution.');
+            self.requestChatHistory('bots');
+            return;
+          }
+
           self.hideChatError(rootId);
+          self.requestChatHistory('bots');
+        }).fail(function() {
+          self.showChatError('La commande bots a été enregistrée, mais le dispatch immédiat a échoué.');
           self.requestChatHistory('bots');
         });
       }).fail(function() {
@@ -1442,11 +1506,8 @@
 
       this.hideChatError(rootId);
 
-      if (mount.activeChannel === 'bots' && normalizedContent.indexOf('/') === 0) {
+      if (mount.activeChannel === 'bots' && this.isBotSlashCommand(content)) {
         this.submitBotCommand(rootId, content);
-        input.val('');
-        this.chatDrafts[this.getChatDraftKey(rootId)] = '';
-        this.hideSlashSuggestions(rootId);
         return;
       }
 
@@ -1462,7 +1523,7 @@
       input.val('');
       this.chatDrafts[this.getChatDraftKey(rootId)] = '';
 
-      if (mount.activeChannel === 'bots' && (normalizedContent.indexOf('/bot ') === 0 || normalizedContent.indexOf('/bots ') === 0)) {
+      if (mount.activeChannel === 'bots' && this.isBotSlashCommand(content)) {
         this.dispatchBotCommands();
       }
     },

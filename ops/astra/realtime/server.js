@@ -334,6 +334,10 @@ function parseBotCommand(content) {
   };
 }
 
+function isBotCommand(content) {
+  return parseBotCommand(content) !== null;
+}
+
 async function resolvePrimaryBotId(session, parsed) {
   if (!parsed || !parsed.targetReference) {
     return null;
@@ -751,7 +755,7 @@ wss.on('connection', async (ws, request, session) => {
           });
         }
 
-        if (channelKey === 'bots' && (content.toLowerCase().startsWith('/bot ') || content.toLowerCase().startsWith('/bots '))) {
+        if (channelKey === 'bots' && isBotCommand(content)) {
           const instruction = await queueBotInstruction(session, content);
           const ackItem = await createBotAckMessage(session, instruction);
 

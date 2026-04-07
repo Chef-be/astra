@@ -116,9 +116,7 @@ class BotAccountProvisioningService
 
 		for ($index = 0; $index < $count && isset($positions[$index]); $index++) {
 			$coords = $positions[$index];
-			$username = !empty($data['name_mode']) && $data['name_mode'] === 'numbered'
-				? 'bot '.($index + 1)
-				: $this->generateLegacyName($index + 1);
+			$username = $this->generateBotName($index + 1, !empty($data['name_mode']) ? $data['name_mode'] : 'random');
 			$plainPassword = $this->generateRandomPassword();
 
 			list($userId, $planetId) = PlayerUtil::createPlayer(
@@ -248,8 +246,27 @@ class BotAccountProvisioningService
 		return substr(bin2hex(random_bytes(max(12, (int) ceil($length / 2)))), 0, $length);
 	}
 
-	protected function generateLegacyName($index)
+	protected function generateBotName($index, $mode = 'random')
 	{
-		return 'Bot Astra '.$index;
+		$firstNames = array(
+			'Orion', 'Lyra', 'Cassian', 'Selene', 'Aurel', 'Nova', 'Mira', 'Soren', 'Kael', 'Elara',
+			'Nereis', 'Tiber', 'Astra', 'Maelis', 'Darian', 'Vesper', 'Nael', 'Ilyan', 'Celia', 'Valen',
+			'Thalia', 'Corvin', 'Saphir', 'Alaric', 'Iris', 'Riven', 'Seren', 'Lorian', 'Nyx', 'Elyas',
+			'Calista', 'Dorian', 'Leora', 'Sylas', 'Talia', 'Marek', 'Zorane', 'Aelis', 'Velor', 'Mylan'
+		);
+		$lastNames = array(
+			'Valmont', 'Rochefort', 'Dargent', 'Solarys', 'Noctis', 'Virel', 'Marwick', 'Auren', 'Caelum', 'Veridian',
+			'Kestrel', 'Dravik', 'Lysandre', 'Sorell', 'Mornac', 'Eidren', 'Valkor', 'Seralis', 'Theron', 'Meral',
+			'Quint', 'Orsen', 'Dorlac', 'Vaelis', 'Cendre', 'Ravenn', 'Helion', 'Nerath', 'Coralis', 'Aster'
+		);
+		$firstName = $firstNames[($index - 1) % count($firstNames)];
+		$lastName = $lastNames[(int) floor(($index - 1) / count($firstNames)) % count($lastNames)];
+		$baseName = $firstName.' '.$lastName;
+
+		if ($mode === 'numbered') {
+			return $baseName.' '.$index;
+		}
+
+		return $baseName;
 	}
 }

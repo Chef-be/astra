@@ -75,6 +75,8 @@ class ShowBotsPage extends AbstractAdminPage
 		$this->assign(array(
 			'botSnapshot' => $snapshot,
 			'botProfiles' => $snapshot['profiles'],
+			'botPresenceEditor' => $this->buildPresenceEditor(isset($snapshot['config']['global_presence_rules_json']) ? $snapshot['config']['global_presence_rules_json'] : array()),
+			'botDecisionEditor' => $this->buildDecisionEditor(isset($snapshot['config']['decision_weights_json']) ? $snapshot['config']['decision_weights_json'] : array()),
 		));
 
 		$this->display('page.bots.default.tpl');
@@ -83,8 +85,8 @@ class ShowBotsPage extends AbstractAdminPage
 	public function saveConfig()
 	{
 		$current = $this->service->getConfig();
-		$presenceRules = $this->decodeJsonInput(HTTP::_GP('global_presence_rules_json', '', true), $current['global_presence_rules_json']);
-		$decisionWeights = $this->decodeJsonInput(HTTP::_GP('decision_weights_json', '', true), $current['decision_weights_json']);
+		$presenceRules = $this->extractPresenceRules(isset($current['global_presence_rules_json']) ? $current['global_presence_rules_json'] : array());
+		$decisionWeights = $this->extractDecisionWeights(isset($current['decision_weights_json']) ? $current['decision_weights_json'] : array());
 
 		$this->service->saveConfig(array(
 			'engine_enabled' => HTTP::_GP('engine_enabled', 'off') === 'on' ? 1 : 0,
@@ -150,8 +152,11 @@ class ShowBotsPage extends AbstractAdminPage
 
 	public function createSend()
 	{
+		$count = max(1, HTTP::_GP('bots_number', 0));
+		$this->boostExecutionLimitsForMassCreation($count);
+
 		$created = $this->service->createBots(array(
-			'count' => HTTP::_GP('bots_number', 0),
+			'count' => $count,
 			'name_mode' => HTTP::_GP('bot_name_type', 'random', true) === '1' ? 'numbered' : 'random',
 			'profile_id' => HTTP::_GP('bot_profile_id', 0),
 			'target_galaxy' => HTTP::_GP('target_galaxy', 1),
@@ -234,6 +239,196 @@ class ShowBotsPage extends AbstractAdminPage
 
 		$decoded = json_decode($json, true);
 		return is_array($decoded) ? $decoded : $fallback;
+	}
+
+	protected function buildPresenceEditor(array $rules)
+	{
+		$defaults = array(
+			'tranches' => array(
+				'00-06' => 0.45,
+				'06-12' => 0.65,
+				'12-18' => 0.85,
+				'18-24' => 1.00,
+			),
+			'sessions' => array(
+				'min_minutes' => 18,
+				'max_minutes' => 75,
+				'min_rest_minutes' => 12,
+				'max_rest_minutes' => 90,
+				'rest_ratio' => 0.55,
+				'commander_bonus_minutes' => 40,
+				'campaign_bonus_minutes' => 55,
+			),
+			'always_visible_roles' => array('chef', 'animateur'),
+		);
+
+		$merged = array_replace_recursive($defaults, $rules);
+		$trancheLabels = array(
+			'00-06' => 'Nuit profonde',
+			'06-12' => 'Matinée',
+			'12-18' => 'Journée',
+			'18-24' => 'Prime time',
+		);
+		$sessionLabels = array(
+			'min_minutes' => 'Session min',
+			'max_minutes' => 'Session max',
+			'min_rest_minutes' => 'Repos min',
+			'max_rest_minutes' => 'Repos max',
+			'rest_ratio' => 'Ratio de repos',
+			'commander_bonus_minutes' => 'Bonus chef',
+			'campaign_bonus_minutes' => 'Bonus campagne',
+		);
+
+		$tranches = array();
+		foreach ($merged['tranches'] as $key => $value) {
+			$tranches[] = array(
+				'key' => $key,
+				'label' => isset($trancheLabels[$key]) ? $trancheLabels[$key] : $key,
+				'value' => $value,
+			);
+		}
+
+		$sessions = array();
+		foreach ($merged['sessions'] as $key => $value) {
+			$sessions[] = array(
+				'key' => $key,
+				'label' => isset($sessionLabels[$key]) ? $sessionLabels[$key] : $key,
+				'value' => $value,
+				'step' => $key === 'rest_ratio' ? '0.05' : '1',
+			);
+		}
+
+		return array(
+			'tranches' => $tranches,
+			'sessions' => $sessions,
+			'always_visible_roles_text' => implode(', ', $merged['always_visible_roles']),
+		);
+	}
+
+	protected function buildDecisionEditor(array $weights)
+	{
+		$labels = array(
+			'economy' => 'Économie',
+			'aggression' => 'Agression',
+			'pression_continue' => 'Pression continue',
+			'communication' => 'Communication',
+		);
+		$fieldLabels = array(
+			'deficit_ressources' => 'Déficit ressources',
+			'retard_infrastructure' => 'Retard infrastructure',
+			'besoin_financement_objectif' => 'Financement objectif',
+			'doctrine_economique' => 'Doctrine éco',
+			'prudence' => 'Prudence',
+			'fatigue' => 'Fatigue',
+			'manque_stock' => 'Manque de stock',
+			'agressivite' => 'Agressivité',
+			'opportunite_raid' => 'Opportunité de raid',
+			'superiorite_locale' => 'Supériorité locale',
+			'appetit_raid' => 'Appétit de raid',
+			'rancune' => 'Rancune',
+			'ordre_offensif' => 'Ordre offensif',
+			'intensite_campagne' => 'Intensité campagne',
+			'soutien_alliance' => 'Soutien alliance',
+			'peur' => 'Peur',
+			'campagne_active' => 'Campagne active',
+			'persistance_tactique' => 'Persistance tactique',
+			'objectif_alliance' => 'Objectif alliance',
+			'bonus_chef' => 'Bonus chef',
+			'rotation_disponible' => 'Rotation disponible',
+			'logistique_disponible' => 'Logistique disponible',
+			'usure' => 'Usure',
+			'saturation_logistique' => 'Saturation logistique',
+			'sociabilite' => 'Sociabilité',
+			'role_social' => 'Rôle social',
+			'opportunite_diplomatique' => 'Opportunité diplomatique',
+			'pression_psychologique' => 'Pression psychologique',
+			'ordre_chef' => 'Ordre de chef',
+			'discretion' => 'Discrétion',
+		);
+
+		$groups = array();
+		foreach ($weights as $groupKey => $groupValues) {
+			$fields = array();
+			foreach ($groupValues as $fieldKey => $value) {
+				$fields[] = array(
+					'key' => $fieldKey,
+					'label' => isset($fieldLabels[$fieldKey]) ? $fieldLabels[$fieldKey] : $fieldKey,
+					'value' => $value,
+				);
+			}
+
+			$groups[] = array(
+				'key' => $groupKey,
+				'label' => isset($labels[$groupKey]) ? $labels[$groupKey] : $groupKey,
+				'fields' => $fields,
+			);
+		}
+
+		return $groups;
+	}
+
+	protected function extractPresenceRules(array $fallback)
+	{
+		$current = $this->buildPresenceEditor($fallback);
+		$rules = array(
+			'tranches' => array(),
+			'sessions' => array(),
+			'always_visible_roles' => array(),
+		);
+
+		$postedTranches = isset($_POST['presence_tranches']) && is_array($_POST['presence_tranches']) ? $_POST['presence_tranches'] : array();
+		foreach ($current['tranches'] as $tranche) {
+			$key = $tranche['key'];
+			$value = isset($postedTranches[$key]) ? (float) $postedTranches[$key] : (float) $tranche['value'];
+			$rules['tranches'][$key] = max(0.1, min(3.0, round($value, 2)));
+		}
+
+		$postedSessions = isset($_POST['presence_sessions']) && is_array($_POST['presence_sessions']) ? $_POST['presence_sessions'] : array();
+		foreach ($current['sessions'] as $session) {
+			$key = $session['key'];
+			$value = isset($postedSessions[$key]) ? $postedSessions[$key] : $session['value'];
+			if ($key === 'rest_ratio') {
+				$rules['sessions'][$key] = max(0.10, min(2.00, round((float) $value, 2)));
+				continue;
+			}
+
+			$rules['sessions'][$key] = max(1, (int) $value);
+		}
+
+		$rolesText = trim(HTTP::_GP('always_visible_roles_text', $current['always_visible_roles_text'], true));
+		$roles = array_filter(array_map('trim', explode(',', $rolesText)));
+		$rules['always_visible_roles'] = empty($roles) ? array('chef', 'animateur') : array_values(array_unique($roles));
+
+		return $rules;
+	}
+
+	protected function extractDecisionWeights(array $fallback)
+	{
+		$groups = $this->buildDecisionEditor($fallback);
+		$postedWeights = isset($_POST['decision_weight']) && is_array($_POST['decision_weight']) ? $_POST['decision_weight'] : array();
+		$weights = array();
+
+		foreach ($groups as $group) {
+			$weights[$group['key']] = array();
+			foreach ($group['fields'] as $field) {
+				$value = isset($postedWeights[$group['key']][$field['key']]) ? (float) $postedWeights[$group['key']][$field['key']] : (float) $field['value'];
+				$weights[$group['key']][$field['key']] = max(-1.0, min(1.0, round($value, 2)));
+			}
+		}
+
+		return $weights;
+	}
+
+	protected function boostExecutionLimitsForMassCreation($count)
+	{
+		if ($count < 100) {
+			return;
+		}
+
+		@ignore_user_abort(true);
+		@set_time_limit(max(300, $count * 3));
+		@ini_set('max_execution_time', '0');
+		@ini_set('memory_limit', '1024M');
 	}
 
 	protected function formatDeltaLabel($seconds, $readyLabel)
