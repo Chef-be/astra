@@ -1,5 +1,5 @@
 {block name="content"}
-<div class="container-fluid py-4 text-white admin-stack">
+<div class="container-fluid py-4 text-white admin-stack admin-public-page">
 	<section class="admin-kpi-grid">
 		<article class="admin-kpi-card">
 			<span class="admin-kpi-card__label">Captures personnalisées</span>
@@ -39,51 +39,62 @@
 	</section>
 
 	<form action="?page=public&mode=saveSettings" method="post" enctype="multipart/form-data" class="admin-stack">
-		<section class="admin-panel-grid">
-			<div class="admin-panel-grid__wide admin-stack">
-				<div class="admin-card">
-					<div class="card-body">
-						<label class="form-label fw-bold" for="homepage_intro_html">Encart éditorial de l’accueil</label>
-						<p class="text-white-50 small">Ce contenu apparaît sur la page d’accueil, au-dessus du bouton d’inscription. Il accepte la mise en forme enrichie.</p>
-						<textarea id="homepage_intro_html" name="homepage_intro_html" class="form-control bg-black text-white border-secondary rich-editor" rows="10">{$homepage_intro_html|escape:'html'}</textarea>
-					</div>
+		<details class="admin-fold admin-fold--compact">
+			<summary class="admin-fold__summary">
+				<div>
+					<h2 class="h5 mb-1">Contenus éditoriaux et navigation</h2>
+					<p class="text-white-50 small mb-0">Page d’accueil, règles, menus publics et Discord. Replié par défaut pour raccourcir l’ouverture mobile.</p>
 				</div>
+				<span class="admin-pill">Édition</span>
+			</summary>
+			<div class="admin-fold__body">
+				<section class="admin-panel-grid">
+					<div class="admin-panel-grid__wide admin-stack">
+						<div class="admin-card">
+							<div class="card-body">
+								<label class="form-label fw-bold" for="homepage_intro_html">Encart éditorial de l’accueil</label>
+								<p class="text-white-50 small">Ce contenu apparaît sur la page d’accueil, au-dessus du bouton d’inscription. Il accepte la mise en forme enrichie.</p>
+								<textarea id="homepage_intro_html" name="homepage_intro_html" class="form-control bg-black text-white border-secondary rich-editor" rows="10">{$homepage_intro_html|escape:'html'}</textarea>
+							</div>
+						</div>
 
-				<div class="admin-card">
-					<div class="card-body">
-						<label class="form-label fw-bold" for="public_rules_html">Page des règles</label>
-						<p class="text-white-50 small">Si ce champ est vide, le texte de règles issu du fichier de langue reste utilisé.</p>
-						<textarea id="public_rules_html" name="public_rules_html" class="form-control bg-black text-white border-secondary rich-editor" rows="10">{$public_rules_html|escape:'html'}</textarea>
-					</div>
-				</div>
-			</div>
-
-			<div class="admin-panel-grid__side admin-stack">
-				<div class="admin-card">
-					<div class="card-body">
-						<h2 class="h5 mb-3">Navigation publique</h2>
-						<div class="admin-toggle-list">
-							<label class="form-check-label"><input class="form-check-input me-2" type="checkbox" name="public_menu_register" {if $public_menu_register}checked{/if}>Inscription</label>
-							<label class="form-check-label"><input class="form-check-input me-2" type="checkbox" name="public_menu_news" {if $public_menu_news}checked{/if}>Actualités</label>
-							<label class="form-check-label"><input class="form-check-input me-2" type="checkbox" name="public_menu_rules" {if $public_menu_rules}checked{/if}>Règles</label>
-							<label class="form-check-label"><input class="form-check-input me-2" type="checkbox" name="public_menu_screens" {if $public_menu_screens}checked{/if}>Captures d’écran</label>
-							<label class="form-check-label"><input class="form-check-input me-2" type="checkbox" name="public_menu_banlist" {if $public_menu_banlist}checked{/if}>Bannis</label>
-							<label class="form-check-label"><input class="form-check-input me-2" type="checkbox" name="public_menu_battlehall" {if $public_menu_battlehall}checked{/if}>Temple de la renommée</label>
-							<label class="form-check-label"><input class="form-check-input me-2" type="checkbox" name="public_menu_disclamer" {if $public_menu_disclamer}checked{/if}>Contact administrateur</label>
+						<div class="admin-card">
+							<div class="card-body">
+								<label class="form-label fw-bold" for="public_rules_html">Page des règles</label>
+								<p class="text-white-50 small">Si ce champ est vide, le texte de règles issu du fichier de langue reste utilisé.</p>
+								<textarea id="public_rules_html" name="public_rules_html" class="form-control bg-black text-white border-secondary rich-editor" rows="10">{$public_rules_html|escape:'html'}</textarea>
+							</div>
 						</div>
 					</div>
-				</div>
 
-				<div class="admin-card">
-					<div class="card-body">
-						<h2 class="h5 mb-3">Discord</h2>
-						<label class="form-check-label d-block mb-2"><input class="form-check-input me-2" type="checkbox" name="discord_active" {if $discord_active}checked{/if}>Afficher Discord dans le menu et le pied de page</label>
-						<label class="form-label mt-3" for="discord_url">Lien Discord</label>
-						<input id="discord_url" name="discord_url" type="url" class="form-control bg-black text-white border-secondary" value="{$discord_url|escape:'html'}" placeholder="https://discord.gg/...">
+					<div class="admin-panel-grid__side admin-stack">
+						<div class="admin-card">
+							<div class="card-body">
+								<h2 class="h5 mb-3">Navigation publique</h2>
+								<div class="admin-toggle-list">
+									<label class="form-check-label"><input class="form-check-input me-2" type="checkbox" name="public_menu_register" {if $public_menu_register}checked{/if}>Inscription</label>
+									<label class="form-check-label"><input class="form-check-input me-2" type="checkbox" name="public_menu_news" {if $public_menu_news}checked{/if}>Actualités</label>
+									<label class="form-check-label"><input class="form-check-input me-2" type="checkbox" name="public_menu_rules" {if $public_menu_rules}checked{/if}>Règles</label>
+									<label class="form-check-label"><input class="form-check-input me-2" type="checkbox" name="public_menu_screens" {if $public_menu_screens}checked{/if}>Captures d’écran</label>
+									<label class="form-check-label"><input class="form-check-input me-2" type="checkbox" name="public_menu_banlist" {if $public_menu_banlist}checked{/if}>Bannis</label>
+									<label class="form-check-label"><input class="form-check-input me-2" type="checkbox" name="public_menu_battlehall" {if $public_menu_battlehall}checked{/if}>Temple de la renommée</label>
+									<label class="form-check-label"><input class="form-check-input me-2" type="checkbox" name="public_menu_disclamer" {if $public_menu_disclamer}checked{/if}>Contact administrateur</label>
+								</div>
+							</div>
+						</div>
+
+						<div class="admin-card">
+							<div class="card-body">
+								<h2 class="h5 mb-3">Discord</h2>
+								<label class="form-check-label d-block mb-2"><input class="form-check-input me-2" type="checkbox" name="discord_active" {if $discord_active}checked{/if}>Afficher Discord dans le menu et le pied de page</label>
+								<label class="form-label mt-3" for="discord_url">Lien Discord</label>
+								<input id="discord_url" name="discord_url" type="url" class="form-control bg-black text-white border-secondary" value="{$discord_url|escape:'html'}" placeholder="https://discord.gg/...">
+							</div>
+						</div>
 					</div>
-				</div>
+				</section>
 			</div>
-		</section>
+		</details>
 
 		<details class="admin-fold admin-fold--compact">
 			<summary class="admin-fold__summary">

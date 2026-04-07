@@ -1,6 +1,6 @@
 {block name="content"}
 
-<div class="container-fluid py-4 text-white admin-stack">
+<div class="container-fluid py-4 text-white admin-stack admin-overview-page">
 	<section class="admin-kpi-grid">
 		<article class="admin-kpi-card">
 			<span class="admin-kpi-card__label">Joueurs humains</span>
@@ -34,136 +34,165 @@
 		</article>
 	</section>
 
-	<section class="admin-overview-grid">
-		<div class="admin-card">
-			<div class="card-body admin-stack">
-				<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-					<div>
-						<h2 class="h4 mb-1">Exploitation en cours</h2>
-						<p class="text-white-50 mb-0">Vue synthétique pour décider vite sans ouvrir cinq pages différentes.</p>
-					</div>
-					<span class="admin-pill">Mis à jour {$dashboard.generatedAt}</span>
+	<details class="admin-fold admin-fold--compact" open>
+		<summary class="admin-fold__summary">
+			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+				<div>
+					<h2 class="h4 mb-1">Exploitation en cours</h2>
+					<p class="text-white-50 mb-0">Raccourcis, alertes et repères rapides. Ouvert par défaut pour le pilotage immédiat.</p>
 				</div>
-
-				<div class="admin-fact-grid">
-					<div class="admin-fact-card">
-						<span class="admin-fact-card__label">Univers</span>
-						<strong class="admin-fact-card__value">{$dashboard.game.universe}</strong>
-					</div>
-					<div class="admin-fact-card">
-						<span class="admin-fact-card__label">Univers disponibles</span>
-						<strong class="admin-fact-card__value">{$dashboard.game.universesTotal}</strong>
-					</div>
-					<div class="admin-fact-card">
-						<span class="admin-fact-card__label">Actualités publiées</span>
-						<strong class="admin-fact-card__value">{$dashboard.game.newsTotal}</strong>
-					</div>
-					<div class="admin-fact-card">
-						<span class="admin-fact-card__label">Cache applicatif</span>
-						<strong class="admin-fact-card__value">{$dashboard.system.cacheSizeHuman}</strong>
-					</div>
-				</div>
-
-				<div class="admin-panel-grid">
-					<div class="admin-panel-grid__wide">
-						<div class="admin-card h-100">
-							<div class="card-body">
-								<h3 class="h5 mb-3">Raccourcis d’exploitation</h3>
-								<div class="admin-quick-links">
-									<a class="admin-shortcut" href="?page=server">
-										<span class="admin-shortcut__icon"><i class="bi bi-hdd-network"></i></span>
-										<span class="admin-shortcut__content">
-											<strong>Configuration serveur</strong>
-											<span>Réglages globaux, identité, SMTP, sécurité, analytics.</span>
-										</span>
-									</a>
-									<a class="admin-shortcut" href="?page=universe">
-										<span class="admin-shortcut__icon"><i class="bi bi-globe2"></i></span>
-										<span class="admin-shortcut__content">
-											<strong>Configuration d’univers</strong>
-											<span>Équilibrage, paramètres gameplay et règles structurelles.</span>
-										</span>
-									</a>
-									<a class="admin-shortcut" href="?page=supervision">
-										<span class="admin-shortcut__icon"><i class="bi bi-activity"></i></span>
-										<span class="admin-shortcut__content">
-											<strong>Supervision détaillée</strong>
-											<span>Ressources hôte, Docker, Redis, cache et visibilité technique.</span>
-										</span>
-									</a>
-									<a class="admin-shortcut" href="?page=bots">
-										<span class="admin-shortcut__icon"><i class="bi bi-robot"></i></span>
-										<span class="admin-shortcut__content">
-											<strong>Pilotage des bots</strong>
-											<span>Présence continue, campagnes, hiérarchie et conformité bots.</span>
-										</span>
-									</a>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="admin-panel-grid__side">
-						<div class="admin-card h-100">
-							<div class="card-body">
-								<h3 class="h5 mb-3">Alertes immédiates</h3>
-								<div class="admin-flag-list">
-									{foreach from=$dashboard.alerts item=alert}
-										<div class="admin-flag admin-flag--{$alert.level}">{$alert.message}</div>
-									{/foreach}
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+				<span class="admin-pill">Mis à jour {$dashboard.generatedAt}</span>
 			</div>
-		</div>
+		</summary>
+		<div class="admin-fold__body">
+			<section class="admin-overview-grid">
+				<div class="admin-card">
+					<div class="card-body admin-stack">
+						<div class="admin-fact-grid">
+							<div class="admin-fact-card">
+								<span class="admin-fact-card__label">Univers</span>
+								<strong class="admin-fact-card__value">{$dashboard.game.universe}</strong>
+							</div>
+							<div class="admin-fact-card">
+								<span class="admin-fact-card__label">Univers disponibles</span>
+								<strong class="admin-fact-card__value">{$dashboard.game.universesTotal}</strong>
+							</div>
+							<div class="admin-fact-card">
+								<span class="admin-fact-card__label">Actualités publiées</span>
+								<strong class="admin-fact-card__value">{$dashboard.game.newsTotal}</strong>
+							</div>
+							<div class="admin-fact-card">
+								<span class="admin-fact-card__label">Cache applicatif</span>
+								<strong class="admin-fact-card__value">{$dashboard.system.cacheSizeHuman}</strong>
+							</div>
+						</div>
 
-		<div class="admin-card">
-			<div class="card-body admin-stack">
+						<details class="admin-fold admin-fold--compact">
+							<summary class="admin-fold__summary">
+								<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+									<div>
+										<h3 class="h5 mb-1">Actions et alertes</h3>
+										<p class="text-white-50 mb-0">Raccourcis d’exploitation et signaux immédiats, repliés pour raccourcir l’arrivée mobile.</p>
+									</div>
+									<span class="admin-pill">{$dashboard.alerts|@count} alerte(s)</span>
+								</div>
+							</summary>
+							<div class="admin-fold__body">
+								<div class="admin-panel-grid">
+									<div class="admin-panel-grid__wide">
+										<div class="admin-card h-100">
+											<div class="card-body">
+												<h3 class="h5 mb-3">Raccourcis d’exploitation</h3>
+												<div class="admin-quick-links">
+													<a class="admin-shortcut" href="?page=server">
+														<span class="admin-shortcut__icon"><i class="bi bi-hdd-network"></i></span>
+														<span class="admin-shortcut__content">
+															<strong>Configuration serveur</strong>
+															<span>Réglages globaux, identité, SMTP, sécurité, analytics.</span>
+														</span>
+													</a>
+													<a class="admin-shortcut" href="?page=universe">
+														<span class="admin-shortcut__icon"><i class="bi bi-globe2"></i></span>
+														<span class="admin-shortcut__content">
+															<strong>Configuration d’univers</strong>
+															<span>Équilibrage, paramètres gameplay et règles structurelles.</span>
+														</span>
+													</a>
+													<a class="admin-shortcut" href="?page=supervision">
+														<span class="admin-shortcut__icon"><i class="bi bi-activity"></i></span>
+														<span class="admin-shortcut__content">
+															<strong>Supervision détaillée</strong>
+															<span>Ressources hôte, Docker, Redis, cache et visibilité technique.</span>
+														</span>
+													</a>
+													<a class="admin-shortcut" href="?page=bots">
+														<span class="admin-shortcut__icon"><i class="bi bi-robot"></i></span>
+														<span class="admin-shortcut__content">
+															<strong>Pilotage des bots</strong>
+															<span>Présence continue, campagnes, hiérarchie et conformité bots.</span>
+														</span>
+													</a>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<div class="admin-panel-grid__side">
+										<div class="admin-card h-100">
+											<div class="card-body">
+												<h3 class="h5 mb-3">Alertes immédiates</h3>
+												<div class="admin-flag-list">
+													{foreach from=$dashboard.alerts item=alert}
+														<div class="admin-flag admin-flag--{$alert.level}">{$alert.message}</div>
+													{/foreach}
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</details>
+					</div>
+				</div>
+			</section>
+		</div>
+	</details>
+
+	<details class="admin-fold admin-fold--compact">
+		<summary class="admin-fold__summary">
+			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
 				<div>
 					<h2 class="h4 mb-1">Santé de la plateforme</h2>
-					<p class="text-white-50 mb-0">Les signaux clés à garder sous les yeux pendant l’exploitation.</p>
+					<p class="text-white-50 mb-0">Charge, mémoire, stockage et repères système, repliés par défaut.</p>
 				</div>
-				<div class="admin-status-list">
-					<div class="admin-status-row">
-						<span>Charge système</span>
-						<strong>{$dashboard.system.loadAverage.one} / {$dashboard.system.loadAverage.five} / {$dashboard.system.loadAverage.fifteen}</strong>
-					</div>
-					<div class="admin-status-row">
-						<span>Mémoire hôte</span>
-						<strong>{$dashboard.system.memory.usedHuman} / {$dashboard.system.memory.totalHuman}</strong>
-					</div>
-					<div class="admin-status-row">
-						<span>Espace disque</span>
-						<strong>{$dashboard.system.disk.usedHuman} / {$dashboard.system.disk.totalHuman}</strong>
-					</div>
-					<div class="admin-status-row">
-						<span>Redis</span>
-						<strong>{if $dashboard.system.redis.available}{$dashboard.system.redis.usedMemoryHuman}{else}Indisponible{/if}</strong>
-					</div>
-					<div class="admin-status-row">
-						<span>Docker Astra</span>
-						<strong>{if $dashboard.docker.available && $dashboard.docker.astraDetected}{$dashboard.docker.servicesTotal} service(s){elseif $dashboard.docker.available}Aucun service Astra détecté{else}Indisponible{/if}</strong>
-					</div>
-				</div>
-				<div class="admin-summary-list">
-					<div class="admin-summary-row">
-						<span>Hôte</span>
-						<strong>{$dashboard.system.hostName}</strong>
-					</div>
-					<div class="admin-summary-row">
-						<span>PHP</span>
-						<strong>{$dashboard.system.phpVersion}</strong>
-					</div>
-					<div class="admin-summary-row">
-						<span>Version jeu</span>
-						<strong>{$dashboard.system.appVersion}</strong>
-					</div>
-				</div>
+				<span class="admin-pill">Infrastructure</span>
 			</div>
+		</summary>
+		<div class="admin-fold__body">
+			<section class="admin-overview-grid">
+				<div class="admin-card">
+					<div class="card-body admin-stack">
+						<div class="admin-status-list">
+							<div class="admin-status-row">
+								<span>Charge système</span>
+								<strong>{$dashboard.system.loadAverage.one} / {$dashboard.system.loadAverage.five} / {$dashboard.system.loadAverage.fifteen}</strong>
+							</div>
+							<div class="admin-status-row">
+								<span>Mémoire hôte</span>
+								<strong>{$dashboard.system.memory.usedHuman} / {$dashboard.system.memory.totalHuman}</strong>
+							</div>
+							<div class="admin-status-row">
+								<span>Espace disque</span>
+								<strong>{$dashboard.system.disk.usedHuman} / {$dashboard.system.disk.totalHuman}</strong>
+							</div>
+							<div class="admin-status-row">
+								<span>Redis</span>
+								<strong>{if $dashboard.system.redis.available}{$dashboard.system.redis.usedMemoryHuman}{else}Indisponible{/if}</strong>
+							</div>
+							<div class="admin-status-row">
+								<span>Docker Astra</span>
+								<strong>{if $dashboard.docker.available && $dashboard.docker.astraDetected}{$dashboard.docker.servicesTotal} service(s){elseif $dashboard.docker.available}Aucun service Astra détecté{else}Indisponible{/if}</strong>
+							</div>
+						</div>
+						<div class="admin-summary-list">
+							<div class="admin-summary-row">
+								<span>Hôte</span>
+								<strong>{$dashboard.system.hostName}</strong>
+							</div>
+							<div class="admin-summary-row">
+								<span>PHP</span>
+								<strong>{$dashboard.system.phpVersion}</strong>
+							</div>
+							<div class="admin-summary-row">
+								<span>Version jeu</span>
+								<strong>{$dashboard.system.appVersion}</strong>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
 		</div>
-	</section>
+	</details>
 
 	<details class="admin-fold admin-fold--compact">
 		<summary class="admin-fold__summary">

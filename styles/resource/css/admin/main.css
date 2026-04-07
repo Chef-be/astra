@@ -2622,9 +2622,30 @@ a {
 		padding: 0.8rem 0.85rem;
 	}
 
-	.admin-kpi-grid,
+	.admin-kpi-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.75rem;
+	}
+
 	.admin-fact-grid {
 		grid-template-columns: 1fr;
+	}
+
+	.admin-kpi-card {
+		padding: 0.85rem;
+		border-radius: 18px;
+	}
+
+	.admin-kpi-card__value {
+		margin-top: 0.3rem;
+		font-size: 1.55rem;
+	}
+
+	.admin-overview-page .admin-fold__summary,
+	.admin-missions-page .admin-fold__summary,
+	.admin-public-page .admin-fold__summary,
+	.admin-supervision-page .admin-fold__summary {
+		padding: 0.9rem 0.95rem;
 	}
 
 	.admin-topbar__select {
