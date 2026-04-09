@@ -66,7 +66,6 @@
 <div class="search-shell">
 	<section class="search-hero">
 		<h1>Recherche</h1>
-		<p>Recherchez rapidement un joueur, une planète ou une alliance dans l’univers et affichez les résultats sans quitter la page.</p>
 	</section>
 
 	<section class="search-panel">

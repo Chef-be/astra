@@ -73,9 +73,11 @@ class Universe {
 			throw new Exception('Unknown universe ID: '.$universeId);
 		}
 
-		$session	= Session::load();
-		$session->emulatedUniverse	= $universeId;
-		$session->save();
+		if (!(MODE === 'CRON' && PHP_SAPI === 'cli')) {
+			$session	= Session::load();
+			$session->emulatedUniverse	= $universeId;
+			$session->save();
+		}
 
 		self::$emulatedUniverse	= $universeId;
 
@@ -94,6 +96,10 @@ class Universe {
 		if(MODE === 'INSTALL')
 		{
 			// Installer are always in the first universe.
+			return ROOT_UNI;
+		}
+
+		if (MODE === 'CRON' && PHP_SAPI === 'cli') {
 			return ROOT_UNI;
 		}
 

@@ -32,11 +32,11 @@
 <script type="text/javascript">
 function check(){
 	if(document.message.text.value == '') {
-		alert('{$LNG.mg_empty_text}');
+		Dialog.alert('{$LNG.mg_empty_text}', null, { title: 'Diplomatie' });
 		return false;
 	} else {
 		$.getJSON('game.php?page=alliance&mode=admin&action=diplomacyCreateProcessor&ajax=1&'+$('#message').serialize(), function(data) {
-			alert(data.message);
+			showGameToast(data.message, data.error ? 'danger' : 'success');
 			if(!data.error) {
 				parent.location.reload();
 			}

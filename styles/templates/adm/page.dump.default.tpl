@@ -1,14 +1,14 @@
 {block name="content"}
-<div class="container-fluid py-3 text-white">
-	<div class="admin-toolbar mb-3">
-		<div class="admin-mini-hero flex-grow-1">
-			<h2 class="h3">Sauvegarde SQL</h2>
-			<p>Choisis les tables utiles, puis lance un export SQL ciblé sans exporter toute la base.</p>
+<div class="admin-settings-shell admin-stack">
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Export</span>
+			<h2>Sauvegarde SQL</h2>
 		</div>
-		<div class="admin-stat-strip">
-			<span class="admin-stat-pill">{$dumpData.sqlTables|@count} tables disponibles</span>
+		<div class="admin-headerline__actions">
+			<span class="admin-pill">Tables {$dumpData.sqlTables|@count}</span>
 		</div>
-	</div>
+	</section>
 
 	<form action="admin.php?page=dump&mode=dump" class="admin-card" method="post">
 		<input type="hidden" name="action" value="dump">
@@ -23,21 +23,20 @@
 					<span>Export brut, prêt à télécharger</span>
 				</div>
 			</div>
-			<div class="admin-toolbar mb-3">
-				<div class="form-check">
+			<div class="admin-table-toolbar mb-3">
+				<div class="form-check mb-0">
 					<input type="checkbox" id="selectAll" class="form-check-input">
 					<label class="form-check-label" for="selectAll">{$LNG.du_select_all_tables}</label>
 				</div>
-				<div class="admin-stat-strip">
-					<span class="admin-stat-pill">Sélection multiple</span>
-					<span class="admin-stat-pill">Export à la demande</span>
+				<div class="admin-table-toolbar__meta">
+					<span class="admin-pill">Sélection multiple</span>
+					<span class="admin-pill">Export à la demande</span>
 				</div>
 			</div>
 			<details class="admin-fold admin-fold--compact" open>
 				<summary class="admin-fold__summary">
 					<div>
 						<h3 class="h5 mb-1">{$LNG.du_choose_tables}</h3>
-						<p class="text-white-50 mb-0">La liste complète reste accessible ici, mais n’écrase plus toute la page sur mobile.</p>
 					</div>
 					<span class="admin-pill">{$dumpData.sqlTables|@count} tables</span>
 				</summary>

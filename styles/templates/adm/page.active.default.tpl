@@ -1,20 +1,13 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Validation des comptes</span>
-			<h1 class="admin-hero__title">Comptes en attente d’activation</h1>
-			<p class="admin-hero__subtitle">Activez les inscriptions encore en attente ou supprimez les demandes obsolètes avant leur première connexion.</p>
+	<section class="admin-headerline">
+		<div class="admin-headerline__lead">
+			<span class="admin-headerline__eyebrow">Validation des comptes</span>
+			<h1 class="admin-headerline__title">Comptes en attente d’activation</h1>
 		</div>
-		<div class="admin-stat-strip">
-			<div class="admin-stat-card">
-				<span class="admin-stat-card__label">Comptes en attente</span>
-				<strong class="admin-stat-card__value">{$pendingCount|default:0}</strong>
-			</div>
-			<div class="admin-stat-card">
-				<span class="admin-stat-card__label">Univers</span>
-				<strong class="admin-stat-card__value">{$uni}</strong>
-			</div>
+		<div class="admin-headerline__meta">
+			<span class="admin-pill">{$pendingCount|default:0} en attente</span>
+			<span class="admin-pill">Univers {$uni}</span>
 		</div>
 	</section>
 
@@ -22,7 +15,6 @@
 		<div class="admin-table-toolbar">
 			<div>
 				<h2 class="h5 mb-1">File de validation</h2>
-				<p class="text-white-50 mb-0">Chaque activation ouvre immédiatement l’accès au jeu pour le joueur concerné.</p>
 			</div>
 			<div class="admin-table-toolbar__meta">
 				<span class="admin-pill">{$pendingCount|default:0} compte(s) à traiter</span>

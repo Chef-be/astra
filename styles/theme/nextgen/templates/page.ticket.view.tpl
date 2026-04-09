@@ -4,7 +4,6 @@
 	<div class="d-flex justify-content-between align-items-center mb-4">
 		<div>
 			<h1 class="h3 text-white mb-1">Ticket #{$ticketID}</h1>
-			<p class="text-white-50 mb-0">Consultez l’historique et répondez directement depuis cette page.</p>
 		</div>
 		<a class="btn btn-outline-light btn-sm" href="game.php?page=ticket">Retour à la liste</a>
 	</div>

@@ -10,8 +10,8 @@
 	.tech-tree-hero {
 		display: grid;
 		grid-template-columns: 1fr auto;
-		gap: 1rem;
-		padding: 1.1rem 1.2rem;
+		gap: 0.85rem;
+		padding: 0.95rem 1rem;
 		border-radius: 1.2rem;
 		border: 1px solid rgba(255, 214, 102, 0.16);
 		background:
@@ -22,28 +22,21 @@
 	}
 
 	.tech-tree-hero h1 {
-		margin: 0 0 0.35rem;
-		color: #f8fbff;
-		font-size: 1.6rem;
-	}
-
-	.tech-tree-hero p {
 		margin: 0;
-		max-width: 72ch;
-		color: rgba(255, 255, 255, 0.74);
-		line-height: 1.55;
+		color: #f8fbff;
+		font-size: 1.42rem;
 	}
 
 	.tech-tree-stats {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.75rem;
+		gap: 0.6rem;
 		justify-content: end;
 	}
 
 	.tech-tree-stat {
-		min-width: 150px;
-		padding: 0.8rem 0.95rem;
+		min-width: 138px;
+		padding: 0.68rem 0.82rem;
 		border-radius: 1rem;
 		background: rgba(255, 255, 255, 0.04);
 		border: 1px solid rgba(255, 255, 255, 0.07);
@@ -60,7 +53,7 @@
 
 	.tech-tree-stat-value {
 		display: block;
-		font-size: 1.15rem;
+		font-size: 1.02rem;
 		font-weight: 700;
 		color: #f8fbff;
 	}
@@ -69,8 +62,8 @@
 		display: flex;
 		align-items: center;
 		flex-wrap: nowrap;
-		gap: 0.8rem;
-		padding: 0.95rem 1rem;
+		gap: 0.75rem;
+		padding: 0.78rem 0.9rem;
 		border-radius: 1.05rem;
 		background: rgba(7, 11, 20, 0.9);
 		border: 1px solid rgba(255, 255, 255, 0.07);
@@ -111,8 +104,8 @@
 		flex-wrap: wrap;
 		align-items: center;
 		justify-content: space-between;
-		gap: 0.8rem;
-		padding: 0.9rem 1rem;
+		gap: 0.7rem;
+		padding: 0.78rem 0.9rem;
 		cursor: pointer;
 		list-style: none;
 	}
@@ -130,7 +123,7 @@
 
 	.tech-tree-section-title h2 {
 		margin: 0;
-		font-size: 1.05rem;
+		font-size: 0.98rem;
 		color: #ffd666;
 	}
 
@@ -165,7 +158,7 @@
 		align-items: center;
 		gap: 0.6rem;
 		color: rgba(255, 255, 255, 0.68);
-		font-size: 0.82rem;
+		font-size: 0.78rem;
 	}
 
 	.tech-tree-summary-meta::after {
@@ -180,8 +173,8 @@
 
 	.tech-tree-list {
 		display: grid;
-		gap: 0.55rem;
-		padding: 0 1rem 1rem;
+		gap: 0.5rem;
+		padding: 0.78rem 0.9rem 0.9rem;
 	}
 
 	.tech-tree-entry {
@@ -193,10 +186,10 @@
 
 	.tech-tree-entry > summary {
 		display: grid;
-		grid-template-columns: 70px minmax(0, 1fr) auto;
-		gap: 0.8rem;
+		grid-template-columns: 58px minmax(0, 1fr) auto;
+		gap: 0.68rem;
 		align-items: center;
-		padding: 0.7rem 0.8rem;
+		padding: 0.62rem 0.72rem;
 		list-style: none;
 		cursor: pointer;
 	}
@@ -210,9 +203,9 @@
 	}
 
 	.tech-tree-thumb {
-		width: 70px;
-		height: 70px;
-		border-radius: 0.9rem;
+		width: 58px;
+		height: 58px;
+		border-radius: 0.82rem;
 		border: 1px solid rgba(255, 214, 102, 0.18);
 		background: rgba(255, 255, 255, 0.03);
 		object-fit: cover;
@@ -228,7 +221,7 @@
 
 	.tech-tree-entry-title {
 		color: #f8fbff;
-		font-size: 0.95rem;
+		font-size: 0.9rem;
 		font-weight: 700;
 		text-decoration: none;
 	}
@@ -240,7 +233,7 @@
 	.tech-tree-entry-desc {
 		margin: 0;
 		color: rgba(255, 255, 255, 0.68);
-		font-size: 0.8rem;
+		font-size: 0.76rem;
 		line-height: 1.4;
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
@@ -252,7 +245,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: end;
-		gap: 0.45rem;
+		gap: 0.4rem;
 	}
 
 	.tech-tree-entry-meta::after {
@@ -270,7 +263,7 @@
 	.tech-tree-entry-body {
 		display: grid;
 		gap: 0.55rem;
-		padding: 0 0.8rem 0.8rem 0.8rem;
+		padding: 0 0.72rem 0.72rem 0.72rem;
 	}
 
 	.tech-tree-req-list {
@@ -312,9 +305,9 @@
 	}
 
 	.tech-tree-empty {
-		padding: 0.9rem 1rem;
+		padding: 0.78rem 0.88rem;
 		color: rgba(255, 255, 255, 0.62);
-		font-size: 0.84rem;
+		font-size: 0.8rem;
 	}
 
 	.tech-tree-search-state {
@@ -396,7 +389,7 @@
 
 	<div class="tech-tree-sections" id="techTreeSections">
 		{foreach $techTreeSections as $section}
-		<details class="tech-tree-section" data-section="{$section.key}"{if $section@first} open{/if}>
+		<details class="tech-tree-section ng-disclosure" data-section="{$section.key}" data-section-title="{$section.title|escape:'html'}"{if $section@first} open{/if}>
 			<summary>
 				<div class="tech-tree-section-title">
 					<h2>{$section.title}</h2>
@@ -406,9 +399,9 @@
 				</div>
 				<div class="tech-tree-summary-meta">Ouvrir la section</div>
 			</summary>
-			<div class="tech-tree-list">
+			<div class="tech-tree-list ng-disclosure__body">
 				{foreach $section.entries as $entry}
-				<details class="tech-tree-entry" data-name="{$LNG.tech.{$entry.id}|escape:'html'}" data-ready="{if $entry.ready}1{else}0{/if}" data-description="{$LNG.shortDescription.{$entry.id}|escape:'html'}">
+				<details class="tech-tree-entry ng-disclosure" data-name="{$LNG.tech.{$entry.id}|escape:'html'}" data-ready="{if $entry.ready}1{else}0{/if}" data-description="{$LNG.shortDescription.{$entry.id}|escape:'html'}">
 					<summary>
 						<a href="#" onclick="return Dialog.info({$entry.id});">
 							<img class="tech-tree-thumb" src="{$dpath}gebaeude/{$entry.id}.{$entry.image}" alt="{$LNG.tech.{$entry.id}}">
@@ -426,7 +419,7 @@
 							<span class="tech-tree-pill tech-tree-pill--neutral">{if $entry.requirements}{count($entry.requirements)} prérequis{else}0 prérequis{/if}</span>
 						</div>
 					</summary>
-					<div class="tech-tree-entry-body">
+					<div class="tech-tree-entry-body ng-disclosure__body">
 						{if $entry.requirements}
 						<div class="tech-tree-req-list">
 							{foreach $entry.requirements as $requireId => $requirement}
@@ -453,9 +446,6 @@
 		Aucun élément ne correspond aux filtres actuels.
 	</div>
 </div>
-{/block}
-
-{block name="script" append}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 	const searchInput = document.getElementById('techTreeSearch');
@@ -463,13 +453,18 @@ document.addEventListener('DOMContentLoaded', function() {
 	const sections = Array.from(document.querySelectorAll('.tech-tree-section'));
 	const searchState = document.getElementById('techTreeSearchState');
 
+	if (!searchInput || !filterSelect || !sections.length) {
+		return;
+	}
+
 	function normalizeTechTreeText(value) {
-		return (value || '')
-			.toString()
-			.normalize('NFD')
-			.replace(/[\u0300-\u036f]/g, '')
-			.toLowerCase()
-			.trim();
+		let normalizedValue = (value || '').toString();
+
+		if (typeof normalizedValue.normalize === 'function') {
+			normalizedValue = normalizedValue.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+		}
+
+		return normalizedValue.toLowerCase().trim();
 	}
 
 	function applyTechTreeFilters() {
@@ -481,13 +476,15 @@ document.addEventListener('DOMContentLoaded', function() {
 		sections.forEach((section) => {
 			let visibleCount = 0;
 			const entries = Array.from(section.querySelectorAll('.tech-tree-entry'));
+			const sectionTitle = normalizeTechTreeText(section.dataset.sectionTitle || '');
+			const sectionMatch = query === '' || sectionTitle.includes(query);
 
 			entries.forEach((entry) => {
 				const name = normalizeTechTreeText(entry.dataset.name || '');
 				const description = normalizeTechTreeText(entry.dataset.description || '');
 				const isReady = entry.dataset.ready === '1';
 
-				const queryMatch = query === '' || name.includes(query) || description.includes(query);
+				const queryMatch = query === '' || sectionMatch || name.includes(query) || description.includes(query);
 				const filterMatch = filter === 'all' || (filter === 'ready' && isReady) || (filter === 'blocked' && !isReady);
 				const visible = queryMatch && filterMatch;
 
@@ -516,6 +513,8 @@ document.addEventListener('DOMContentLoaded', function() {
 	}
 
 	searchInput.addEventListener('input', applyTechTreeFilters);
+	searchInput.addEventListener('search', applyTechTreeFilters);
+	searchInput.addEventListener('keyup', applyTechTreeFilters);
 	filterSelect.addEventListener('change', applyTechTreeFilters);
 	applyTechTreeFilters();
 });

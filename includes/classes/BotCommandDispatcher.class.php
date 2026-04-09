@@ -419,11 +419,16 @@ class BotCommandDispatcher
 			return array('status' => 'rejected', 'responseText' => 'Bot source introuvable pour le message de chat.');
 		}
 
-		foreach ($botIds as $botId) {
-			$this->messagingService->queueSocialMessage((int) $botId, 'bots', isset($payload['message']) ? $payload['message'] : '', null, isset($payload['target_username']) ? $payload['target_username'] : '', $payload);
+		$channelKey = !empty($payload['channel_key']) ? trim((string) $payload['channel_key']) : 'bots';
+		if (!in_array($channelKey, array('bots', 'global', 'alliance', 'admin', 'auto'), true)) {
+			$channelKey = 'bots';
 		}
 
-		return array('status' => 'done', 'responseText' => sprintf('Message de chat préparé pour %d bot(s).', count($botIds)));
+		foreach ($botIds as $botId) {
+			$this->messagingService->queueSocialMessage((int) $botId, $channelKey, isset($payload['message']) ? $payload['message'] : '', null, isset($payload['target_username']) ? $payload['target_username'] : '', $payload);
+		}
+
+		return array('status' => 'done', 'responseText' => sprintf('Message de chat préparé pour %d bot(s) sur le canal %s.', count($botIds), $channelKey));
 	}
 
 	protected function createCampaign(array $command, array $payload, array $targetBotIds)

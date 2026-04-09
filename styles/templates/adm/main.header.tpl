@@ -10,7 +10,7 @@
 	<meta http-equiv="refresh" content="{$gotoinsec};URL={$goto}">
 	{/if}
 
-		{assign var="REV" value="1.0.0.47" nocache}
+		{assign var="REV" value="1.0.0.51" nocache}
 
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,7 +20,7 @@
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/base/jquery.fancybox.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="./styles/resource/css/base/validationEngine.jquery.css?v={$REV}">
 	<link rel="stylesheet" type="text/css" href="styles/resource/css/login/icon-font/style.css?v={$REV}">
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" type="text/css">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Outfit:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" type="text/css">
 	<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
 
 	<!-- Bootstrap 5 - No IE support -->
@@ -47,6 +47,12 @@
 	<script type="text/javascript">
 	$(function() {
 		{$execscript}
+		$('[data-bs-toggle="tooltip"]').each(function() {
+			new bootstrap.Tooltip(this, {
+				container: 'body',
+				boundary: document.body
+			});
+		});
 	});
 	</script>
 

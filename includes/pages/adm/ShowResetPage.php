@@ -22,6 +22,7 @@ if ($USER['id'] != ROOT_USER || $_GET['sid'] != session_id()) exit;
 function ShowResetPage()
 {
 	global $LNG, $reslist, $resource;
+	require_once ROOT_PATH.'includes/classes/AdminUiService.class.php';
 	$template	= new template();
 	$config	= Config::get(ROOT_UNI);
 
@@ -150,6 +151,62 @@ function ShowResetPage()
 		exit;
 	}
 
+	$resetGroups = array(
+		array(
+			'title' => $LNG['re_player_and_planets'],
+			'items' => array(
+				array('name' => 'players', 'label' => $LNG['re_reset_player'], 'tag' => 'Compte', 'image' => AdminUiService::getThemeAssetUrl(902)),
+				array('name' => 'planets', 'label' => $LNG['re_reset_planets'], 'tag' => 'Orbites', 'image' => './styles/theme/nextgen/planeten/small/s_normaltempplanet04.jpg'),
+				array('name' => 'moons', 'label' => $LNG['re_reset_moons'], 'tag' => 'Orbites', 'image' => './styles/theme/nextgen/planeten/small/s_dschjungelplanet02.jpg'),
+			),
+		),
+		array(
+			'title' => $LNG['re_defenses_and_ships'],
+			'items' => array(
+				array('name' => 'defenses', 'label' => $LNG['re_defenses'], 'tag' => 'Combat', 'image' => AdminUiService::getThemeAssetUrl(401)),
+				array('name' => 'ships', 'label' => $LNG['re_ships'], 'tag' => 'Combat', 'image' => AdminUiService::getThemeAssetUrl(202)),
+				array('name' => 'h_d', 'label' => $LNG['re_reset_hangar'], 'tag' => 'File', 'image' => AdminUiService::getThemeAssetUrl(21)),
+			),
+		),
+		array(
+			'title' => $LNG['re_buldings'],
+			'items' => array(
+				array('name' => 'edif_p', 'label' => $LNG['re_buildings_pl'], 'tag' => 'Planète', 'image' => AdminUiService::getThemeAssetUrl(1)),
+				array('name' => 'edif_l', 'label' => $LNG['re_buildings_lu'], 'tag' => 'Lune', 'image' => AdminUiService::getThemeAssetUrl(41)),
+				array('name' => 'edif', 'label' => $LNG['re_reset_buldings'], 'tag' => 'File', 'image' => AdminUiService::getThemeAssetUrl(14)),
+			),
+		),
+		array(
+			'title' => $LNG['re_inve_ofis'],
+			'items' => array(
+				array('name' => 'ofis', 'label' => $LNG['re_ofici'], 'tag' => 'Compte', 'image' => AdminUiService::getThemeAssetUrl(601)),
+				array('name' => 'inves', 'label' => $LNG['re_investigations'], 'tag' => 'Recherche', 'image' => AdminUiService::getThemeAssetUrl(106)),
+				array('name' => 'inves_c', 'label' => $LNG['re_reset_invest'], 'tag' => 'File', 'image' => AdminUiService::getThemeAssetUrl(31)),
+			),
+		),
+		array(
+			'title' => $LNG['re_resources'],
+			'items' => array(
+				array('name' => 'dark', 'label' => $LNG['re_resources_dark'], 'tag' => 'Compte', 'image' => AdminUiService::getThemeAssetUrl(921)),
+				array('name' => 'resources', 'label' => $LNG['re_resources_met_cry'], 'tag' => 'Planète', 'image' => './styles/theme/nextgen/img/resources/metal.webp'),
+			),
+		),
+		array(
+			'title' => $LNG['re_general'],
+			'items' => array(
+				array('name' => 'notes', 'label' => $LNG['re_reset_notes'], 'tag' => 'Social', 'image' => AdminUiService::getThemeAssetUrl(106)),
+				array('name' => 'rw', 'label' => $LNG['re_reset_rw'], 'tag' => 'Combat', 'image' => AdminUiService::getThemeAssetUrl(215)),
+				array('name' => 'friends', 'label' => $LNG['re_reset_buddies'], 'tag' => 'Social', 'image' => AdminUiService::getThemeAssetUrl(604)),
+				array('name' => 'alliances', 'label' => $LNG['re_reset_allys'], 'tag' => 'Alliance', 'image' => AdminUiService::getThemeAssetUrl(603)),
+				array('name' => 'fleets', 'label' => $LNG['re_reset_fleets'], 'tag' => 'Vol', 'image' => AdminUiService::getThemeAssetUrl(207)),
+				array('name' => 'errors', 'label' => $LNG['re_reset_errors'], 'tag' => 'Journal', 'image' => AdminUiService::getThemeAssetUrl(108)),
+				array('name' => 'banneds', 'label' => $LNG['re_reset_banned'], 'tag' => 'Sanction', 'image' => AdminUiService::getThemeAssetUrl(109)),
+				array('name' => 'messages', 'label' => $LNG['re_reset_messages'], 'tag' => 'Messages', 'image' => AdminUiService::getThemeAssetUrl(202)),
+				array('name' => 'statpoints', 'label' => $LNG['re_reset_statpoints'], 'tag' => 'Stats', 'image' => AdminUiService::getThemeAssetUrl(113)),
+			),
+		),
+	);
+
 	$template->assign_vars(array(
 		'button_submit'						=> $LNG['button_submit'],
 		're_reset_universe_confirmation'	=> $LNG['re_reset_universe_confirmation'],
@@ -184,6 +241,7 @@ function ShowResetPage()
 		're_reset_player'					=> $LNG['re_reset_player'],
 		're_player_and_planets'				=> $LNG['re_player_and_planets'],
 		're_general'						=> $LNG['re_general'],
+		'resetGroups'						=> $resetGroups,
 	));
 
 	$template->show('ResetPage.tpl');

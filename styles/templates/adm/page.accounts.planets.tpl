@@ -1,10 +1,9 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Éditeur de compte</span>
-			<h1 class="admin-hero__title">{$planetHero.title}</h1>
-			<p class="admin-hero__subtitle">{$planetHero.subtitle}</p>
+	<section class="admin-headerline">
+		<div class="admin-headerline__lead">
+			<span class="admin-headerline__eyebrow">Éditeur de compte</span>
+			<h1 class="admin-headerline__title">{$planetHero.title}</h1>
 		</div>
 	</section>
 
@@ -31,15 +30,25 @@
 			</label>
 		</div>
 
-		<div class="admin-form-row">
-			<label class="admin-field-card"><span>{$LNG.ad_pla_delete_b}</span><input class="form-check-input mt-2" name="0_buildings" type="checkbox"></label>
-			<label class="admin-field-card"><span>{$LNG.ad_pla_delete_s}</span><input class="form-check-input mt-2" name="0_ships" type="checkbox"></label>
-			<label class="admin-field-card"><span>{$LNG.ad_pla_delete_d}</span><input class="form-check-input mt-2" name="0_defenses" type="checkbox"></label>
-			<label class="admin-field-card"><span>{$LNG.ad_pla_delete_hd}</span><input class="form-check-input mt-2" name="0_c_hangar" type="checkbox"></label>
-			<label class="admin-field-card"><span>{$LNG.ad_pla_delete_cb}</span><input class="form-check-input mt-2" name="0_c_buildings" type="checkbox"></label>
+		<div class="admin-asset-panel">
+			<div class="admin-asset-panel__header">
+				<h4>Remises à zéro ciblées</h4>
+			</div>
+			<div class="admin-asset-board admin-asset-board--dense">
+				{foreach from=$planetResetCards item=card}
+					{include file='component.asset_toggle.tpl'
+						name=$card.name
+						title=$card.title
+						tag=$card.tag
+						tooltip=$card.tooltip
+						image=$card.image
+						checked=$card.checked
+					}
+				{/foreach}
+			</div>
 		</div>
 
-		<div class="admin-field-card">
+		<div class="admin-field-card admin-field--full">
 			<span>{$LNG.ad_pla_change_p}</span>
 			<div class="d-flex flex-wrap gap-2 align-items-center">
 				<input class="form-check-input" name="change_position" type="checkbox" title="{$LNG.ad_pla_change_pp}">

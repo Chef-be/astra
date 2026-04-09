@@ -1,10 +1,9 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Conformité</span>
-			<h1 class="admin-hero__title">Mentions légales</h1>
-			<p class="admin-hero__subtitle">Centralisez les coordonnées de contact et la notice légale affichée sur la plateforme publique.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Conformité</span>
+			<h2>Mentions légales</h2>
 		</div>
 	</section>
 

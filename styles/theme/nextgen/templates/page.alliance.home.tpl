@@ -158,7 +158,7 @@
 	</tr>
 	<tr>
 		<td>
-			<a href="game.php?page=alliance&amp;mode=close" onclick="return confirm('{$LNG.al_leave_ally}');">
+			<a href="game.php?page=alliance&amp;mode=close" data-confirm-message="{$LNG.al_leave_ally|escape:'html'}" data-confirm-title="Alliance" data-confirm-confirm-label="Quitter" data-confirm-variant="danger">
 				<button class="btn btn-block btn-danger text-white p-1 fs-12 fw-bold">{$LNG.al_continue}</button>
 			</a>
 		</td>

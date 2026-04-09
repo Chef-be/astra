@@ -1,41 +1,37 @@
 {block name="content"}
 <div class="container-fluid py-4 text-white admin-stack admin-public-page">
-	<section class="admin-kpi-grid">
-		<article class="admin-kpi-card">
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Site public</span>
+			<h2>Site public</h2>
+		</div>
+		<div class="admin-headerline__actions">
+			<a class="admin-shell-action admin-shell-action--light" href="index.php" target="_blank" rel="noopener">Voir le site public</a>
+			<a class="admin-shell-action admin-shell-action--accent" href="admin.php?page=news">Actualités</a>
+		</div>
+	</section>
+
+	<section class="admin-kpi-grid admin-kpi-grid--public">
+		<article class="admin-kpi-card admin-kpi-card--micro">
 			<span class="admin-kpi-card__label">Captures personnalisées</span>
 			<strong class="admin-kpi-card__value">{$public_screenshots|@count}</strong>
 			<span class="admin-kpi-card__meta">galerie publique éditable</span>
 		</article>
-		<article class="admin-kpi-card">
+		<article class="admin-kpi-card admin-kpi-card--micro">
 			<span class="admin-kpi-card__label">Discord public</span>
 			<strong class="admin-kpi-card__value">{if $discord_active}Actif{else}Inactif{/if}</strong>
 			<span class="admin-kpi-card__meta">menu et pied de page</span>
 		</article>
-		<article class="admin-kpi-card">
+		<article class="admin-kpi-card admin-kpi-card--micro">
 			<span class="admin-kpi-card__label">SEO titre</span>
 			<strong class="admin-kpi-card__value">{if $seo_meta_title|trim neq ''}Renseigné{else}À compléter{/if}</strong>
 			<span class="admin-kpi-card__meta">métadonnées publiques</span>
 		</article>
-		<article class="admin-kpi-card">
+		<article class="admin-kpi-card admin-kpi-card--micro">
 			<span class="admin-kpi-card__label">Page des règles</span>
 			<strong class="admin-kpi-card__value">{if $public_rules_html|trim neq ''}Personnalisée{else}Langue par défaut{/if}</strong>
 			<span class="admin-kpi-card__meta">texte joueur</span>
 		</article>
-	</section>
-
-	<section class="admin-card">
-		<div class="card-body admin-stack">
-			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-				<div>
-					<h2 class="h4 mb-1">Pilotage du site public</h2>
-					<p class="text-white-50 mb-0">Centralisez contenu éditorial, navigation, galerie, questions secrètes et métadonnées depuis une seule vue d’administration.</p>
-				</div>
-				<div class="admin-cluster">
-					<a class="admin-shell-action admin-shell-action--light" href="index.php" target="_blank" rel="noopener">Voir le site public</a>
-					<a class="admin-shell-action admin-shell-action--accent" href="admin.php?page=news">Actualités</a>
-				</div>
-			</div>
-		</div>
 	</section>
 
 	<form action="?page=public&mode=saveSettings" method="post" enctype="multipart/form-data" class="admin-stack">
@@ -43,9 +39,8 @@
 			<summary class="admin-fold__summary">
 				<div>
 					<h2 class="h5 mb-1">Contenus éditoriaux et navigation</h2>
-					<p class="text-white-50 small mb-0">Page d’accueil, règles, menus publics et Discord. Replié par défaut pour raccourcir l’ouverture mobile.</p>
 				</div>
-				<span class="admin-pill">Édition</span>
+				<span class="admin-pill">Principal</span>
 			</summary>
 			<div class="admin-fold__body">
 				<section class="admin-panel-grid">
@@ -53,7 +48,6 @@
 						<div class="admin-card">
 							<div class="card-body">
 								<label class="form-label fw-bold" for="homepage_intro_html">Encart éditorial de l’accueil</label>
-								<p class="text-white-50 small">Ce contenu apparaît sur la page d’accueil, au-dessus du bouton d’inscription. Il accepte la mise en forme enrichie.</p>
 								<textarea id="homepage_intro_html" name="homepage_intro_html" class="form-control bg-black text-white border-secondary rich-editor" rows="10">{$homepage_intro_html|escape:'html'}</textarea>
 							</div>
 						</div>
@@ -61,7 +55,6 @@
 						<div class="admin-card">
 							<div class="card-body">
 								<label class="form-label fw-bold" for="public_rules_html">Page des règles</label>
-								<p class="text-white-50 small">Si ce champ est vide, le texte de règles issu du fichier de langue reste utilisé.</p>
 								<textarea id="public_rules_html" name="public_rules_html" class="form-control bg-black text-white border-secondary rich-editor" rows="10">{$public_rules_html|escape:'html'}</textarea>
 							</div>
 						</div>
@@ -100,7 +93,6 @@
 			<summary class="admin-fold__summary">
 				<div>
 					<h2 class="h5 mb-1">Captures d’écran</h2>
-					<p class="text-white-50 small mb-0">Gestion de la galerie publique, repliée par défaut pour garder la page éditoriale lisible sur mobile.</p>
 				</div>
 				<span class="admin-pill">{$public_screenshots|@count} visuel(x)</span>
 			</summary>
@@ -108,10 +100,7 @@
 				<section class="admin-card">
 					<div class="card-body admin-stack">
 						<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-							<div>
-								<h2 class="h5 mb-1">Captures d’écran</h2>
-								<p class="text-white-50 small mb-0">Réorganisez l’ordre par glisser-déposer, choisissez la capture mise en avant et enrichissez chaque description.</p>
-							</div>
+							<div class="admin-pill">Ordre libre et mise en avant</div>
 							<input type="file" name="public_screens_upload[]" multiple accept=".png,.jpg,.jpeg,.gif,.webp" class="form-control bg-black text-white border-secondary" style="max-width:360px;">
 						</div>
 						{if $public_screenshots|@count > 0}
@@ -152,9 +141,8 @@
 			<summary class="admin-fold__summary">
 				<div>
 					<h2 class="h5 mb-1">SEO, métadonnées et sécurité d’inscription</h2>
-					<p class="text-white-50 small mb-0">Bloc secondaire replié par défaut pour laisser la priorité au contenu éditorial principal.</p>
 				</div>
-				<span class="admin-pill">Secondaire</span>
+				<span class="admin-pill">SEO</span>
 			</summary>
 			<div class="admin-fold__body">
 				<section class="admin-panel-grid">
@@ -162,7 +150,6 @@
 						<div class="admin-card h-100">
 							<div class="card-body">
 								<label class="form-label fw-bold" for="secret_question_options">Questions secrètes de l’inscription</label>
-								<p class="text-white-50 small">Une question par ligne. Cette liste sert à l’inscription et à la validation serveur.</p>
 								<textarea id="secret_question_options" name="secret_question_options" class="form-control bg-black text-white border-secondary" rows="8">{$secret_question_options|escape:'html'}</textarea>
 							</div>
 						</div>
@@ -200,7 +187,6 @@
 		<section class="admin-form-submitbar">
 			<div class="admin-form-submitbar__copy">
 				<strong>Enregistrer le site public</strong>
-				<span>La sauvegarde applique les textes, menus, captures, questions secrètes et métadonnées visibles sur cette page.</span>
 			</div>
 			<div class="d-flex justify-content-end">
 				<button type="submit" class="btn btn-primary px-4">Enregistrer</button>

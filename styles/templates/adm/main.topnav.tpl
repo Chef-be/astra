@@ -1,83 +1,91 @@
 <script>
 $(function() {
-	$('.js-admin-universe').on('change', function() {
-		var url = new URL(window.location.href);
-		url.searchParams.set('uni', $(this).val());
-		window.location.href = url.toString();
+	$('#adminSidebarToggle').on('click', function() {
+		$('body').toggleClass('bridge-nav-open');
 	});
 
-	$('.js-admin-quickjump').on('change', function() {
+	$('.js-bridge-quickjump').on('change', function() {
 		if ($(this).val()) {
 			window.location.href = $(this).val();
 		}
 	});
 
-	$('.js-admin-density-toggle').on('click', function() {
-		$('body').toggleClass('admin-density-compact');
-		localStorage.setItem('astra-admin-density', $('body').hasClass('admin-density-compact') ? 'compact' : 'comfortable');
+	$('.js-bridge-universe').on('change', function() {
+		var url = new URL(window.location.href);
+		url.searchParams.set('uni', $(this).val());
+		window.location.href = url.toString();
 	});
 
-	if (localStorage.getItem('astra-admin-density') === 'compact') {
-		$('body').addClass('admin-density-compact');
-	}
+	$('.bridge-drawer__backdrop').on('click', function() {
+		$('body').removeClass('bridge-nav-open');
+	});
+
+	$(document).on('keydown', function(event) {
+		if (event.key === 'Escape') {
+			$('body').removeClass('bridge-nav-open');
+		}
+	});
+
+	$('.admin-section-title').each(function() {
+		var help = $(this).find('small').first().text().trim();
+		if (help !== '' && !$(this).attr('title')) {
+			$(this).attr('title', help);
+		}
+	});
+
+	$('.admin-table-toolbar').each(function() {
+		var help = $(this).find('p').first().text().trim();
+		if (help !== '' && !$(this).attr('title')) {
+			$(this).attr('title', help);
+		}
+	});
 });
 </script>
 
-{capture name="adminTopbarTools"}
-	<select class="form-select admin-topbar__select admin-topbar__select--jump js-admin-quickjump">
-		<option value="">Aller vers une page…</option>
-		{foreach from=$adminNavigation item=section}
-			<optgroup label="{$section.label}">
-				{foreach from=$section.items item=menuItem}
-					<option value="{$menuItem.url}" {if $currentPage == $menuItem.page}selected{/if}>{$menuItem.label}</option>
-				{/foreach}
-			</optgroup>
-		{/foreach}
-	</select>
-
-	{if $authlevel == $smarty.const.AUTH_ADM}
-		<select class="form-select admin-topbar__select admin-topbar__select--uni js-admin-universe">
-			{html_options options=$AvailableUnis selected=$UNI}
-		</select>
-	{/if}
-
-	<button class="admin-icon-button js-admin-density-toggle" type="button" aria-label="Basculer la densité d’affichage">
-		<i class="bi bi-arrows-collapse"></i>
-	</button>
-
-	<a href="admin.php?page=overview" class="admin-topbar__link admin-topbar__link--ghost">Vue d’ensemble</a>
-	<a href="index.php" target="_blank" rel="noopener" class="admin-topbar__link admin-topbar__link--ghost">Site public</a>
-	{if $id == 1}
-		<a href="?page=reset&amp;sid={$sid}" class="admin-topbar__link admin-topbar__link--warning">Réinitialiser</a>
-	{/if}
-	<a href="javascript:top.location.href='game.php';" target="_top" class="admin-topbar__link admin-topbar__link--danger">Retour au jeu</a>
-{/capture}
-
-<div class="admin-topbar">
-	<div class="admin-topbar__group admin-topbar__group--primary">
-		<button id="adminSidebarToggle" class="admin-icon-button" type="button" aria-label="Réduire ou ouvrir le menu latéral">
-			<i class="bi bi-layout-sidebar-inset"></i>
+<div class="bridge-bar">
+	<div class="bridge-bar__cluster">
+		<button id="adminSidebarToggle" class="bridge-bar__menu" type="button" aria-label="Ouvrir la navigation">
+			<i class="bi bi-grid-3x3-gap-fill"></i>
+			<span>Menu</span>
 		</button>
-		<div class="admin-topbar__headline">
-			<span class="admin-topbar__kicker">Centre d’exploitation</span>
-			<strong class="admin-topbar__title">{$currentPageMeta.title|default:$LNG.adm_cp_title}</strong>
-			<span class="admin-topbar__subtitle">{$currentPageMeta.description|default:$LNG.adm_cp_title}</span>
-		</div>
+		<a href="admin.php?page=overview" class="bridge-bar__brand" title="Retour au tableau de bord">
+			<span class="bridge-bar__kicker">console admin</span>
+			<strong>{$gameName|default:'Astra Dominion'}</strong>
+		</a>
+		<span class="bridge-status">U {$UNI}</span>
+		<a href="admin.php?page=support" class="bridge-status" title="Ouvrir le support">{$supportticks|default:0} ticket(s)</a>
 	</div>
 
-	<div class="admin-topbar__group admin-topbar__group--tools admin-topbar__group--desktop">
-		{$smarty.capture.adminTopbarTools nofilter}
+	<div class="bridge-bar__cluster bridge-bar__cluster--fill">
+		<select class="bridge-select js-bridge-quickjump bridge-select--wide">
+			<option value="">Palette de pages…</option>
+			{foreach from=$adminNavigation item=section}
+				<optgroup label="{$section.label}">
+					{foreach from=$section.items item=menuItem}
+						<option value="{$menuItem.url}" {if $currentPage == $menuItem.page}selected{/if}>{$menuItem.label}</option>
+					{/foreach}
+				</optgroup>
+			{/foreach}
+		</select>
 	</div>
 
-	<details class="admin-topbar__mobile-tools">
-		<summary class="admin-topbar__mobile-summary">
-			<span>Actions rapides</span>
-			<span class="admin-pill">Navigation</span>
-		</summary>
-		<div class="admin-topbar__mobile-panel">
-			<div class="admin-topbar__group admin-topbar__group--tools admin-topbar__group--mobile">
-				{$smarty.capture.adminTopbarTools nofilter}
-			</div>
-		</div>
-	</details>
+	<div class="bridge-bar__cluster bridge-bar__cluster--tight">
+		{if $authlevel == $smarty.const.AUTH_ADM}
+			<select class="bridge-select js-bridge-universe bridge-select--compact">
+				{html_options options=$AvailableUnis selected=$UNI}
+			</select>
+		{/if}
+		<a href="admin.php?page=overview" class="bridge-iconlink" title="Tableau de bord">
+			<i class="bi bi-speedometer2"></i>
+		</a>
+		<a href="admin.php?page=expedition" class="bridge-iconlink" title="Expéditions">
+			<i class="bi bi-compass"></i>
+		</a>
+		<a href="index.php" target="_blank" rel="noopener" class="bridge-iconlink" title="Site public">
+			<i class="bi bi-box-arrow-up-right"></i>
+		</a>
+		<a href="javascript:top.location.href='game.php';" target="_top" class="bridge-iconlink bridge-iconlink--accent" title="Retour au jeu">
+			<i class="bi bi-controller"></i>
+		</a>
+	</div>
 </div>

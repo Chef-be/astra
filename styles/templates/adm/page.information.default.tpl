@@ -1,31 +1,27 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Diagnostic</span>
-			<h1 class="admin-hero__title">Informations techniques</h1>
-			<p class="admin-hero__subtitle">Consolidez rapidement les versions, extensions PHP, fuseaux horaires, journaux et informations d’exécution utiles au support.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Diagnostic</span>
+			<h2>Informations techniques</h2>
 		</div>
 	</section>
 
 	<div class="admin-split">
 		<div class="admin-table-shell admin-stack">
-			<div>
-				<h2 class="h5 mb-1">Plateforme et serveur</h2>
-				<p class="text-white-50 mb-0">Environnement d’exécution actuellement détecté.</p>
-			</div>
-			<div class="admin-stat-strip">
-				<div class="admin-stat-card">
-					<span class="admin-stat-card__label">PHP</span>
-					<strong class="admin-stat-card__value">{$vPHP}</strong>
+			<div><h2 class="h5 mb-1">Plateforme et serveur</h2></div>
+			<div class="admin-overview-grid">
+				<div class="admin-overview-card">
+					<strong>{$vPHP}</strong>
+					<span>PHP</span>
 				</div>
-				<div class="admin-stat-card">
-					<span class="admin-stat-card__label">MySQL client</span>
-					<strong class="admin-stat-card__value">{$vMySQLc}</strong>
+				<div class="admin-overview-card">
+					<strong>{$vMySQLc}</strong>
+					<span>MySQL client</span>
 				</div>
-				<div class="admin-stat-card">
-					<span class="admin-stat-card__label">Base</span>
-					<strong class="admin-stat-card__value">{$dbVersion}</strong>
+				<div class="admin-overview-card">
+					<strong>{$dbVersion}</strong>
+					<span>Base</span>
 				</div>
 			</div>
 			<div class="admin-stack small">
@@ -42,10 +38,7 @@
 		</div>
 
 		<div class="admin-table-shell admin-stack">
-			<div>
-				<h2 class="h5 mb-1">Jeu et accès</h2>
-				<p class="text-white-50 mb-0">Références utiles pour le support, la maintenance et les vérifications d’environnement.</p>
-			</div>
+			<div><h2 class="h5 mb-1">Jeu et accès</h2></div>
 			<div class="admin-stack small">
 				<div class="admin-pill">Version de la plateforme : {$vGame}</div>
 				<div class="admin-pill">Adresse publique : http://{$root}/</div>

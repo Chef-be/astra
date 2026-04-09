@@ -132,11 +132,17 @@ abstract class AbstractAdminPage
 			'currentPageMeta'		=> $pageMeta,
 			'brandLogoUrl'			=> BrandingService::getActiveLogoUrl(),
 			'adminSectionLabel'		=> AdminUiService::getSectionLabel($pageMeta['section']),
+			'adminSectionUrl'		=> AdminUiService::getSectionUrl($pageMeta['section']),
+			'adminCurrentUrl'		=> 'admin.php'.(!empty($this->getQueryString()) ? '?'.$this->getQueryString() : '?page=overview'),
+			'adminThemeKey'			=> Config::get(Universe::getEmulated())->server_default_theme,
 		));
 	}
 
 	protected function printMessage($message, $redirectButtons = NULL, $redirect = NULL, $fullSide = true)
 	{
+		if (!isset($redirect) && is_array($redirectButtons) && count($redirectButtons) === 1 && !empty($redirectButtons[0]['url'])) {
+			$redirect = array($redirectButtons[0]['url'], 2);
+		}
 
 		$this->assign(array(
 			'message'			=> $message,

@@ -80,7 +80,18 @@ $(document).ready(function(){
 });
 </script>
 
-<div class="admin-settings-shell">
+<div class="admin-settings-shell admin-stack">
+<section class="admin-headerline admin-headerline--universe">
+	<div class="admin-headerline__lead">
+		<span class="admin-headerline__eyebrow">Cadence active</span>
+		<h2 class="admin-headerline__title">{$uni_name|default:$game_name}</h2>
+	</div>
+	<div class="admin-headerline__meta">
+		<span class="admin-pill">Langue {$lang}</span>
+		<span class="admin-pill">Vitesse x{$game_speed}</span>
+		<span class="admin-pill">Éco x{$resource_multiplier}</span>
+	</div>
+</section>
 <div class="admin-section-nav">
 	<a class="admin-section-link" href="#universe-general">Général</a>
 	<a class="admin-section-link" href="#universe-build">Files d’attente</a>
@@ -91,10 +102,10 @@ $(document).ready(function(){
 	<a class="admin-section-link" href="#universe-trader">Marchand</a>
 	<a class="admin-section-link" href="#universe-news">Actualité de l’univers</a>
 </div>
-<form id="universeSettings" class="bg-black w-75 text-white p-3 my-3 mx-auto fs-12" action="?page=universe&mode=saveSettings" method="post">
+<form id="universeSettings" class="text-white fs-12 admin-settings-form admin-stack" action="?page=universe&mode=saveSettings" method="post">
 <input type="hidden" name="opt_save" value="1">
-<div class="form-gorup d-flex justify-content-between admin-settings-toolbar admin-field--full">
-	<span class="text-yellow text-center fw-bold fs-14">{$LNG.se_server_parameters}</span>
+<div class="form-gorup d-flex justify-content-between admin-settings-toolbar admin-settings-toolbar--universe admin-field--full">
+	<strong>{$LNG.se_server_parameters}</strong>
 	<input style="max-width:250px;" id="searchInUniverseSettings" class="form-control py-1 bg-dark text-white my-1 border border-secondary" type="text" name="" placeholder="Rechercher un paramètre…">
 </div>
 <div id="universe-general" class="form-gorup d-flex flex-column my-1 p-2 admin-section-title">
@@ -137,35 +148,35 @@ $(document).ready(function(){
 	<label class="text-start my-1 cursor-pointer hover-underline" for="energySpeed">{$LNG.se_energy_speed}</label>
 	<input id="energySpeed" class="form-control py-1 bg-dark text-white my-1 border border-secondary" name="energySpeed" value="{$energySpeed}" type="text">
 </div>
-<div class="form-gorup d-flex my-1 p-2 ">
-	<label class="text-start my-1 cursor-pointer hover-underline" for="show_unlearned_ships">Afficher les vaisseaux non débloqués</label>
-	<input class="mx-2" id="show_unlearned_ships" name="show_unlearned_ships" {if $show_unlearned_ships} checked="checked"{/if} type="checkbox">
+<div class="form-gorup d-flex flex-column my-1 p-2 admin-field--full">
+	<div class="admin-asset-panel">
+		<div class="admin-asset-panel__header">
+			<h4>Activation visuelle du contenu</h4>
+			<p>Vaisseaux, bâtiments et recherches sont pilotés directement sur leurs cartes.</p>
+		</div>
+		<div class="admin-asset-board admin-asset-board--toggles">
+			{foreach from=$universeVisibilityCards item=card}
+				{include file='component.asset_toggle.tpl'
+					name=$card.name
+					title=$card.title
+					tag=$card.tag
+					tooltip=$card.tooltip
+					image=$card.image
+					checked=$card.checked
+				}
+			{/foreach}
+		</div>
+	</div>
 </div>
-<div class="form-gorup d-flex my-1 p-2 ">
-	<label class="text-start my-1 cursor-pointer hover-underline" for="show_unlearned_buildings">Afficher les bâtiments non débloqués</label>
-	<input class="mx-2" id="show_unlearned_buildings" name="show_unlearned_buildings" {if $show_unlearned_buildings} checked="checked"{/if} type="checkbox">
-</div>
-<div class="form-gorup d-flex my-1 p-2 ">
-	<label class="text-start my-1 cursor-pointer hover-underline" for="show_unlearned_technology">Afficher les technologies non débloquées</label>
-	<input class="mx-2" id="show_unlearned_technology" name="show_unlearned_technology" {if $show_unlearned_technology} checked="checked"{/if} type="checkbox">
-</div>
-<div class="form-gorup d-flex my-1 p-2 ">
-	<label class="text-start my-1 cursor-pointer hover-underline" for="show_tech_no_research">Afficher les technologies sans laboratoire</label>
-	<input class="mx-2" id="show_tech_no_research" name="show_tech_no_research" {if $show_tech_no_research} checked="checked"{/if} type="checkbox">
-</div>
-<div class="form-gorup d-flex my-1 p-2 ">
-	<label class="text-start my-1 cursor-pointer hover-underline" for="show_ships_no_shipyard">Afficher les vaisseaux sans chantier spatial</label>
-	<input class="mx-2" id="show_ships_no_shipyard" name="show_ships_no_shipyard" {if $show_ships_no_shipyard} checked="checked"{/if} type="checkbox">
-</div>
-<div class="form-gorup d-flex flex-column my-1 p-2 ">
+<div class="form-gorup d-flex flex-column my-1 p-2 admin-field--full">
 	<label class="text-start my-1 cursor-pointer hover-underline" for="forum_url">{$LNG.se_forum_link}</label>
 	<input id="forum_url"  class="form-control py-1 bg-dark text-white my-1 border border-secondary" name="forum_url" size="60" maxlength="254" value="{$forum_url}" type="text">
 </div>
-<div class="form-gorup d-flex my-1 p-2 ">
+<div class="form-gorup d-flex my-1 p-2 admin-toggle-row">
 	<label class="text-start my-1 cursor-pointer hover-underline" for="closed">{$LNG.se_server_op_close}</label>
 	<input class="mx-2" id="closed" name="closed"{if $game_disable == '1'} checked="checked"{/if} type="checkbox">
 </div>
-<div class="form-gorup d-flex flex-column my-1 p-2 ">
+<div class="form-gorup d-flex flex-column my-1 p-2 admin-field--full">
 	<label class="text-start my-1 cursor-pointer hover-underline" for="close_reason">{$LNG.se_server_status_message}</label>
 	<textarea id="close_reason"  class="form-control py-1 bg-dark text-white my-1 border border-secondary" name="close_reason" cols="80" rows="5">{$close_reason}</textarea>
 </div>
@@ -193,7 +204,7 @@ $(document).ready(function(){
 	<span class="text-yellow fw-bold fs-14">{$LNG.se_ref}</span>
 	<small>Activation du parrainage, bonus et conditions d’éligibilité.</small>
 </div>
-<div class="form-gorup d-flex my-1 p-2 ">
+<div class="form-gorup d-flex my-1 p-2 admin-toggle-row">
 	<label class="text-start my-1 cursor-pointer hover-underline" for="ref_active">{$LNG.se_ref_active}</label>
 	<input class="mx-2" id="ref_active" name="ref_active"{if $ref_active} checked="checked"{/if} type="checkbox">
 </div>
@@ -217,17 +228,26 @@ $(document).ready(function(){
 	<label class="text-start my-1 cursor-pointer hover-underline" for="min_player_planets">{$LNG.se_planets_min}</label>
 	<input id="min_player_planets"  class="form-control py-1 bg-dark text-white my-1 border border-secondary" name="min_player_planets" maxlength="11" size="11" value="{$min_player_planets}" type="text">
 </div>
-<div class="form-gorup d-flex flex-column my-1 p-2 ">
-	<label class="text-start my-1 cursor-pointer hover-underline" for="planets_tech">{$LNG.se_planets_tech}</label>
-	<input id="planets_tech" name="planets_tech"  class="form-control py-1 bg-dark text-white my-1 border border-secondary" maxlength="11" size="11" value="{$planets_tech}" type="text">
-</div>
-<div class="form-gorup d-flex flex-column my-1 p-2 ">
-	<label class="text-start my-1 cursor-pointer hover-underline" for="planets_officier">{$LNG.se_planets_officier}</label>
-	<input id="planets_officier" class="form-control py-1 bg-dark text-white my-1 border border-secondary" name="planets_officier" maxlength="11" size="11" value="{$planets_officier}" type="text">
-</div>
-<div class="form-gorup d-flex flex-column my-1 p-2 ">
-	<label class="text-start my-1 cursor-pointer hover-underline" for="planets_per_tech">{$LNG.se_planets_per_tech}</label>
-	<input id="planets_per_tech"  class="form-control py-1 bg-dark text-white my-1 border border-secondary" name="planets_per_tech" maxlength="11" size="11" value="{$planets_per_tech}" type="text">
+<div class="form-gorup d-flex flex-column my-1 p-2 admin-field--full">
+	<div class="admin-asset-panel">
+		<div class="admin-asset-panel__header">
+			<h4>Leviers de colonisation</h4>
+			<p>Recherche, officiers et ratio planétaire sont regroupés dans une vue unique.</p>
+		</div>
+		<div class="admin-asset-board admin-asset-board--metrics">
+			{foreach from=$universeColonizationCards item=card}
+				{include file='component.asset_metric.tpl'
+					name=$card.name
+					title=$card.title
+					tag=$card.tag
+					tooltip=$card.tooltip
+					image=$card.image
+					value=$card.value
+					step=$card.step
+				}
+			{/foreach}
+		</div>
+	</div>
 </div>
 <div id="universe-planets" class="form-gorup d-flex flex-column my-1 p-2 admin-section-title">
 	<span class="text-yellow fw-bold fs-14">{$LNG.se_server_planet_parameters}</span>
@@ -261,19 +281,19 @@ $(document).ready(function(){
 	<label class="text-start my-1 cursor-pointer hover-underline" for="min_build_time">{$LNG.se_min_build_time}</label>
 	<input id="min_build_time"  class="form-control py-1 bg-dark text-white my-1 border border-secondary" name="min_build_time" maxlength="2" size="5" value="{$min_build_time}" type="text">
 </div>
-<div class="form-gorup d-flex my-1 p-2 ">
+<div class="form-gorup d-flex my-1 p-2 admin-toggle-row">
 	<label class="text-start my-1 cursor-pointer hover-underline" for="reg_closed">{$LNG.se_reg_closed}</label>
 	<input class="mx-2" id="reg_closed" name="reg_closed"{if $reg_closed} checked="checked"{/if} type="checkbox">
 </div>
-<div class="form-gorup d-flex my-1 p-2 ">
+<div class="form-gorup d-flex my-1 p-2 admin-toggle-row">
 	<label class="text-start my-1 cursor-pointer hover-underline" for="user_valid">{$LNG.se_verfiy_mail}</label>
 	<input class="mx-2" id="user_valid" name="user_valid"{if $user_valid} checked="checked"{/if} type="checkbox">
 </div>
-<div class="form-gorup d-flex my-1 p-2 ">
+<div class="form-gorup d-flex my-1 p-2 admin-toggle-row">
 	<label class="text-start my-1 cursor-pointer hover-underline" for="adm_attack">{$LNG.se_admin_protection}</label>
 	<input class="mx-2" id="adm_attack" name="adm_attack"{if $adm_attack} checked="checked"{/if} type="checkbox">
 </div>
-<div class="form-gorup d-flex my-1 p-2 ">
+<div class="form-gorup d-flex my-1 p-2 admin-toggle-row">
 	<label class="text-start my-1 cursor-pointer hover-underline" for="debug">{$LNG.se_debug_mode}</label>
 	<input class="mx-2" id="debug" name="debug"{if $debug} checked="checked"{/if} type="checkbox">
 </div>
@@ -341,11 +361,11 @@ $(document).ready(function(){
 	<label class="text-start my-1 cursor-pointer hover-underline" for="gate_wait_time">{$LNG.se_gate_wait_time}</label>
 	<input id="gate_wait_time" class="form-control py-1 bg-dark text-white my-1 border border-secondary" name="gate_wait_time" maxlength="11" size="11" value="{$gate_wait_time}" type="text">
 </div>
-<div class="form-gorup d-flex my-1 p-2 ">
+<div class="form-gorup d-flex my-1 p-2 admin-toggle-row">
 	<label class="text-start my-1 cursor-pointer hover-underline" for="debris_moon">{$LNG.se_debris_moon}</label>
 	<input class="mx-2" id="debris_moon" name="debris_moon"{if $debris_moon} checked="checked"{/if} type="checkbox">
 </div>
-<div class="form-gorup d-flex my-1 p-2 ">
+<div class="form-gorup d-flex my-1 p-2 admin-toggle-row">
 	<label class="text-start my-1 cursor-pointer hover-underline" for="noobprotection">{$LNG.se_noob_protect}</label>
 	<input class="mx-2" id="noobprotection" name="noobprotection"{if $noobprot} checked="checked"{/if} type="checkbox">
 </div>
@@ -373,9 +393,27 @@ $(document).ready(function(){
 	<span class="text-yellow fw-bold fs-14">{$LNG.se_trader_head}</span>
 	<small>Paramètres du marchand, vaisseaux autorisés et commission.</small>
 </div>
-<div class="form-gorup d-flex flex-column my-1 p-2 ">
-	<label class="text-start my-1 cursor-pointer hover-underline" for="trade_allowed_ships">{$LNG.se_trader_ships}</label>
-	<input id="trade_allowed_ships" class="form-control py-1 bg-dark text-white my-1 border border-secondary" name="trade_allowed_ships" maxlength="255" size="60" value="{$trade_allowed_ships}" type="text">
+<div class="form-gorup d-flex flex-column my-1 p-2 admin-field--full">
+	<div class="admin-asset-panel">
+		<div class="admin-asset-panel__header">
+			<h4>{$LNG.se_trader_ships}</h4>
+		</div>
+		<div class="admin-asset-board admin-asset-board--dense">
+			{foreach from=$traderShipCards item=card}
+				{include file='component.asset_toggle.tpl'
+					name=$card.name
+					value=$card.value
+					title=$card.title
+					tag=$card.tag
+					tooltip=$card.tooltip
+					image=$card.image
+					checked=$card.checked
+					checkedLabel='Autorisé'
+					uncheckedLabel='Interdit'
+				}
+			{/foreach}
+		</div>
+	</div>
 </div>
 <div class="form-gorup d-flex flex-column my-1 p-2 ">
 	<label class="text-start my-1 cursor-pointer hover-underline" for="trade_charge">{$LNG.se_trader_charge}</label>
@@ -385,11 +423,11 @@ $(document).ready(function(){
 	<span class="text-yellow fw-bold fs-14">{$LNG.se_news_head}</span>
 	<small>Encart d’actualité de l’univers, visible en jeu selon l’activation choisie.</small>
 </div>
-<div class="form-gorup d-flex my-1 p-2 ">
+<div class="form-gorup d-flex my-1 p-2 admin-toggle-row">
 	<label class="text-start my-1 cursor-pointer hover-underline" for="newsframe">{$LNG.se_news_active}</label>
 	<input class="mx-2" id="newsframe" name="newsframe"{if $newsframe} checked="checked"{/if} type="checkbox">
 </div>
-<div class="form-gorup d-flex flex-column my-1 p-2 ">
+<div class="form-gorup d-flex flex-column my-1 p-2 admin-field--full">
 	<label class="text-start my-1 cursor-pointer hover-underline" for="NewsText">{$LNG.se_news}</label>
 	<textarea id="NewsText" class="form-control py-1 bg-dark text-white my-1 border border-secondary rich-editor" name="NewsText" cols="80" rows="5">{$NewsTextVal|escape:'html'}</textarea>
 </div>

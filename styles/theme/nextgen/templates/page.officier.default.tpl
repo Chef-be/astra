@@ -8,9 +8,9 @@
 
 	.officer-hero {
 		display: grid;
-		grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr);
-		gap: 0.85rem;
-		padding: 0.95rem 1.05rem;
+		grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+		gap: 0.75rem;
+		padding: 0.88rem 1rem;
 		border-radius: 1.25rem;
 		border: 1px solid rgba(255, 214, 102, 0.16);
 		background:
@@ -21,8 +21,8 @@
 	}
 
 	.officer-hero h1 {
-		margin: 0 0 0.2rem;
-		font-size: 1.45rem;
+		margin: 0;
+		font-size: 1.32rem;
 		color: #f8fbff;
 	}
 
@@ -36,12 +36,12 @@
 
 	.officer-hero-metrics {
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0.75rem;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 0.6rem;
 	}
 
 	.officer-metric {
-		padding: 0.6rem 0.75rem;
+		padding: 0.58rem 0.68rem;
 		border-radius: 1rem;
 		background: rgba(255, 255, 255, 0.04);
 		border: 1px solid rgba(255, 255, 255, 0.07);
@@ -59,7 +59,7 @@
 	.officer-metric-value {
 		display: block;
 		color: #f8fbff;
-		font-size: 1.02rem;
+		font-size: 0.96rem;
 		font-weight: 700;
 	}
 
@@ -332,6 +332,10 @@
 			grid-template-columns: 1fr;
 		}
 
+		.officer-hero-metrics {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
 		.officer-summary {
 			grid-template-columns: 84px minmax(0, 1fr);
 		}
@@ -385,7 +389,6 @@
 	<section class="officer-hero">
 		<div>
 			<h1>{$LNG.lm_officiers}</h1>
-			<p>Vue compacte des bonus temporaires et des officiers permanents, avec l’essentiel visible immédiatement et les détails à la demande.</p>
 		</div>
 		<div class="officer-hero-metrics">
 			<div class="officer-metric">
@@ -412,13 +415,12 @@
 		<div class="officer-section-head">
 			<div>
 				<h2>{$of_dm_trade}</h2>
-				<p>Modules temporaires activables pour accélérer votre progression sans surcharger la page.</p>
 			</div>
 			<span class="officer-section-count">{$dmCount|number} élément{if $dmCount > 1}s{/if}</span>
 		</div>
 		<div class="officer-list">
 			{foreach $darkmatterList as $ID => $Element}
-			<details class="officer-entry">
+			<details class="officer-entry ng-disclosure">
 				<summary class="officer-summary">
 					<img class="officer-thumb" src="{$dpath}gebaeude/{$ID}.gif" alt="{$LNG.tech.{$ID}}">
 					<div class="officer-summary-text">
@@ -447,7 +449,7 @@
 					</div>
 					<span class="officer-toggle">Détails</span>
 				</summary>
-				<div class="officer-body">
+				<div class="officer-body ng-disclosure__body">
 					<div class="officer-panel">
 						<h3>Bonus et effets</h3>
 						<div class="officer-bonus-list">
@@ -505,13 +507,12 @@
 		<div class="officer-section-head">
 			<div>
 				<h2>{$LNG.of_offi}</h2>
-				<p>Progression permanente par palier, avec aperçu immédiat du niveau, des bonus et du coût suivant.</p>
 			</div>
 			<span class="officer-section-count">{$officerCount|number} officier{if $officerCount > 1}s{/if}</span>
 		</div>
 		<div class="officer-list">
 			{foreach $officierList as $ID => $Element}
-			<details class="officer-entry">
+			<details class="officer-entry ng-disclosure">
 				<summary class="officer-summary">
 					<img class="officer-thumb" src="{$dpath}gebaeude/{$ID}.jpg" alt="{$LNG.tech.{$ID}}">
 					<div class="officer-summary-text">
@@ -538,7 +539,7 @@
 					</div>
 					<span class="officer-toggle">Détails</span>
 				</summary>
-				<div class="officer-body">
+				<div class="officer-body ng-disclosure__body">
 					<div class="officer-panel">
 						<h3>Bonus et progression</h3>
 						<div class="officer-bonus-list">

@@ -8,14 +8,23 @@ class BotActionGenerator
 		$intention = isset($decision['intention']) ? $decision['intention'] : 'observer';
 		$planet = isset($snapshot['planet']) ? $snapshot['planet'] : array();
 		$bestTarget = isset($snapshot['best_target']) ? $snapshot['best_target'] : array();
-		$manualCommands = isset($snapshot['commands']) ? $snapshot['commands'] : array();
-		$currentCampaign = isset($snapshot['current_campaign']) ? $snapshot['current_campaign'] : array();
-		$actions = array();
+			$focusTarget = $this->resolveFocusTarget($snapshot, $bestTarget);
+			$manualCommands = isset($snapshot['commands']) ? $snapshot['commands'] : array();
+			$currentCampaign = isset($snapshot['current_campaign']) ? $snapshot['current_campaign'] : array();
+			$hostileContext = isset($snapshot['hostile_context']) ? $snapshot['hostile_context'] : array();
+			$allianceAlert = isset($snapshot['alliance_alert']) ? $snapshot['alliance_alert'] : array();
+			$actions = array();
 
 		if ($goal === 'croissance_economique' || $goal === 'stabilisation') {
 			$actions[] = $this->action('enqueue_building', $goal, 55, 10, 75, array('element_id' => $this->pickEconomicBuilding($planet)));
 			$actions[] = $this->action('enqueue_research', $goal, 48, 8, 65, array('element_id' => $this->pickResearch($snapshot)));
 			$actions[] = $this->action('enqueue_shipyard', $goal, 42, 6, 70, array('element_id' => 210, 'amount' => 1));
+			$actions[] = $this->action('queue_social_message', $goal, 39, 5, 63, array(
+				'channel_key' => 'auto',
+				'channel_preference' => 'global',
+				'template_key' => 'croissance_signal',
+				'social_value' => 1,
+			));
 		}
 
 		if ($goal === 'rattrapage_technologique') {
@@ -26,23 +35,39 @@ class BotActionGenerator
 		if ($goal === 'expansion_coloniale') {
 			$actions[] = $this->action('enqueue_shipyard', $goal, 65, 12, 80, array('element_id' => 208, 'amount' => 1));
 			$actions[] = $this->action('enqueue_building', $goal, 45, 10, 68, array('element_id' => 23));
+			$actions[] = $this->action('queue_social_message', $goal, 37, 5, 61, array(
+				'channel_key' => 'auto',
+				'channel_preference' => 'alliance',
+				'template_key' => 'expansion_signal',
+				'social_value' => 1,
+				'coverage_sociale' => 1,
+			));
 		}
 
 		if (in_array($goal, array('pression_locale', 'campagne_harcelement'), true)) {
-			if (!empty($bestTarget)) {
-				$coordinates = $bestTarget['galaxy'].':'.$bestTarget['system'].':'.$bestTarget['planet'];
+			if (!empty($focusTarget['target_coordinates'])) {
+				$coordinates = $focusTarget['target_coordinates'];
 				$actions[] = $this->action('send_spy', $goal, 75, 22, 85, array(
 					'target_coordinates' => $coordinates,
-					'target_planet_id' => (int) $bestTarget['id'],
+					'target_planet_id' => !empty($focusTarget['target_planet_id']) ? (int) $focusTarget['target_planet_id'] : 0,
+					'target_user_id' => !empty($focusTarget['target_user_id']) ? (int) $focusTarget['target_user_id'] : 0,
+					'target_username' => !empty($focusTarget['target_username']) ? $focusTarget['target_username'] : '',
+					'retaliation_value' => !empty($hostileContext['retaliation_target']) ? 1 : 0,
 				));
 				$actions[] = $this->action('send_raid', $goal, 70, 34, 72, array(
 					'target_coordinates' => $coordinates,
-					'target_planet_id' => (int) $bestTarget['id'],
+					'target_planet_id' => !empty($focusTarget['target_planet_id']) ? (int) $focusTarget['target_planet_id'] : 0,
+					'target_user_id' => !empty($focusTarget['target_user_id']) ? (int) $focusTarget['target_user_id'] : 0,
+					'target_username' => !empty($focusTarget['target_username']) ? $focusTarget['target_username'] : '',
+					'continuity_value' => 1,
+					'retaliation_value' => !empty($hostileContext['retaliation_target']) ? 1 : 0,
 				));
 				$actions[] = $this->action('queue_social_message', $goal, 35, 14, 58, array(
 					'channel_key' => 'bots',
-					'target_username' => $bestTarget['username'],
-					'template_key' => 'pression_locale',
+					'target_username' => !empty($focusTarget['target_username']) ? $focusTarget['target_username'] : '',
+					'target_coordinates' => $coordinates,
+					'template_key' => !empty($hostileContext['retaliation_target']) ? 'riposte_zone' : 'pression_locale',
+					'psychological_value' => 1,
 				));
 			}
 
@@ -53,31 +78,59 @@ class BotActionGenerator
 		if ($goal === 'defense_zone') {
 			$actions[] = $this->action('enqueue_shipyard', $goal, 72, 18, 84, array('element_id' => 401, 'amount' => 8));
 			$actions[] = $this->action('enqueue_shipyard', $goal, 64, 16, 80, array('element_id' => 402, 'amount' => 2));
-			$actions[] = $this->action('queue_social_message', $goal, 25, 8, 60, array('channel_key' => 'bots', 'template_key' => 'defense_zone'));
+			if (!empty($focusTarget['target_coordinates'])) {
+				$actions[] = $this->action('send_spy', $goal, 58, 9, 86, array(
+					'target_coordinates' => $focusTarget['target_coordinates'],
+					'target_planet_id' => !empty($focusTarget['target_planet_id']) ? (int) $focusTarget['target_planet_id'] : 0,
+					'target_user_id' => !empty($focusTarget['target_user_id']) ? (int) $focusTarget['target_user_id'] : 0,
+					'target_username' => !empty($focusTarget['target_username']) ? $focusTarget['target_username'] : '',
+					'information_value' => 1,
+					'retaliation_value' => !empty($hostileContext['retaliation_target']) ? 1 : 0,
+				));
+			}
+			$actions[] = $this->action('queue_social_message', $goal, 25, 8, 60, array(
+				'channel_key' => 'auto',
+				'channel_preference' => 'alliance',
+				'template_key' => !empty($hostileContext['spy_count']) ? 'contre_espionnage' : 'defense_zone',
+				'target_coordinates' => !empty($focusTarget['target_coordinates']) ? $focusTarget['target_coordinates'] : '',
+				'target_username' => !empty($focusTarget['target_username']) ? $focusTarget['target_username'] : '',
+				'psychological_value' => 1,
+			));
 		}
 
 		if ($goal === 'surveillance_active') {
-			if (!empty($bestTarget)) {
-				$coordinates = $bestTarget['galaxy'].':'.$bestTarget['system'].':'.$bestTarget['planet'];
+			if (!empty($focusTarget['target_coordinates'])) {
+				$coordinates = $focusTarget['target_coordinates'];
 				$actions[] = $this->action('send_spy', $goal, 72, 14, 88, array(
 					'target_coordinates' => $coordinates,
-					'target_planet_id' => (int) $bestTarget['id'],
+					'target_planet_id' => !empty($focusTarget['target_planet_id']) ? (int) $focusTarget['target_planet_id'] : 0,
+					'target_user_id' => !empty($focusTarget['target_user_id']) ? (int) $focusTarget['target_user_id'] : 0,
+					'target_username' => !empty($focusTarget['target_username']) ? $focusTarget['target_username'] : '',
 					'information_value' => 1,
+					'retaliation_value' => !empty($hostileContext['retaliation_target']) ? 1 : 0,
 				));
 			}
 
 			$actions[] = $this->action('presence_ping', $goal, 24, 2, 95, array('relay_value' => 1));
-			$actions[] = $this->action('queue_social_message', $goal, 26, 6, 64, array('channel_key' => 'bots', 'template_key' => 'presence_visible', 'social_value' => 1));
+			$actions[] = $this->action('queue_social_message', $goal, 26, 6, 64, array(
+				'channel_key' => 'auto',
+				'channel_preference' => 'global',
+				'template_key' => !empty($hostileContext['spy_count']) ? 'contre_espionnage' : 'presence_visible',
+				'target_coordinates' => !empty($focusTarget['target_coordinates']) ? $focusTarget['target_coordinates'] : '',
+				'target_username' => !empty($focusTarget['target_username']) ? $focusTarget['target_username'] : '',
+				'information_value' => 1,
+				'social_value' => 1,
+			));
 		}
 
 		if ($goal === 'relai_offensif') {
 			$actions[] = $this->action('presence_ping', $goal, 34, 2, 96, array('relay_value' => 1, 'continuity_value' => 1, 'target_social' => 'visible'));
-			$actions[] = $this->action('queue_social_message', $goal, 28, 4, 70, array('channel_key' => 'bots', 'template_key' => 'presence_continue', 'coverage_sociale' => 1));
-			if (!empty($bestTarget)) {
-				$coordinates = $bestTarget['galaxy'].':'.$bestTarget['system'].':'.$bestTarget['planet'];
+			$actions[] = $this->action('queue_social_message', $goal, 28, 4, 70, array('channel_key' => 'auto', 'channel_preference' => 'alliance', 'template_key' => 'presence_continue', 'coverage_sociale' => 1));
+			if (!empty($focusTarget['target_coordinates'])) {
+				$coordinates = $focusTarget['target_coordinates'];
 				$actions[] = $this->action('send_spy', $goal, 48, 12, 84, array(
 					'target_coordinates' => $coordinates,
-					'target_planet_id' => (int) $bestTarget['id'],
+					'target_planet_id' => !empty($focusTarget['target_planet_id']) ? (int) $focusTarget['target_planet_id'] : 0,
 					'prepare_hidden' => 1,
 				));
 			}
@@ -85,22 +138,41 @@ class BotActionGenerator
 
 		if ($goal === 'pression_psychologique') {
 			$actions[] = $this->action('queue_social_message', $goal, 62, 6, 82, array('channel_key' => 'bots', 'template_key' => 'brouillage', 'psychological_value' => 1, 'bluff_value' => 1));
-			if (!empty($bestTarget['id_owner'])) {
+			if (!empty($focusTarget['target_user_id'])) {
 				$actions[] = $this->action('queue_private_message', $goal, 64, 8, 80, array(
-					'target_user_id' => (int) $bestTarget['id_owner'],
-					'target_username' => $bestTarget['username'],
-					'template_key' => 'intimidation',
+					'target_user_id' => (int) $focusTarget['target_user_id'],
+					'target_username' => !empty($focusTarget['target_username']) ? $focusTarget['target_username'] : '',
+					'target_coordinates' => !empty($focusTarget['target_coordinates']) ? $focusTarget['target_coordinates'] : '',
+					'template_key' => !empty($hostileContext['retaliation_target']) ? 'riposte_directe' : 'intimidation',
 					'psychological_value' => 1,
 				));
 			}
 			$actions[] = $this->action('presence_ping', $goal, 18, 1, 94, array('coverage_sociale' => 1));
 		}
 
-		if ($goal === 'soutien_alliance') {
-			$actions[] = $this->action('presence_ping', $goal, 28, 2, 94, array());
-			$actions[] = $this->action('queue_social_message', $goal, 36, 4, 74, array('channel_key' => 'bots', 'template_key' => 'presence_visible'));
-			$actions[] = $this->action('enqueue_shipyard', $goal, 52, 12, 76, array('element_id' => 210, 'amount' => 2));
-		}
+			if ($goal === 'soutien_alliance') {
+				$supportCoordinates = !empty($allianceAlert['primary_ally']['coordinates']) ? $allianceAlert['primary_ally']['coordinates'] : '';
+				$supportUsername = !empty($allianceAlert['primary_ally']['username']) ? $allianceAlert['primary_ally']['username'] : '';
+				$actions[] = $this->action('presence_ping', $goal, 34, 2, 94, array(
+					'target_logical' => !empty($allianceAlert['primary_ally']['attack_count']) ? 'coordination' : 'engage',
+					'target_social' => 'visible',
+					'relay_value' => 1,
+					'continuity_value' => 1,
+				));
+				$actions[] = $this->action('queue_social_message', $goal, 42, 4, 78, array(
+					'channel_key' => 'auto',
+					'channel_preference' => 'alliance',
+					'template_key' => 'soutien_alliance',
+					'target_coordinates' => $supportCoordinates,
+					'target_username' => $supportUsername,
+					'coverage_sociale' => 1,
+					'relay_value' => 1,
+				));
+				$actions[] = $this->action('enqueue_shipyard', $goal, 52, 12, 76, array('element_id' => 210, 'amount' => 2));
+				if (!empty($allianceAlert['primary_ally']['attack_count'])) {
+					$actions[] = $this->action('enqueue_shipyard', $goal, 56, 14, 78, array('element_id' => 401, 'amount' => 6));
+				}
+			}
 
 		if ($goal === 'recrutement') {
 			$actions[] = $this->action('queue_social_message', $goal, 58, 4, 82, array('channel_key' => 'bots', 'message' => 'Recherche de soutien et de relais tactiques pour les opérations en cours.'));
@@ -112,10 +184,11 @@ class BotActionGenerator
 
 		if ($goal === 'communication_ciblee') {
 			$actions[] = $this->action('queue_social_message', $goal, 66, 5, 80, array('channel_key' => 'bots', 'template_key' => 'supervision'));
-			if (!empty($bestTarget['id_owner'])) {
+			if (!empty($focusTarget['target_user_id'])) {
 				$actions[] = $this->action('queue_private_message', $goal, 60, 8, 76, array(
-					'target_user_id' => (int) $bestTarget['id_owner'],
-					'target_username' => $bestTarget['username'],
+					'target_user_id' => (int) $focusTarget['target_user_id'],
+					'target_username' => !empty($focusTarget['target_username']) ? $focusTarget['target_username'] : '',
+					'target_coordinates' => !empty($focusTarget['target_coordinates']) ? $focusTarget['target_coordinates'] : '',
 					'template_key' => 'test_diplomatique',
 				));
 			}
@@ -136,9 +209,7 @@ class BotActionGenerator
 			$actions[] = $this->action('presence_ping', 'ordre_manuel', 18, 2, 96, array('manual_order_count' => count($manualCommands)));
 		}
 
-		$actions = array_merge($actions, $this->buildIntentionActions($intention, $goal, $snapshot, $bestTarget));
-
-		$actions[] = $this->action('presence_ping', $goal, 12, 2, 95, array());
+		$actions = array_merge($actions, $this->buildIntentionActions($intention, $goal, $snapshot, $focusTarget));
 
 		return $actions;
 	}
@@ -175,7 +246,7 @@ class BotActionGenerator
 	{
 		$bot = isset($snapshot['bot']) ? $snapshot['bot'] : array();
 		$options = array(
-			106 => isset($bot['espionage_tech']) ? (int) $bot['espionage_tech'] : 0,
+			106 => isset($bot['spy_tech']) ? (int) $bot['spy_tech'] : (isset($bot['espionage_tech']) ? (int) $bot['espionage_tech'] : 0),
 			108 => isset($bot['computer_tech']) ? (int) $bot['computer_tech'] : 0,
 			109 => isset($bot['military_tech']) ? (int) $bot['military_tech'] : 0,
 			110 => isset($bot['defence_tech']) ? (int) $bot['defence_tech'] : 0,
@@ -189,17 +260,17 @@ class BotActionGenerator
 		return (int) key($options);
 	}
 
-	protected function buildIntentionActions($intention, $goal, array $snapshot, array $bestTarget)
+	protected function buildIntentionActions($intention, $goal, array $snapshot, array $focusTarget)
 	{
 		$actions = array();
-		$coordinates = !empty($bestTarget) ? $bestTarget['galaxy'].':'.$bestTarget['system'].':'.$bestTarget['planet'] : '';
+		$coordinates = !empty($focusTarget['target_coordinates']) ? $focusTarget['target_coordinates'] : '';
 
 		switch ($intention) {
 			case 'observer':
 				if ($coordinates !== '') {
 					$actions[] = $this->action('send_spy', $goal, 68, 10, 88, array(
 						'target_coordinates' => $coordinates,
-						'target_planet_id' => (int) $bestTarget['id'],
+						'target_planet_id' => !empty($focusTarget['target_planet_id']) ? (int) $focusTarget['target_planet_id'] : 0,
 						'information_value' => 1,
 					));
 				}
@@ -209,7 +280,9 @@ class BotActionGenerator
 				if ($coordinates !== '') {
 					$actions[] = $this->action('send_raid', $goal, 78, 28, 78, array(
 						'target_coordinates' => $coordinates,
-						'target_planet_id' => (int) $bestTarget['id'],
+						'target_planet_id' => !empty($focusTarget['target_planet_id']) ? (int) $focusTarget['target_planet_id'] : 0,
+						'target_user_id' => !empty($focusTarget['target_user_id']) ? (int) $focusTarget['target_user_id'] : 0,
+						'target_username' => !empty($focusTarget['target_username']) ? $focusTarget['target_username'] : '',
 						'continuity_value' => 1,
 					));
 				}
@@ -217,7 +290,7 @@ class BotActionGenerator
 					'channel_key' => 'bots',
 					'template_key' => 'pression_locale',
 					'target_coordinates' => $coordinates,
-					'target_username' => !empty($bestTarget['username']) ? $bestTarget['username'] : '',
+					'target_username' => !empty($focusTarget['target_username']) ? $focusTarget['target_username'] : '',
 					'psychological_value' => 1,
 				));
 				break;
@@ -226,14 +299,15 @@ class BotActionGenerator
 				if ($coordinates !== '') {
 					$actions[] = $this->action('send_spy', $goal, 72, 12, 86, array(
 						'target_coordinates' => $coordinates,
-						'target_planet_id' => (int) $bestTarget['id'],
+						'target_planet_id' => !empty($focusTarget['target_planet_id']) ? (int) $focusTarget['target_planet_id'] : 0,
 						'prepare_hidden' => 1,
 					));
 				}
-				if (!empty($bestTarget['id_owner'])) {
+				if (!empty($focusTarget['target_user_id'])) {
 					$actions[] = $this->action('queue_private_message', $goal, 48, 8, 74, array(
-						'target_user_id' => (int) $bestTarget['id_owner'],
-						'target_username' => !empty($bestTarget['username']) ? $bestTarget['username'] : '',
+						'target_user_id' => (int) $focusTarget['target_user_id'],
+						'target_username' => !empty($focusTarget['target_username']) ? $focusTarget['target_username'] : '',
+						'target_coordinates' => $coordinates,
 						'template_key' => 'mise_en_garde',
 					));
 				}
@@ -252,7 +326,7 @@ class BotActionGenerator
 					'channel_key' => 'bots',
 					'template_key' => 'brouillage',
 					'target_coordinates' => $coordinates,
-					'target_username' => !empty($bestTarget['username']) ? $bestTarget['username'] : '',
+					'target_username' => !empty($focusTarget['target_username']) ? $focusTarget['target_username'] : '',
 					'bluff_value' => 1,
 				));
 				$actions[] = $this->action('presence_ping', $goal, 22, 2, 92, array(
@@ -294,15 +368,16 @@ class BotActionGenerator
 				if ($coordinates !== '') {
 					$actions[] = $this->action('send_spy', $goal, 70, 11, 88, array(
 						'target_coordinates' => $coordinates,
-						'target_planet_id' => (int) $bestTarget['id'],
+						'target_planet_id' => !empty($focusTarget['target_planet_id']) ? (int) $focusTarget['target_planet_id'] : 0,
 						'information_value' => 1,
 						'prepare_hidden' => 1,
 					));
 				}
-				if (!empty($bestTarget['id_owner'])) {
+				if (!empty($focusTarget['target_user_id'])) {
 					$actions[] = $this->action('queue_private_message', $goal, 36, 6, 66, array(
-						'target_user_id' => (int) $bestTarget['id_owner'],
-						'target_username' => !empty($bestTarget['username']) ? $bestTarget['username'] : '',
+						'target_user_id' => (int) $focusTarget['target_user_id'],
+						'target_username' => !empty($focusTarget['target_username']) ? $focusTarget['target_username'] : '',
+						'target_coordinates' => $coordinates,
 						'template_key' => 'test_diplomatique',
 					));
 				}
@@ -310,5 +385,31 @@ class BotActionGenerator
 		}
 
 		return $actions;
+	}
+
+	protected function resolveFocusTarget(array $snapshot, array $bestTarget)
+	{
+		$candidates = array(
+			isset($snapshot['hostile_context']['retaliation_target']) ? $snapshot['hostile_context']['retaliation_target'] : array(),
+			isset($snapshot['current_target_focus']) ? $snapshot['current_target_focus'] : array(),
+			isset($snapshot['commander_target_focus']) ? $snapshot['commander_target_focus'] : array(),
+		);
+
+		foreach ($candidates as $candidate) {
+			if (!empty($candidate['target_coordinates'])) {
+				return $candidate;
+			}
+		}
+
+		if (!empty($bestTarget)) {
+			return array(
+				'target_coordinates' => $bestTarget['galaxy'].':'.$bestTarget['system'].':'.$bestTarget['planet'],
+				'target_planet_id' => (int) $bestTarget['id'],
+				'target_user_id' => (int) $bestTarget['id_owner'],
+				'target_username' => isset($bestTarget['username']) ? $bestTarget['username'] : '',
+			);
+		}
+
+		return array();
 	}
 }

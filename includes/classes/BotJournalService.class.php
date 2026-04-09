@@ -4,6 +4,8 @@ class BotJournalService
 {
 	public function logActivity($botUserId, $type, $summary, array $payload = array())
 	{
+		$summary = $this->truncateText($summary, 250);
+
 		Database::get()->insert('INSERT INTO %%BOT_ACTIVITY%% SET
 			bot_user_id = :botUserId,
 			universe = :universe,
@@ -22,6 +24,16 @@ class BotJournalService
 
 	public function logDecision($botUserId, array $context)
 	{
+		if (!empty($context['ordre_hierarchique'])) {
+			$context['ordre_hierarchique'] = $this->truncateText($context['ordre_hierarchique'], 64);
+		}
+		if (!empty($context['opportunite_dominante'])) {
+			$context['opportunite_dominante'] = $this->truncateText($context['opportunite_dominante'], 48);
+		}
+		if (!empty($context['next_step'])) {
+			$context['next_step'] = $this->truncateText($context['next_step'], 72);
+		}
+
 		$summary = sprintf(
 			'%s [%s/%s] besoin=%s opportunité=%s ordre=%s action=%s confiance=%d risque=%d suite=%s.',
 			isset($context['bot_name']) ? $context['bot_name'] : 'Bot',

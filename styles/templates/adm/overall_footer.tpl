@@ -13,3 +13,8 @@ top.document.location.reload();
 </script>
 {/if}
 {/if}
+<div class="admin-footer-note">
+	<span>Administration refondue</span>
+	<span>Univers {$UNI|default:'-'}</span>
+	<span>{$gameName|default:'Astra Dominion'}</span>
+</div>

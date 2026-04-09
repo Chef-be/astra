@@ -1,10 +1,9 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Contrôle d’intégrité</span>
-			<h1 class="admin-hero__title">Vérification des fichiers</h1>
-			<p class="admin-hero__subtitle">Comparez rapidement les fichiers locaux du projet avec les références distantes selon le type de ressource à auditer.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Contrôle</span>
+			<h2>Vérification des fichiers</h2>
 		</div>
 	</section>
 

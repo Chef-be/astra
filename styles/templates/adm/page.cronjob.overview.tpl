@@ -1,45 +1,38 @@
 {block name="content"}
 <div class="container-fluid py-4 text-white admin-stack">
-	<section class="admin-kpi-grid">
-		<article class="admin-kpi-card">
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Planification</span>
+			<h2>Tâches planifiées</h2>
+		</div>
+		<div class="admin-headerline__actions">
+			<a class="admin-shell-action admin-shell-action--accent" href="admin.php?page=cronjob&mode=showCronjobCreate">{$LNG.cronjob_new}</a>
+			<a class="admin-shell-action admin-shell-action--light" href="admin.php?page=supervision">Supervision</a>
+		</div>
+	</section>
+
+	<section class="admin-kpi-grid admin-kpi-grid--cron">
+		<article class="admin-kpi-card admin-kpi-card--micro">
 			<span class="admin-kpi-card__label">Cronjobs</span>
 			<strong class="admin-kpi-card__value">{$cronTotal}</strong>
 			<span class="admin-kpi-card__meta">ensemble configuré</span>
 		</article>
-		<article class="admin-kpi-card">
+		<article class="admin-kpi-card admin-kpi-card--micro">
 			<span class="admin-kpi-card__label">Actifs</span>
 			<strong class="admin-kpi-card__value">{$cronActive}</strong>
 			<span class="admin-kpi-card__meta">désactivés : {$cronTotal-$cronActive}</span>
 		</article>
-		<article class="admin-kpi-card">
+		<article class="admin-kpi-card admin-kpi-card--micro">
 			<span class="admin-kpi-card__label">Verrous</span>
 			<strong class="admin-kpi-card__value">{$cronLocked}</strong>
 			<span class="admin-kpi-card__meta">libres : {$cronTotal-$cronLocked}</span>
 		</article>
 	</section>
 
-	<section class="admin-card">
-		<div class="card-body admin-stack">
-			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-				<div>
-					<h2 class="h4 mb-1">Tâches planifiées</h2>
-					<p class="text-white-50 mb-0">Le pilotage distingue l’état métier, le verrou technique et la prochaine exécution pour éviter les ambiguïtés.</p>
-				</div>
-				<div class="admin-cluster">
-					<a class="admin-shell-action admin-shell-action--accent" href="admin.php?page=cronjob&mode=showCronjobCreate">{$LNG.cronjob_new}</a>
-					<a class="admin-shell-action admin-shell-action--light" href="admin.php?page=supervision">Supervision</a>
-				</div>
-			</div>
-		</div>
-	</section>
-
 	<details class="admin-fold admin-fold--compact">
 		<summary class="admin-fold__summary">
 			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-				<div>
-					<h2 class="h5 mb-1">Catalogue des cronjobs</h2>
-					<p class="text-white-50 mb-0">Vue détaillée des tâches, repliée par défaut pour ne pas monopoliser l’écran mobile.</p>
-				</div>
+				<div><h2 class="h5 mb-1">Catalogue des cronjobs</h2></div>
 				<span class="admin-pill">{$cronTotal} tâche(s)</span>
 			</div>
 		</summary>

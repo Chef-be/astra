@@ -103,7 +103,6 @@
 		<div class="fleet-dealer-headline">
 			<div>
 				<h2 class="fs-4 m-0 text-yellow">{$LNG.ft_head}</h2>
-				<p class="m-0 fleet-dealer-compact-note">Revendez rapidement les appareils autorisés avec un aperçu direct du rendement unitaire et total.</p>
 			</div>
 			<div class="text-white-50">{$LNG.ft_charge}: <strong class="text-warning">{$Charge}%</strong></div>
 		</div>

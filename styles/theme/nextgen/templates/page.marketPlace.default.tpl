@@ -324,12 +324,24 @@ $('#shipT').on('change', function (e) {
 
 $('#shipT').trigger("change");
 
-$(".market_form").submit( function() {
-	var c = confirm("{$LNG.market_confirm_are_you_sure}");
-	if (c) {
-		$(this).append('<input type="hidden" name="shipType" value="' + $("#shipT").val() + '">')
-	}
-	return c;
+$(".market_form").submit(function(event) {
+	event.preventDefault();
+
+	var form = this;
+
+	Dialog.confirm("{$LNG.market_confirm_are_you_sure|escape:'javascript'}", {
+		title: 'Marché',
+		confirmLabel: 'Confirmer',
+		cancelLabel: 'Annuler'
+	}).then(function(confirmed) {
+		if (!confirmed) {
+			return;
+		}
+
+		$(form).find('input[name="shipType"]').remove();
+		$(form).append('<input type="hidden" name="shipType" value="' + $("#shipT").val() + '">');
+		form.submit();
+	});
 });
 });</script>
 {/block}

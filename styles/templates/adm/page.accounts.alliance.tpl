@@ -1,10 +1,9 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Éditeur de compte</span>
-			<h1 class="admin-hero__title">{$allianceHero.title}</h1>
-			<p class="admin-hero__subtitle">{$allianceHero.subtitle}</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Éditeur de compte</span>
+			<h2>{$allianceHero.title}</h2>
 		</div>
 	</section>
 

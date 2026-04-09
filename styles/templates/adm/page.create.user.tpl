@@ -1,15 +1,15 @@
 {block name="content"}
-<div class="container-fluid py-3 text-white">
-	<div class="admin-toolbar mb-4">
-		<div class="admin-mini-hero flex-grow-1">
-			<h2 class="h3">Créer un nouveau compte</h2>
-			<p>Assistant de création complet avec positionnement initial, niveau d’accès et langue.</p>
+<div class="admin-settings-shell admin-stack">
+	<section class="admin-headerline">
+		<div class="admin-headerline__lead">
+			<span class="admin-headerline__eyebrow">Création</span>
+			<h1 class="admin-headerline__title">Nouveau compte</h1>
 		</div>
-		<div class="admin-actions">
-			<a class="btn btn-outline-light" href="?page=create">Retour</a>
-			<a class="btn btn-outline-info" href="?page=create&mode=user">Réinitialiser</a>
+		<div class="admin-actions admin-actions--header">
+			<a class="admin-shell-action admin-shell-action--light" href="?page=create">Retour</a>
+			<a class="admin-shell-action admin-shell-action--light" href="?page=create&mode=user">Réinitialiser</a>
 		</div>
-	</div>
+	</section>
 
 	<form class="admin-card" action="?page=create&mode=createUser" method="post">
 		<div class="admin-card__body">

@@ -1,53 +1,80 @@
 {include file="main.header.tpl" bodyclass="full"}
 
-<div class="admin-shell">
-	<aside class="admin-shell__sidebar">
-		{include file="main.navigation.tpl" bodyclass="full"}
-	</aside>
-	<div class="admin-shell__main">
-		<div class="admin-shell__topbar">
-			{include file="main.topnav.tpl" bodyclass="full"}
+<div class="bridge-layout">
+	<div class="bridge-drawer">
+		<div class="bridge-drawer__backdrop"></div>
+		<div class="bridge-drawer__panel">
+			{include file="main.navigation.tpl" bodyclass="full"}
 		</div>
-		<main class="content admin-shell__content px-2 px-lg-4">
-			<section class="admin-hero admin-hero--shell my-3">
-				<div class="admin-hero__content">
-					<div class="admin-hero__eyebrow">
+	</div>
+
+	<div class="bridge-shell">
+		<header class="bridge-topbar">
+			{include file="main.topnav.tpl" bodyclass="full"}
+		</header>
+
+		<main class="bridge-main">
+			<section class="bridge-headline">
+				<div class="bridge-headline__lead">
+					<div class="bridge-headline__path">
 						{if !empty($currentPageMeta.icon)}<i class="bi {$currentPageMeta.icon}"></i>{/if}
-						<span>{$adminSectionLabel}</span>
+						<a href="admin.php?page=overview" class="bridge-headline__crumb">Administration</a>
+						<i class="bi bi-chevron-right"></i>
+						<a href="{$adminSectionUrl}" class="bridge-headline__crumb">{$adminSectionLabel}</a>
+						<i class="bi bi-chevron-right"></i>
+						<a href="{$adminCurrentUrl}" class="bridge-headline__crumb is-current">{$currentPageMeta.title}</a>
+						{if !empty($currentPageMeta.description)}
+							<button
+								class="bridge-headline__hint"
+								type="button"
+								data-bs-toggle="tooltip"
+								data-bs-placement="bottom"
+								title="{$currentPageMeta.description|escape:'html'}"
+								aria-label="Aide sur la page"
+							>?</button>
+						{/if}
 					</div>
-					<h1 class="admin-hero__title">{$currentPageMeta.title}</h1>
-					<p class="admin-hero__description">{$currentPageMeta.description}</p>
+					<h1 class="bridge-headline__title">{$currentPageMeta.title}</h1>
 				</div>
-				<div class="admin-hero__aside">
-					<div class="admin-hero__meta">
-						<div class="admin-hero__chip">Univers <strong>{$UNI}</strong></div>
-						<div class="admin-hero__chip">Tickets <strong>{$supportticks|default:0}</strong></div>
-						<div class="admin-hero__chip">Page <strong>{$currentPageMeta.title}</strong></div>
-					</div>
+
+				<div class="bridge-headline__facts">
+					<span class="bridge-chip">Univers {$UNI}</span>
+					<a href="admin.php?page=support" class="bridge-chip" title="Ouvrir le support">Tickets {$supportticks|default:0}</a>
+					<span class="bridge-chip">{$adminTabs|@count} onglet(s)</span>
+				</div>
+			</section>
+
+			{if $adminTabs|@count > 0 || !empty($currentPageMeta.actions)}
+				<section class="bridge-commandbar">
+					{if $adminTabs|@count > 0}
+						<nav class="bridge-tabs" aria-label="Navigation locale">
+							{foreach from=$adminTabs item=adminTab}
+								<a href="{$adminTab.url}" class="bridge-tab {if $adminTab.active}is-active{/if}">
+									<i class="bi {$adminTab.icon|default:'bi-dot'}"></i>
+									<span>{$adminTab.label}</span>
+								</a>
+							{/foreach}
+						</nav>
+					{/if}
+
 					{if !empty($currentPageMeta.actions)}
-						<div class="admin-hero__actions">
-							{foreach from=$currentPageMeta.actions item=heroAction}
-								<a href="{$heroAction.url}" class="admin-shell-action admin-shell-action--{$heroAction.tone|default:'light'}">{$heroAction.label}</a>
+						<div class="bridge-actions">
+							{foreach from=$currentPageMeta.actions item=pageAction}
+								<a href="{$pageAction.url}" class="bridge-actionchip bridge-actionchip--{$pageAction.tone|default:'light'}">{$pageAction.label}</a>
 							{/foreach}
 						</div>
 					{/if}
-				</div>
-			</section>
-			{if $adminTabs|@count > 0}
-				<nav class="admin-tabs mb-3" aria-label="Navigation locale">
-					{foreach from=$adminTabs item=adminTab}
-						<a href="{$adminTab.url}" class="admin-tab {if $adminTab.active}is-active{/if}">
-							<i class="bi {$adminTab.icon|default:'bi-dot'}"></i>
-							<span>{$adminTab.label}</span>
-						</a>
-					{/foreach}
-				</nav>
+				</section>
 			{/if}
-			{block name="content"}{/block}
+
+			<section class="bridge-content">
+				{block name="content"}{/block}
+			</section>
 		</main>
-		<div class="admin-shell__footer">
-			{include file="overall_footer.tpl" bodyclass="full"}
-		</div>
+	</div>
+
+	<div class="bridge-footer">
+		{include file="overall_footer.tpl" bodyclass="full"}
 	</div>
 </div>
 </body>

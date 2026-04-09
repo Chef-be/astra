@@ -3,7 +3,6 @@
 	<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
 		<div>
 			<h1 class="h3 mb-1">Missions</h1>
-			<p class="text-white-50 mb-0">Suivez vos objectifs, récupérez vos récompenses et gardez un cap de progression clair.</p>
 		</div>
 		<div class="d-flex gap-2 flex-wrap">
 			<span class="badge bg-secondary">En cours : {$missionsSnapshot.inProgress}</span>

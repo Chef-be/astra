@@ -197,6 +197,9 @@ class ShowStatisticsPage extends AbstractGamePage
 
         require_once 'includes/classes/Cronjob.class.php';
 
+        $statUpdateTimestamp = (int) Cronjob::getLastExecutionTime('statistic');
+        $statDate = $statUpdateTimestamp > 0 ? _date($LNG['php_tdformat'], $statUpdateTimestamp, $USER['timezone']) : null;
+
         $this->assign(array(
             'Selectors'                => $Selector,
             'who'                    => $who,
@@ -205,7 +208,9 @@ class ShowStatisticsPage extends AbstractGamePage
             'RangeList'                => $RangeList,
             'CUser_ally'            => $USER['ally_id'],
             'CUser_id'                => $USER['id'],
-            'stat_date'                => _date($LNG['php_tdformat'], Cronjob::getLastExecutionTime('statistic'), $USER['timezone']),
+            'stat_date'                => $statDate,
+            'stat_update_label'        => $statDate !== null ? sprintf($LNG['rec_last_update_on'], $statDate) : null,
+            'stat_update_timestamp'    => $statUpdateTimestamp,
 			'ShortStatus'				=> array(
 				'vacation'					=> $LNG['gl_short_vacation'],
 				'banned'					=> $LNG['gl_short_ban'],

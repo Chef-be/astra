@@ -257,6 +257,10 @@ function extractBotPayload(tokens) {
       payload.interval = tokens[index + 1];
     }
 
+    if ((normalized === 'canal' || normalized === 'channel') && tokens[index + 1]) {
+      payload.channel_key = String(tokens[index + 1]).trim().toLowerCase();
+    }
+
     if (normalized === 'mode' && tokens[index + 1]) {
       payload.mode = tokens[index + 1];
     }

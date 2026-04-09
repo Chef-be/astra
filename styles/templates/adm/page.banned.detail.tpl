@@ -1,22 +1,22 @@
 {block name="content"}
-<div class="container-fluid py-3 text-white">
-	<div class="admin-toolbar mb-4">
-		<div class="admin-mini-hero flex-grow-1">
-			<h2 class="h3">Sanction du compte {$name}</h2>
-			<p>Définissez le motif, la durée et l’éventuel passage en mode vacances associé à la sanction.</p>
+<div class="admin-settings-shell admin-stack">
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Sanction</span>
+			<h2>Compte {$name}</h2>
 		</div>
-		<div class="admin-actions">
-			<a class="btn btn-outline-light" href="?page=banned">Retour aux bannissements</a>
+		<div class="admin-headerline__actions">
+			<a class="admin-shell-action admin-shell-action--light" href="?page=banned">Retour aux bannissements</a>
 		</div>
-	</div>
+	</section>
 
 	<form action="?page=banned&mode=banUser" method="post" class="admin-card">
 		<input type="hidden" name="target_id" value="{$target_id}">
 		<div class="admin-card__body">
-			<div class="admin-stat-strip mb-4">
-				<div class="admin-stat-pill">{$bantitle}</div>
+			<div class="admin-table-toolbar__meta mb-4">
+				<span class="admin-pill">{$bantitle}</span>
 				{if !empty($timesus)}
-					<div class="admin-stat-pill">Sanction déjà active</div>
+					<span class="admin-pill">Sanction déjà active</span>
 				{/if}
 			</div>
 			<div class="admin-form-grid">

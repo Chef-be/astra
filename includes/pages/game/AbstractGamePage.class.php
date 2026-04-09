@@ -459,6 +459,10 @@ abstract class AbstractGamePage
 	}
 	protected function printMessage($message, $redirectButtons = NULL, $redirect = NULL, $fullSide = true)
 	{
+		if (!isset($redirect) && is_array($redirectButtons) && count($redirectButtons) === 1 && !empty($redirectButtons[0]['url'])) {
+			$redirect = array($redirectButtons[0]['url'], 3);
+		}
+
 		$this->assign(array(
 			'message'			=> $message,
 			'redirectButtons'	=> $redirectButtons,

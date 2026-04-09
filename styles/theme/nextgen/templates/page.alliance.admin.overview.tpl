@@ -131,8 +131,8 @@
 	</tr>
 	<tr>
 		<td>
-			<form action="game.php?page=alliance&amp;mode=admin&amp;action=close" method="post">
-				<input class="btn btn-block btn-danger text-white fs-12 p-1 fw-bold w-100" type="submit" value="{$LNG.al_continue}" onclick="return confirm('{$LNG.al_close_ally}');">
+			<form action="game.php?page=alliance&amp;mode=admin&amp;action=close" method="post" data-confirm-message="{$LNG.al_close_ally|escape:'html'}" data-confirm-title="Alliance" data-confirm-confirm-label="Dissoudre" data-confirm-variant="danger">
+				<input class="btn btn-block btn-danger text-white fs-12 p-1 fw-bold w-100" type="submit" value="{$LNG.al_continue}">
 			</form>
 	</td>
 	</tr>

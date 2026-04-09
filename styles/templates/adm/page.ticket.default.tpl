@@ -1,44 +1,40 @@
 {block name="content"}
 
-<div class="container-fluid py-4 text-white">
-	<div class="admin-toolbar mb-4">
-		<div class="admin-mini-hero flex-grow-1">
-			<h1 class="h3 mb-1">Tickets de support</h1>
-			<p class="text-white-50 mb-0">Centre de traitement avec actions rapides, sélection multiple et purge complète.</p>
-		</div>
-		<div class="admin-stat-strip align-items-start">
-			<span class="admin-stat-pill">{$ticketSummary.total} ticket(s)</span>
-			<form action="admin.php?page=support&amp;mode=purgeAll" method="post" onsubmit="return confirm('Supprimer tous les tickets, toutes les réponses et réinitialiser les compteurs ?');">
-				<button type="submit" class="btn btn-sm btn-outline-danger">Tout supprimer et remettre à zéro</button>
-			</form>
-		</div>
-	</div>
-	<div class="admin-overview-grid mb-4">
-		<div class="admin-overview-card">
-			<strong>{$ticketSummary.open}</strong>
-			<span>Ouverts</span>
-		</div>
-		<div class="admin-overview-card">
-			<strong>{$ticketSummary.answer}</strong>
-			<span>En attente joueur</span>
-		</div>
-		<div class="admin-overview-card">
-			<strong>{$ticketSummary.closed}</strong>
-			<span>Clôturés</span>
-		</div>
-		<div class="admin-overview-card">
-			<strong>{$ticketSummary.total}</strong>
-			<span>Total traité</span>
-		</div>
-	</div>
-	<div class="admin-table-shell">
-		<form action="admin.php?page=support&amp;mode=bulk" method="post" id="supportBulkForm">
-		<div class="admin-table-toolbar">
-			<div class="admin-table-toolbar__meta">
-				<span class="admin-pill">File la plus récente en tête</span>
-				<span class="admin-pill">Actions rapides par ticket</span>
+<div class="admin-settings-shell admin-stack admin-support-page">
+	<section class="admin-support-strip">
+		<article class="admin-kpi-card admin-kpi-card--micro">
+			<span class="admin-kpi-card__label">Ouverts</span>
+			<strong class="admin-kpi-card__value">{$ticketSummary.open}</strong>
+		</article>
+		<article class="admin-kpi-card admin-kpi-card--micro">
+			<span class="admin-kpi-card__label">En attente</span>
+			<strong class="admin-kpi-card__value">{$ticketSummary.answer}</strong>
+		</article>
+		<article class="admin-kpi-card admin-kpi-card--micro">
+			<span class="admin-kpi-card__label">Clôturés</span>
+			<strong class="admin-kpi-card__value">{$ticketSummary.closed}</strong>
+		</article>
+		<section class="admin-card admin-support-control">
+			<div class="admin-card__body">
+				<div class="admin-support-control__meta">
+					<span class="admin-kpi-card__label">Tickets</span>
+					<strong>{$ticketSummary.total}</strong>
+				</div>
+				<form action="admin.php?page=support&amp;mode=purgeAll" method="post" onsubmit="return confirm('Supprimer tous les tickets, toutes les réponses et réinitialiser les compteurs ?');">
+					<button type="submit" class="btn btn-outline-danger">Tout supprimer</button>
+				</form>
 			</div>
-			<div class="admin-actions">
+		</section>
+	</section>
+
+	<div class="admin-table-shell admin-table-shell--support">
+		<form action="admin.php?page=support&amp;mode=bulk" method="post" id="supportBulkForm">
+		<div class="admin-table-toolbar admin-table-toolbar--support">
+			<div class="admin-table-toolbar__meta">
+				<span class="admin-pill">Tickets récents en tête</span>
+				<span class="admin-pill">{$ticketSummary.total} élément(s)</span>
+			</div>
+			<div class="admin-actions admin-actions--support">
 				<select name="bulkAction" id="supportBulkAction" class="form-select bg-dark text-white border-secondary">
 					<option value="">Action de masse</option>
 					<option value="answer">Prendre en charge</option>

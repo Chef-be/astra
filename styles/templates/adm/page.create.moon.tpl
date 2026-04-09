@@ -1,15 +1,15 @@
 {block name="content"}
-<div class="container-fluid py-3 text-white">
-	<div class="admin-toolbar mb-4">
-		<div class="admin-mini-hero flex-grow-1">
-			<h2 class="h3">Créer une lune</h2>
-			<p>Attachez une lune à une planète cible, avec diamètre manuel ou génération aléatoire.</p>
+<div class="admin-settings-shell admin-stack">
+	<section class="admin-headerline">
+		<div class="admin-headerline__lead">
+			<span class="admin-headerline__eyebrow">Création orbitale</span>
+			<h1 class="admin-headerline__title">Créer une lune</h1>
 		</div>
-		<div class="admin-actions">
-			<a class="btn btn-outline-light" href="?page=create">Retour</a>
-			<a class="btn btn-outline-info" href="?page=create&mode=moon">Réinitialiser</a>
+		<div class="admin-actions admin-actions--header">
+			<a class="admin-shell-action admin-shell-action--light" href="?page=create">Retour</a>
+			<a class="admin-shell-action admin-shell-action--light" href="?page=create&mode=moon">Réinitialiser</a>
 		</div>
-	</div>
+	</section>
 
 	<form class="admin-card" action="?page=create&mode=createMoon" method="post">
 		<div class="admin-card__body">

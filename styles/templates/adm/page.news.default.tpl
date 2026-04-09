@@ -1,26 +1,21 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Publication</span>
-			<h1 class="admin-hero__title">Actualités du jeu</h1>
-			<p class="admin-hero__subtitle">Rédigez, mettez à jour et retirez les actualités visibles sur la page publique sans casser la présentation existante.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Publication</span>
+			<h2>Actualités du jeu</h2>
 		</div>
-		<div class="admin-stat-strip">
-			<div class="admin-stat-card">
-				<span class="admin-stat-card__label">Articles publiés</span>
-				<strong class="admin-stat-card__value">{$NewsList|@count}</strong>
-			</div>
+		<div class="admin-headerline__actions">
+			<span class="admin-pill">Articles {$NewsList|@count}</span>
+			<a class="btn btn-primary" href="admin.php?page=news&amp;mode=create">Nouvelle actualité</a>
 		</div>
 	</section>
 
 	<div class="admin-table-shell">
 		<div class="admin-table-toolbar">
-			<div>
-				<h2 class="h5 mb-1">Liste des actualités</h2>
-				<p class="text-white-50 mb-0">L’éditeur riche sombre reste cohérent avec le thème d’administration.</p>
+			<div class="admin-table-toolbar__meta">
+				<span class="admin-pill">Liste</span>
 			</div>
-			<a class="btn btn-primary" href="admin.php?page=news&amp;mode=create">Nouvelle actualité</a>
 		</div>
 
 		{if $NewsList|@count > 0}

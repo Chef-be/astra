@@ -140,23 +140,267 @@ function handleErr(errMessage, url, line)
 	error += "URL: " + url + "\n";
 	error += "Line: " + line + "\n\n";
 	error += "Click OK to continue viewing this page,\n";
-	alert(error);
+	Dialog.alert(error, null, { title: 'Erreur JavaScript' });
 	if(typeof console == "object")
 		console.log(error);
 
 	return true;
 }
 
+function getGameUiWindow() {
+	var currentWindow = window;
+
+	try {
+		while (currentWindow.parent && currentWindow.parent !== currentWindow) {
+			if (currentWindow.parent.location.origin !== currentWindow.location.origin) {
+				break;
+			}
+
+			currentWindow = currentWindow.parent;
+		}
+	} catch (error) {
+		return window;
+	}
+
+	return currentWindow;
+}
+
+function normalizeGameMessage(message) {
+	if (message === null || typeof message === 'undefined') {
+		return '';
+	}
+
+	if ($.isArray(message)) {
+		return message.join("\n");
+	}
+
+	if (typeof message === 'object') {
+		if (typeof message.message !== 'undefined') {
+			return normalizeGameMessage(message.message);
+		}
+
+		if (typeof message.mess !== 'undefined') {
+			return normalizeGameMessage(message.mess);
+		}
+
+		try {
+			return JSON.stringify(message);
+		} catch (error) {
+			return String(message);
+		}
+	}
+
+	return String(message);
+}
+
+function escapeGameHtml(value) {
+	return $('<div>').text(value === null || typeof value === 'undefined' ? '' : String(value)).html();
+}
+
+function getGameModalContext() {
+	var uiWindow = getGameUiWindow();
+	var doc = uiWindow.document;
+
+	return {
+		win: uiWindow,
+		doc: doc,
+		element: doc.getElementById('gameGlobalModal'),
+		title: doc.getElementById('gameGlobalModalTitle'),
+		body: doc.getElementById('gameGlobalModalBody'),
+		cancelButton: doc.querySelector('#gameGlobalModal [data-role="cancel"]'),
+		confirmButton: doc.querySelector('#gameGlobalModal [data-role="confirm"]'),
+		closeButton: doc.querySelector('#gameGlobalModal .btn-close')
+	};
+}
+
+function openGamePromptDialog(options) {
+	options = options || {};
+
+	var context = getGameModalContext();
+	if (!context.element || !context.win.bootstrap || typeof context.win.bootstrap.Modal !== 'function') {
+		return Promise.resolve(context.win.prompt(options.message || '', options.defaultValue || ''));
+	}
+
+	context.title.textContent = options.title || 'Saisie requise';
+	context.body.innerHTML =
+		'<label class="form-label text-white-50 mb-2" for="gameGlobalModalInput">' + escapeGameHtml(options.message || '') + '</label>' +
+		'<input id="gameGlobalModalInput" class="form-control bg-dark text-white border-secondary" type="' + escapeGameHtml(options.inputType || 'text') + '" value="' + escapeGameHtml(options.defaultValue || '') + '">';
+
+	context.cancelButton.textContent = options.cancelLabel || 'Annuler';
+	context.confirmButton.textContent = options.confirmLabel || 'Valider';
+	context.cancelButton.classList.remove('d-none');
+	context.confirmButton.className = 'btn ' + (options.confirmClass || 'btn-primary');
+
+	return new Promise(function(resolve) {
+		var modal = context.win.bootstrap.Modal.getOrCreateInstance(context.element);
+		var result = null;
+		var input = context.doc.getElementById('gameGlobalModalInput');
+
+		var cleanup = function() {
+			context.confirmButton.removeEventListener('click', onConfirm);
+			context.cancelButton.removeEventListener('click', onCancel);
+			context.closeButton.removeEventListener('click', onCancel);
+			context.element.removeEventListener('hidden.bs.modal', onHidden);
+		};
+
+		var onConfirm = function() {
+			result = input ? input.value : '';
+			modal.hide();
+		};
+
+		var onCancel = function() {
+			result = null;
+		};
+
+		var onHidden = function() {
+			cleanup();
+			resolve(result);
+		};
+
+		context.confirmButton.addEventListener('click', onConfirm);
+		context.cancelButton.addEventListener('click', onCancel);
+		context.closeButton.addEventListener('click', onCancel);
+		context.element.addEventListener('hidden.bs.modal', onHidden);
+
+		modal.show();
+
+		context.win.setTimeout(function() {
+			if (!input) {
+				return;
+			}
+
+			input.focus();
+			input.select();
+		}, 150);
+	});
+}
+
+function openGameDialog(options) {
+	options = options || {};
+
+	var context = getGameModalContext();
+	var message = normalizeGameMessage(options.message);
+
+	if (!context.element || !context.win.bootstrap || typeof context.win.bootstrap.Modal !== 'function') {
+		if (options.showCancel) {
+			return Promise.resolve(context.win.confirm(message));
+		}
+
+		context.win.alert(message);
+		return Promise.resolve(true);
+	}
+
+	context.title.textContent = options.title || (options.showCancel ? 'Confirmation' : 'Information');
+	context.body.textContent = message;
+	context.body.innerHTML = options.html === true ? message : context.body.innerHTML;
+
+	context.cancelButton.textContent = options.cancelLabel || 'Annuler';
+	context.confirmButton.textContent = options.confirmLabel || (options.showCancel ? 'Confirmer' : 'Fermer');
+	context.cancelButton.classList.toggle('d-none', !options.showCancel);
+	context.confirmButton.className = 'btn ' + (options.confirmClass || (options.showCancel ? 'btn-primary' : 'btn-primary'));
+
+	return new Promise(function(resolve) {
+		var modal = context.win.bootstrap.Modal.getOrCreateInstance(context.element);
+		var result = options.showCancel ? false : true;
+
+		var cleanup = function() {
+			context.confirmButton.removeEventListener('click', onConfirm);
+			context.cancelButton.removeEventListener('click', onCancel);
+			context.closeButton.removeEventListener('click', onCancel);
+			context.element.removeEventListener('hidden.bs.modal', onHidden);
+		};
+
+		var onConfirm = function() {
+			result = true;
+			modal.hide();
+		};
+
+		var onCancel = function() {
+			result = options.showCancel ? false : true;
+		};
+
+		var onHidden = function() {
+			cleanup();
+			resolve(result);
+		};
+
+		context.confirmButton.addEventListener('click', onConfirm);
+		context.cancelButton.addEventListener('click', onCancel);
+		context.closeButton.addEventListener('click', onCancel);
+		context.element.addEventListener('hidden.bs.modal', onHidden);
+
+		modal.show();
+	});
+}
+
 var Dialog	= {
 	info: function(ID){
-		return Dialog.open('game.php?page=information&id='+ID, 590, (ID > 600 && ID < 800 || ID > 900 && ID < 930) ? 210 : ((ID > 100 && ID < 200) ? 300 : 620));
+		var dialogWidth = 760;
+		var dialogHeight = 680;
+
+		if ((ID > 600 && ID < 800) || (ID > 900 && ID < 930)) {
+			dialogWidth = 720;
+			dialogHeight = 360;
+		} else if (ID > 100 && ID < 200) {
+			dialogWidth = 700;
+			dialogHeight = 440;
+		}
+
+		return Dialog.open('game.php?page=information&id='+ID, dialogWidth, dialogHeight);
 	},
 
-	alert: function(msg, callback){
-		alert(msg);
-		if(typeof callback === "function") {
-			callback();
+	alert: function(msg, callback, options){
+		var rootWindow = getGameUiWindow();
+
+		if (rootWindow !== window && rootWindow.Dialog && typeof rootWindow.Dialog.alert === 'function') {
+			return rootWindow.Dialog.alert(msg, callback, options);
 		}
+
+		return openGameDialog($.extend({
+			message: msg,
+			title: 'Information',
+			confirmLabel: 'Fermer',
+			showCancel: false
+		}, options || {})).then(function() {
+			if(typeof callback === "function") {
+				callback();
+			}
+			return true;
+		});
+	},
+
+	confirm: function(msg, options){
+		var rootWindow = getGameUiWindow();
+
+		if (rootWindow !== window && rootWindow.Dialog && typeof rootWindow.Dialog.confirm === 'function') {
+			return rootWindow.Dialog.confirm(msg, options);
+		}
+
+		return openGameDialog($.extend({
+			message: msg,
+			title: 'Confirmation',
+			confirmLabel: 'Confirmer',
+			cancelLabel: 'Annuler',
+			confirmClass: 'btn-danger',
+			showCancel: true
+		}, options || {}));
+	},
+
+	prompt: function(msg, defaultValue, options) {
+		var rootWindow = getGameUiWindow();
+
+		if (rootWindow !== window && rootWindow.Dialog && typeof rootWindow.Dialog.prompt === 'function') {
+			return rootWindow.Dialog.prompt(msg, defaultValue, options);
+		}
+
+		return openGamePromptDialog($.extend({
+			message: msg,
+			defaultValue: defaultValue || '',
+			title: 'Saisie requise',
+			confirmLabel: 'Valider',
+			cancelLabel: 'Annuler',
+			confirmClass: 'btn-primary'
+		}, options || {}));
 	},
 
 	PM: function(ID, Subject, Message) {
@@ -201,12 +445,103 @@ var Dialog	= {
 }
 
 function NotifyBox(text) {
-	tip = $('#tooltipNotify')
-	tip.html(text).addClass('notify').css({
-		left : (($(window).width() - $('#leftmenu').width()) / 2 - tip.outerWidth() / 2) + $('#leftmenu').width(),
-	}).show();
-	window.setTimeout(function(){tip.fadeOut(1000, function() {tip.removeClass('notify')})}, 500);
+	showGameToast(text, 'info');
 }
+
+function showGameToast(message, type, options) {
+	options = options || {};
+	message = normalizeGameMessage(message);
+
+	if (!message) {
+		return null;
+	}
+
+	var rootWindow = getGameUiWindow();
+	if (rootWindow !== window && typeof rootWindow.showGameToast === 'function') {
+		return rootWindow.showGameToast(message, type, options);
+	}
+
+	var toastType = typeof type === 'string' && type ? type : 'info';
+	var icons = {
+		success: '✓',
+		danger: '!',
+		warning: '!',
+		info: 'i'
+	};
+	var container = document.getElementById('gameToastContainer');
+
+	if (!container) {
+		var tip = $('#tooltipNotify');
+		if (!tip.length) {
+			Dialog.alert(message);
+			return null;
+		}
+		tip.stop(true, true).html(message).addClass('notify').css({
+			left : (($(window).width() - $('#leftmenu').width()) / 2 - tip.outerWidth() / 2) + $('#leftmenu').width(),
+		}).show();
+		window.setTimeout(function() {
+			tip.fadeOut(1000, function() {
+				tip.removeClass('notify');
+			});
+		}, 1200);
+		return null;
+	}
+
+	var toast = document.createElement('div');
+	toast.className = 'toast game-toast game-toast--' + toastType;
+	toast.setAttribute('role', 'alert');
+	toast.setAttribute('aria-live', 'assertive');
+	toast.setAttribute('aria-atomic', 'true');
+	toast.innerHTML =
+		'<div class="game-toast__body">' +
+			'<span class="game-toast__icon" aria-hidden="true">' + (icons[toastType] || icons.info) + '</span>' +
+			'<div class="game-toast__message"></div>' +
+			'<button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Fermer"></button>' +
+		'</div>';
+
+	toast.querySelector('.game-toast__message').textContent = message;
+	container.appendChild(toast);
+
+	var removeToast = function() {
+		if (toast && toast.parentNode) {
+			toast.parentNode.removeChild(toast);
+		}
+	};
+
+	if (window.bootstrap && typeof bootstrap.Toast === 'function') {
+		toast.addEventListener('hidden.bs.toast', removeToast, { once: true });
+		var instance = new bootstrap.Toast(toast, {
+			autohide: options.autohide !== false,
+			delay: typeof options.delay === 'number' ? options.delay : 3600
+		});
+		instance.show();
+		return instance;
+	}
+
+	$(toast).addClass('show');
+	window.setTimeout(function() {
+		$(toast).fadeOut(250, removeToast);
+	}, typeof options.delay === 'number' ? options.delay : 3600);
+	return toast;
+}
+
+var GameUI = {
+	toast: function(message, type, options) {
+		return showGameToast(message, type, options);
+	},
+
+	alert: function(message, callback, options) {
+		return Dialog.alert(message, callback, options);
+	},
+
+	confirm: function(message, options) {
+		return Dialog.confirm(message, options);
+	},
+
+	prompt: function(message, defaultValue, options) {
+		return Dialog.prompt(message, defaultValue, options);
+	}
+};
 
 
 function UhrzeitAnzeigen() {
@@ -270,5 +605,46 @@ $(function() {
 		});
 
 		return false;
+	});
+
+	$(document).on('click', 'a[data-confirm-message]', function(event) {
+		event.preventDefault();
+
+		var link = this;
+		Dialog.confirm($(link).attr('data-confirm-message'), {
+			title: $(link).attr('data-confirm-title') || 'Confirmation',
+			confirmLabel: $(link).attr('data-confirm-confirm-label') || 'Confirmer',
+			cancelLabel: $(link).attr('data-confirm-cancel-label') || 'Annuler',
+			confirmClass: $(link).attr('data-confirm-variant') === 'danger' ? 'btn-danger' : 'btn-primary'
+		}).then(function(confirmed) {
+			if (!confirmed) {
+				return;
+			}
+
+			if (link.target && link.target !== '_self') {
+				window.open(link.href, link.target);
+				return;
+			}
+
+			window.location.href = link.href;
+		});
+	});
+
+	$(document).on('submit', 'form[data-confirm-message]', function(event) {
+		event.preventDefault();
+
+		var form = this;
+		Dialog.confirm($(form).attr('data-confirm-message'), {
+			title: $(form).attr('data-confirm-title') || 'Confirmation',
+			confirmLabel: $(form).attr('data-confirm-confirm-label') || 'Confirmer',
+			cancelLabel: $(form).attr('data-confirm-cancel-label') || 'Annuler',
+			confirmClass: $(form).attr('data-confirm-variant') === 'danger' ? 'btn-danger' : 'btn-primary'
+		}).then(function(confirmed) {
+			if (!confirmed) {
+				return;
+			}
+
+			form.submit();
+		});
 	});
 });

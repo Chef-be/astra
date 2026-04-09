@@ -13,10 +13,18 @@ function change3(){
 }
 </script>
 
-<form class="bg-black w-75 text-white p-3 my-3 mx-auto fs-12" action="?page=teamspeak&mode=saveSettings" method="post">
+<div class="admin-settings-shell admin-stack">
+<section class="admin-headerline admin-headerline--compact">
+	<div class="admin-headerline__copy">
+		<span class="admin-pill">Intégration</span>
+		<h2>Passerelle TeamSpeak</h2>
+	</div>
+</section>
+
+<form class="admin-settings-form admin-legacy-form admin-stack text-white fs-12" action="?page=teamspeak&mode=saveSettings" method="post">
 <input type="hidden" name="opt_save" value="1">
-<div class="form-gorup d-flex justify-content-between">
-	<span>{$ts_settings}</span>
+<div class="form-gorup d-flex justify-content-between admin-settings-toolbar admin-field--full">
+	<strong>{$ts_settings}</strong>
 </div>
 <div class="form-gorup d-flex my-1 p-2 ">
 	<label class="text-start my-1 cursor-pointer hover-underline" for="ts_on">{$ts_active}</label>
@@ -59,6 +67,7 @@ function change3(){
 	<input class="btn btn-primary text-white" value="{$se_save_parameters}" type="submit">
 </div>
 </form>
+</div>
 
 <script type="text/javascript">
 change{$ts_v}();

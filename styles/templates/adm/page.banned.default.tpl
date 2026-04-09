@@ -1,9 +1,13 @@
 {block name="content"}
-<div class="container-fluid py-3 text-white admin-banned-page">
-	<div class="admin-mini-hero mb-4">
-		<h2 class="h3">Bannissements</h2>
-		<p>Préparez une sanction, filtrez les comptes disponibles et gérez rapidement les levées de bannissement.</p>
-	</div>
+<div class="admin-settings-shell admin-stack admin-banned-page">
+	<section class="admin-card">
+		<div class="admin-card__body d-flex flex-wrap justify-content-between align-items-center gap-2">
+			<div class="admin-cluster">
+				<span class="admin-pill">Utilisateurs {$usercount}</span>
+				<span class="admin-pill">Bannis {$bancount}</span>
+			</div>
+		</div>
+	</section>
 
 	<div class="admin-split">
 		<details class="admin-fold admin-fold--compact" open>
@@ -11,7 +15,6 @@
 				<div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
 					<div>
 						<h3 class="h5 mb-1">Sélection d’un joueur</h3>
-						<p class="text-white-50 mb-0">Choisissez un compte puis ouvrez sa fiche de sanction.</p>
 					</div>
 					<div class="admin-stat-pill">{$LNG.bo_total_users} {$usercount}</div>
 				</div>
@@ -51,7 +54,6 @@
 				<div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
 					<div>
 						<h3 class="h5 mb-1">Levée de bannissement</h3>
-						<p class="text-white-50 mb-0">Filtrez les comptes déjà sanctionnés puis retirez l’interdiction.</p>
 					</div>
 					<div class="admin-stat-pill">{$LNG.bo_total_banneds} {$bancount}</div>
 				</div>

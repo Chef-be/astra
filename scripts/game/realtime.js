@@ -511,6 +511,7 @@
               return;
             }
 
+            $('#astraNotificationPanel').addClass('d-none');
             self.markNotificationRead(notificationId);
             self.openNotificationModal(payload.item);
           });
@@ -561,17 +562,21 @@
       }
 
       if (!this.notifications.length) {
-        list.html('<div class="p-3 text-white-50 small">Aucune notification non lue.</div>');
+        list.html('<div class="astra-notification-empty">Aucune notification non lue.</div>');
         return;
       }
 
       this.notifications.slice(0, 20).forEach(function(item) {
-        html += '<a href="#" data-notification-id="' + item.id + '" class="d-block px-3 py-3 text-decoration-none text-white border-bottom border-secondary" style="background:rgba(255,255,255,0.06);">';
-        html += '<div class="d-flex justify-content-between gap-2">';
-        html += '<div class="fw-bold small">' + AstraRealtime.escapeHtml(item.title || 'Notification') + '</div>';
-        html += '<div class="text-white-50 small">' + AstraRealtime.formatDate(item.created_at) + '</div>';
+        var typeLabel = AstraRealtime.escapeHtml(String(item.notification_type || 'notification').replace(/_/g, ' '));
+        html += '<a href="#" data-notification-id="' + item.id + '" class="astra-notification-item">';
+        html += '<div class="astra-notification-item__meta">';
+        html += '<div>';
+        html += '<div class="astra-notification-item__type">' + typeLabel + '</div>';
+        html += '<div class="astra-notification-item__title">' + AstraRealtime.escapeHtml(item.title || 'Notification') + '</div>';
         html += '</div>';
-        html += '<div class="small text-white-50 mt-1">' + AstraRealtime.escapeHtml((item.body || '').substring(0, 120)) + '</div>';
+        html += '<div class="astra-notification-item__date">' + AstraRealtime.formatDate(item.created_at) + '</div>';
+        html += '</div>';
+        html += '<div class="astra-notification-item__body">' + AstraRealtime.escapeHtml((item.body || '').substring(0, 140)) + '</div>';
         html += '</a>';
       });
 
@@ -1708,51 +1713,68 @@
     deleteChatMessage: function(rootId, messageId) {
       var self = this;
 
-      if (!window.confirm('Supprimer ce message du chat ?')) {
-        return;
-      }
-
-      $.post('game.php?page=realtime&mode=deleteChatMessage&ajax=1', {
-        messageId: messageId
-      }).done(function(payload) {
-        var mount = self.chatMounts[rootId];
-        if (!payload || payload.status !== 'ok') {
-          self.showChatError((payload && payload.message) || 'Suppression impossible.');
+      Dialog.confirm('Supprimer ce message du chat ?', {
+        title: 'Modération du chat',
+        confirmLabel: 'Supprimer',
+        cancelLabel: 'Annuler',
+        confirmClass: 'btn-danger'
+      }).then(function(confirmed) {
+        if (!confirmed) {
           return;
         }
 
-        if (mount) {
-          self.requestChatHistory(mount.activeChannel);
-        }
+        $.post('game.php?page=realtime&mode=deleteChatMessage&ajax=1', {
+          messageId: messageId
+        }).done(function(payload) {
+          var mount = self.chatMounts[rootId];
+          if (!payload || payload.status !== 'ok') {
+            self.showChatError((payload && payload.message) || 'Suppression impossible.');
+            return;
+          }
+
+          showGameToast((payload && payload.message) || 'Message supprimé.', 'success');
+
+          if (mount) {
+            self.requestChatHistory(mount.activeChannel);
+          }
+        });
       });
     },
 
     muteChatUser: function(rootId, channelId, targetUserId, username) {
       var self = this;
-      var duration = window.prompt('Durée de restriction en minutes. Utilisez 0 pour un bannissement jusqu’à levée manuelle.', '30');
-      var reason;
-
-      if (duration === null) {
-        return;
-      }
-
-      reason = window.prompt('Motif de la restriction pour ' + username + ' :', 'Modération du chat');
-      if (reason === null) {
-        return;
-      }
-
-      $.post('game.php?page=realtime&mode=muteChatUser&ajax=1', {
-        channelKey: channelId,
-        targetUserId: targetUserId,
-        durationMinutes: duration,
-        reason: reason
-      }).done(function(payload) {
-        if (!payload || payload.status !== 'ok') {
-          self.showChatError((payload && payload.message) || 'Restriction impossible.');
+      Dialog.prompt('Durée de restriction en minutes. Utilisez 0 pour un bannissement jusqu’à levée manuelle.', '30', {
+        title: 'Restriction du chat',
+        confirmLabel: 'Suivant'
+      }).then(function(duration) {
+        if (duration === null) {
           return;
         }
 
-        self.hideChatError(rootId);
+        Dialog.prompt('Motif de la restriction pour ' + username + ' :', 'Modération du chat', {
+          title: 'Restriction du chat',
+          confirmLabel: 'Appliquer',
+          confirmClass: 'btn-danger'
+        }).then(function(reason) {
+          if (reason === null) {
+            return;
+          }
+
+          $.post('game.php?page=realtime&mode=muteChatUser&ajax=1', {
+            channelKey: channelId,
+            targetUserId: targetUserId,
+            durationMinutes: duration,
+            reason: reason
+          }).done(function(payload) {
+            if (!payload || payload.status !== 'ok') {
+              self.showChatError((payload && payload.message) || 'Restriction impossible.');
+              return;
+            }
+
+            self.hideChatError(rootId);
+            showGameToast((payload && payload.message) || ('Restriction appliquée à ' + username + '.'), 'success');
+          });
+        });
       });
     },
 

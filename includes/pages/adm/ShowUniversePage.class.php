@@ -22,6 +22,43 @@
  */
 class ShowUniversePage extends AbstractAdminPage
 {
+	private function normalizeTraderShipIds(array $selectedIds, array $availableIds)
+	{
+		$selectedMap = array_fill_keys(array_map('intval', $selectedIds), true);
+		$normalized = array();
+
+		foreach ($availableIds as $shipId) {
+			$shipId = (int) $shipId;
+			if (isset($selectedMap[$shipId])) {
+				$normalized[] = $shipId;
+			}
+		}
+
+		return $normalized;
+	}
+
+	private function buildTraderShipCards(array $fleetIds, array $selectedIds, $LNG)
+	{
+		require_once ROOT_PATH.'includes/classes/AdminUiService.class.php';
+
+		$cards = array();
+		$selectedMap = array_fill_keys(array_map('intval', $selectedIds), true);
+
+		foreach ($fleetIds as $shipId) {
+			$shipId = (int) $shipId;
+			$cards[] = array(
+				'name' => 'trade_allowed_ships[]',
+				'value' => $shipId,
+				'title' => isset($LNG['tech'][$shipId]) ? $LNG['tech'][$shipId] : ('ID '.$shipId),
+				'tag' => 'Marchand',
+				'tooltip' => isset($LNG['shortDescription'][$shipId]) ? $LNG['shortDescription'][$shipId] : '',
+				'image' => AdminUiService::getThemeAssetUrl($shipId),
+				'checked' => isset($selectedMap[$shipId]),
+			);
+		}
+
+		return $cards;
+	}
 
 	function __construct()
 	{
@@ -30,9 +67,86 @@ class ShowUniversePage extends AbstractAdminPage
 
 	function show(){
 
-		global $LNG;
+		global $LNG, $reslist;
+		require_once ROOT_PATH.'includes/classes/AdminUiService.class.php';
 
 		$config = Config::get(Universe::getEmulated());
+		$traderShipIds = $this->normalizeTraderShipIds(explode(',', (string) $config->trade_allowed_ships), $reslist['fleet']);
+
+		$universeVisibilityCards = array(
+			array(
+				'name' => 'show_unlearned_ships',
+				'title' => 'Vaisseaux non débloqués',
+				'tag' => 'Affichage',
+				'tooltip' => 'Affiche les vaisseaux même si le joueur n’a pas encore les prérequis.',
+				'image' => AdminUiService::getThemeAssetUrl(202),
+				'checked' => $config->show_unlearned_ships,
+			),
+			array(
+				'name' => 'show_unlearned_buildings',
+				'title' => 'Bâtiments non débloqués',
+				'tag' => 'Affichage',
+				'tooltip' => 'Affiche les bâtiments encore verrouillés.',
+				'image' => AdminUiService::getThemeAssetUrl(1),
+				'checked' => $config->show_unlearned_buildings,
+			),
+			array(
+				'name' => 'show_unlearned_technology',
+				'title' => 'Technologies non débloquées',
+				'tag' => 'Affichage',
+				'tooltip' => 'Affiche les technologies encore verrouillées.',
+				'image' => AdminUiService::getThemeAssetUrl(106),
+				'checked' => $config->show_unlearned_technology,
+			),
+			array(
+				'name' => 'show_tech_no_research',
+				'title' => 'Technologies sans laboratoire',
+				'tag' => 'Pré-requis',
+				'tooltip' => 'Affiche les technologies même sans laboratoire de recherche.',
+				'image' => AdminUiService::getThemeAssetUrl(31),
+				'checked' => $config->show_tech_no_research,
+			),
+			array(
+				'name' => 'show_ships_no_shipyard',
+				'title' => 'Vaisseaux sans chantier',
+				'tag' => 'Pré-requis',
+				'tooltip' => 'Affiche les vaisseaux même sans chantier spatial.',
+				'image' => AdminUiService::getThemeAssetUrl(21),
+				'checked' => $config->show_ships_no_shipyard,
+			),
+		);
+
+		$universeColonizationCards = array(
+			array(
+				'name' => 'planets_tech',
+				'title' => $LNG['se_planets_tech'],
+				'tag' => 'Colonisation',
+				'tooltip' => 'Technologie prise en compte pour augmenter le nombre de planètes.',
+				'image' => AdminUiService::getThemeAssetUrl(106),
+				'value' => $config->planets_tech,
+				'step' => 1,
+			),
+			array(
+				'name' => 'planets_officier',
+				'title' => $LNG['se_planets_officier'],
+				'tag' => 'Colonisation',
+				'tooltip' => 'Bonus d’officier appliqué au nombre de planètes.',
+				'image' => AdminUiService::getThemeAssetUrl(601),
+				'value' => $config->planets_officier,
+				'step' => 1,
+			),
+			array(
+				'name' => 'planets_per_tech',
+				'title' => $LNG['se_planets_per_tech'],
+				'tag' => 'Ratio',
+				'tooltip' => 'Poids de la technologie dans le gain de planètes supplémentaires.',
+				'image' => AdminUiService::getThemeAssetUrl(208),
+				'value' => $config->planets_per_tech,
+				'step' => 0.1,
+			),
+		);
+
+		$traderShipCards = $this->buildTraderShipCards($reslist['fleet'], $traderShipIds, $LNG);
 
 		$this->assign(array(
 			'game_name'						=> $config->game_name,
@@ -76,6 +190,7 @@ class ShowUniversePage extends AbstractAdminPage
 			'min_build_time'    	        => $config->min_build_time,
 			'trade_allowed_ships'        	=> $config->trade_allowed_ships,
 			'trade_charge'		        	=> $config->trade_charge,
+			'traderShipCards'				=> $traderShipCards,
 			'Selector'						=> array(
 				'langs' => $LNG->getAllowedLangs(false),
 				'mail'  => array(0 => $LNG['se_mail_sel_0'], 1 => $LNG['se_mail_sel_1'], 2 => $LNG['se_mail_sel_2']),
@@ -118,6 +233,8 @@ class ShowUniversePage extends AbstractAdminPage
 			'user_max_notes' => $config->user_max_notes,
 			'show_ships_no_shipyard' => $config->show_ships_no_shipyard,
 			'show_tech_no_research' => $config->show_tech_no_research,
+			'universeVisibilityCards'		=> $universeVisibilityCards,
+			'universeColonizationCards'		=> $universeColonizationCards,
 		));
 
 		$this->display('page.universe.default.tpl');
@@ -126,7 +243,7 @@ class ShowUniversePage extends AbstractAdminPage
 
 	function saveSettings(){
 		require_once ROOT_PATH.'includes/classes/RichTextService.class.php';
-		global $LNG;
+		global $LNG, $reslist;
 
 		$config = Config::get(Universe::getEmulated());
 
@@ -232,7 +349,8 @@ class ShowUniversePage extends AbstractAdminPage
 			$noobprotectiontime		= HTTP::_GP('noobprotectiontime', 0);
 			$noobprotectionmulti	= HTTP::_GP('noobprotectionmulti', 0);
 			$min_build_time			= HTTP::_GP('min_build_time', 0);
-			$trade_allowed_ships	= HTTP::_GP('trade_allowed_ships', '');
+			$trade_allowed_ship_ids = HTTP::_GP('trade_allowed_ships', array(0));
+			$trade_allowed_ships	= implode(',', $this->normalizeTraderShipIds($trade_allowed_ship_ids, $reslist['fleet']));
 			$trade_charge			= HTTP::_GP('trade_charge', 0.0);
 			$max_galaxy				= HTTP::_GP('max_galaxy', 0);
 			$max_system				= HTTP::_GP('max_system', 0);

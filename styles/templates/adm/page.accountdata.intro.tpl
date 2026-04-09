@@ -1,18 +1,14 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Exploration de compte</span>
-			<h1 class="admin-hero__title">Choisir un joueur à inspecter</h1>
-			<p class="admin-hero__subtitle">Sélectionnez un compte dans la liste filtrable ou saisissez directement son identifiant numérique.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Exploration</span>
+			<h2>Choisir un joueur à inspecter</h2>
 		</div>
 	</section>
 
 	<form action="" method="post" name="users" class="admin-table-shell admin-stack">
-		<div>
-			<h2 class="h5 mb-1">{$ac_enter_user_id}</h2>
-			<p class="text-white-50 mb-0">Le filtre alphabétique reste disponible pour parcourir rapidement de longues listes.</p>
-		</div>
+		<div><h2 class="h5 mb-1">{$ac_enter_user_id}</h2></div>
 
 		<div class="admin-field-card">
 			<select name="id_u" size="20" class="form-select bg-dark text-white border-secondary" style="min-height: 22rem;">

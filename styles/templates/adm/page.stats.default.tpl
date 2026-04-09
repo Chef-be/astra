@@ -1,10 +1,9 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Classements</span>
-			<h1 class="admin-hero__title">Réglages des statistiques</h1>
-			<p class="admin-hero__subtitle">Ajustez la pondération des points, la visibilité du classement et le niveau de droit requis pour accéder aux statistiques.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Classements</span>
+			<h2>Réglages des statistiques</h2>
 		</div>
 	</section>
 

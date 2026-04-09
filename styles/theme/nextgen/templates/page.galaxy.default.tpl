@@ -50,15 +50,32 @@
 	}
 
 	.galaxy-hero h1 {
-		margin: 0 0 0.35rem;
+		margin: 0;
 		font-size: 1.55rem;
 		color: #f8fbff;
 	}
 
-	.galaxy-hero p {
-		margin: 0;
-		color: rgba(255, 255, 255, 0.72);
-		line-height: 1.55;
+	.galaxy-hero-bar,
+	.galaxy-section-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	.galaxy-hero-kicker,
+	.galaxy-section-badge {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.28rem 0.58rem;
+		border-radius: 999px;
+		background: rgba(255, 214, 102, 0.1);
+		border: 1px solid rgba(255, 214, 102, 0.18);
+		font-size: 0.72rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: rgba(255, 230, 167, 0.92);
 	}
 
 	.galaxy-summary {
@@ -91,52 +108,70 @@
 	}
 
 	.galaxy-toolbar,
-	.galaxy-panel {
+	section.galaxy-panel {
 		padding: 0.95rem;
 	}
 
 	.galaxy-section-title {
-		margin: 0 0 0.75rem;
+		margin: 0;
 		font-size: 1rem;
 		color: #ffd666;
 	}
 
 	.galaxy-occupied-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-		gap: 0.75rem;
+		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+		gap: 0.65rem;
 	}
 
 	.galaxy-slot-card {
-		padding: 0.8rem;
+		padding: 0.66rem 0.72rem;
 		border-radius: 1rem;
 		background: rgba(255, 255, 255, 0.03);
 		border: 1px solid rgba(255, 255, 255, 0.06);
+		align-content: start;
+	}
+
+	.galaxy-slot-card--hot {
+		border-color: rgba(255, 214, 102, 0.22);
+		background:
+			radial-gradient(circle at top right, rgba(255, 214, 102, 0.08), transparent 34%),
+			rgba(255, 255, 255, 0.03);
 	}
 
 	.galaxy-slot-head {
 		display: grid;
-		grid-template-columns: 56px minmax(0, 1fr);
-		gap: 0.7rem;
+		grid-template-columns: 48px minmax(0, 1fr);
+		gap: 0.62rem;
 		align-items: center;
 	}
 
 	.galaxy-slot-head img {
-		width: 56px;
-		height: 56px;
+		width: 48px;
+		height: 48px;
 		object-fit: cover;
-		border-radius: 0.85rem;
+		border-radius: 0.78rem;
 		border: 1px solid rgba(255, 214, 102, 0.16);
 	}
 
 	.galaxy-slot-name {
 		color: #f8fbff;
 		font-weight: 700;
+		font-size: 0.9rem;
+		line-height: 1.25;
 	}
 
 	.galaxy-slot-subline {
-		font-size: 0.78rem;
+		font-size: 0.74rem;
 		color: rgba(255, 255, 255, 0.62);
+		line-height: 1.3;
+	}
+
+	.galaxy-slot-note {
+		display: inline-flex;
+		margin-top: 0.22rem;
+		font-size: 0.7rem;
+		color: rgba(255, 214, 102, 0.86);
 	}
 
 	.galaxy-slot-meta,
@@ -144,17 +179,17 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.35rem;
-		margin-top: 0.65rem;
+		margin-top: 0.5rem;
 	}
 
 	.galaxy-slot-pill {
 		display: inline-flex;
 		align-items: center;
-		padding: 0.24rem 0.46rem;
+		padding: 0.22rem 0.42rem;
 		border-radius: 999px;
 		background: rgba(255, 255, 255, 0.05);
 		border: 1px solid rgba(255, 255, 255, 0.08);
-		font-size: 0.72rem;
+		font-size: 0.68rem;
 		color: rgba(255, 255, 255, 0.82);
 	}
 
@@ -180,8 +215,16 @@
 
 	.galaxy-system-details summary span {
 		color: rgba(255, 255, 255, 0.62);
-		font-size: 0.78rem;
+		font-size: 0.74rem;
 		font-weight: 400;
+	}
+
+	.galaxy-system-details > summary {
+		padding: 0.8rem 0.95rem;
+	}
+
+	.galaxy-system-details > .ng-disclosure__body {
+		padding: 0.78rem 0.95rem 0.95rem;
 	}
 
 	.galaxy-controls-grid {
@@ -251,6 +294,28 @@
 		background: rgba(26, 37, 58, 0.95);
 	}
 
+	.galaxy-action-btn--attack {
+		border-color: rgba(255, 112, 112, 0.42) !important;
+		background: rgba(42, 13, 17, 0.92) !important;
+		color: #ffb8b8 !important;
+	}
+
+	.galaxy-action-btn--attack:hover {
+		border-color: rgba(255, 146, 146, 0.72) !important;
+		background: rgba(72, 19, 24, 0.96) !important;
+		color: #ffe2e2 !important;
+	}
+
+	.galaxy-action-btn--attack span {
+		font-size: 1.05rem !important;
+	}
+
+	.galaxy-action-glyph--swords {
+		font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", "DejaVu Sans", "Arial Unicode MS", sans-serif;
+		font-style: normal;
+		line-height: 1;
+	}
+
 	.galaxy-grid .galaxy-action-btn span {
 		display: inline-block;
 		transform: translateY(-0.02rem);
@@ -310,18 +375,24 @@
 		.galaxy-controls-grid {
 			grid-template-columns: 1fr;
 		}
+
+		.galaxy-system-details summary {
+			align-items: flex-start;
+		}
 	}
 </style>
 
 <div class="galaxy-shell">
 	<section class="galaxy-hero">
-		<h1>{$LNG.lm_galaxy}</h1>
-		<p>Explorez les systèmes voisins, repérez l’activité, surveillez les lunes et champs de débris, et déclenchez vos actions principales depuis une vue plus lisible.</p>
+		<div class="galaxy-hero-bar">
+			<h1>{$LNG.lm_galaxy}</h1>
+			<span class="galaxy-hero-kicker">Vue tactique</span>
+		</div>
 		<div class="galaxy-summary">
-			<div class="galaxy-summary-item"><span>Coordonnées</span><strong>{$galaxy}:{$system}:{$planet}</strong></div>
-			<div class="galaxy-summary-item"><span>Planètes repérées</span><strong>{$planetcount}</strong></div>
-			<div class="galaxy-summary-item"><span>Flottes</span><strong>{$maxfleetcount}/{$fleetmax}</strong></div>
-			<div class="galaxy-summary-item"><span>Sondes / recycleurs</span><strong>{$spyprobes|number} / {$recyclers|number}</strong></div>
+			<div class="galaxy-summary-item"><span>Zone</span><strong>{$galaxy}:{$system}:{$planet}</strong></div>
+			<div class="galaxy-summary-item"><span>Occupées</span><strong>{$planetcount}</strong></div>
+			<div class="galaxy-summary-item"><span>Slots</span><strong>{$maxfleetcount}/{$fleetmax}</strong></div>
+			<div class="galaxy-summary-item"><span>Sondes / recy</span><strong>{$spyprobes|number} / {$recyclers|number}</strong></div>
 		</div>
 	</section>
 
@@ -362,14 +433,20 @@
 		</table>
 	</form>
 	</section>
-    {/if}
-	<section class="galaxy-panel">
-		<h2 class="galaxy-section-title">Positions actives du système</h2>
-		<div class="galaxy-occupied-grid">
+	{/if}
+	<details class="galaxy-panel galaxy-system-details ng-disclosure ng-disclosure--chevron" open>
+		<summary>
+			<div class="galaxy-section-head">
+				<h2 class="galaxy-section-title">Positions actives</h2>
+				<span class="galaxy-section-badge">{$planetcount} occupée{if $planetcount > 1}s{/if}</span>
+			</div>
+			<span><span class="galaxy-action-glyph--swords">⚔︎</span> = flotte détectée</span>
+		</summary>
+		<div class="galaxy-occupied-grid ng-disclosure__body">
 			{for $planet=1 to $max_planets}
 				{if isset($GalaxyRows[$planet]) && $GalaxyRows[$planet] !== false}
 					{$currentPlanet = $GalaxyRows[$planet]}
-					<article class="galaxy-slot-card">
+					<article class="galaxy-slot-card{if $currentPlanet.action && $currentPlanet.action.attackAlert} galaxy-slot-card--hot{/if}">
 						<div class="galaxy-slot-head">
 							<img src="{$dpath}planeten/{$currentPlanet.planet.image}.jpg" alt="{$currentPlanet.planet.name}">
 							<div>
@@ -380,17 +457,24 @@
 									<span>({foreach $currentPlanet.user.class as $class}{if !$class@first} {/if}<span class="galaxy-short-{$class} galaxy-short">{$ShortStatus.$class}</span>{/foreach})</span>
 									{/if}
 								</div>
+								{if $currentPlanet.action && $currentPlanet.action.attackAlert}
+								<div class="galaxy-slot-note">Flotte repérée, frappe directe disponible</div>
+								{/if}
 							</div>
 						</div>
 						<div class="galaxy-slot-meta">
 							<span class="galaxy-slot-pill">Coordonnées [{$galaxy}:{$system}:{$planet}]</span>
 							{if $currentPlanet.lastActivity}<span class="galaxy-slot-pill">Activité {$currentPlanet.lastActivity}</span>{/if}
+							{if $currentPlanet.user.fleet_count > 0}<span class="galaxy-slot-pill">Flotte {$currentPlanet.user.fleet_count|number}</span>{/if}
 							{if $currentPlanet.moon}<span class="galaxy-slot-pill">Lune {$currentPlanet.moon.name}</span>{/if}
 							{if $currentPlanet.debris}<span class="galaxy-slot-pill">CDR {$currentPlanet.debris.metal|number} / {$currentPlanet.debris.crystal|number}</span>{/if}
 							{if $currentPlanet.alliance}<span class="galaxy-slot-pill">Alliance {$currentPlanet.alliance.tag}</span>{/if}
 						</div>
 						<div class="galaxy-slot-actions">
 							{if $currentPlanet.action}
+								{if $currentPlanet.action.attack}
+								<a class="galaxy-action-btn galaxy-action-btn--attack text-decoration-none" title="{$LNG.type_mission_1}" href="?page=fleetTable&amp;galaxy={$galaxy}&amp;system={$system}&amp;planet={$planet}&amp;planettype=1&amp;target_mission=1"><span class="galaxy-action-glyph--swords">⚔︎</span></a>
+								{/if}
 								{if $currentPlanet.action.esp}
 								<a class="galaxy-action-btn text-decoration-none" title="{$LNG.gl_spy}" onclick="doit(6,{$currentPlanet.planet.id},{$spyShips|json|escape:'html'})"><span>🔭</span></a>
 								{/if}
@@ -411,7 +495,7 @@
 				{elseif isset($GalaxyRows[$planet]) && $GalaxyRows[$planet] === false}
 					<article class="galaxy-slot-card galaxy-slot-card--destroyed">
 						<div class="galaxy-slot-name">{$planet}. Position détruite</div>
-						<div class="galaxy-slot-subline">Cette orbite est détruite et ne contient plus de planète exploitable.</div>
+						<div class="galaxy-slot-subline">Orbite détruite.</div>
 					</article>
 				{/if}
 			{/for}
@@ -423,20 +507,19 @@
 			</article>
 			<article class="galaxy-slot-card">
 				<div class="galaxy-slot-name">Commerce</div>
-				<div class="galaxy-slot-subline">Zone commerciale du système courant.</div>
 				<div class="galaxy-slot-actions">
 					<a class="btn btn-outline-light btn-sm" href="?page=fleetTable&amp;galaxy={$galaxy}&amp;system={$system}&amp;planet={$max_planets + 2}&amp;planettype=1&amp;target_mission=16">Accéder</a>
 				</div>
 			</article>
 		</div>
-	</section>
+	</details>
 
-	<details class="galaxy-panel galaxy-system-details">
+	<details class="galaxy-panel galaxy-system-details ng-disclosure ng-disclosure--chevron">
 		<summary>
-			<div>Vue complète du système</div>
-			<span>{$planetcount} planète(s) occupée(s), {$maxfleetcount}/{$fleetmax} emplacements de flotte, {$spyprobes|number} sondes, {$recyclers|number} recycleurs</span>
+			<div>Vue complète</div>
+			<span>{$planetcount} • {$maxfleetcount}/{$fleetmax} slots</span>
 		</summary>
-		<div class="galaxy-grid-wrap mt-3">
+		<div class="galaxy-grid-wrap ng-disclosure__body">
 	<table class="table table-sm table-gow fs-12 galaxy-grid">
     <tr>
 			<th class="text-center" colspan="8">{$LNG.gl_solar_system} {$galaxy}:{$system}</th>
@@ -755,6 +838,15 @@
 		<td class="text-center align-middle">
 			<div class="galaxy-actions">
 			{if $currentPlanet.action}
+				{if $currentPlanet.action.attack}
+				<a class='hover-pointer text-decoration-none'
+				data-bs-toggle="tooltip"
+				data-bs-placement="top"
+				data-bs-html="true"
+				title="{$LNG.type_mission_1}"
+				href="?page=fleetTable&amp;galaxy={$galaxy}&amp;system={$system}&amp;planet={$planet}&amp;planettype=1&amp;target_mission=1">
+					<span class="galaxy-action-btn galaxy-action-btn--attack" aria-hidden="true"><span class="galaxy-action-glyph--swords">⚔︎</span></span>
+				</a>{/if}
 				{if $currentPlanet.action.esp}
 				<a class='hover-pointer text-decoration-none' data-bs-toggle="tooltip"
 				data-bs-placement="top"
@@ -820,16 +912,12 @@
 		</td>
 	</tr>
 	<tr>
-		<td colspan="4"><span id="missiles">{$currentmip|number}</span> {$LNG.gl_avaible_missiles}</td>
-		<td colspan="4"><span id="slots">{$maxfleetcount}</span>/{$fleetmax} {$LNG.gl_fleets}</td>
+		<td colspan="4">Missiles <span id="missiles">{$currentmip|number}</span></td>
+		<td colspan="4">Slots <span id="slots">{$maxfleetcount}</span>/{$fleetmax}</td>
 	</tr>
 	<tr>
-		<td colspan="4">
-			<span id="elementID210">{$spyprobes|number}</span> {$LNG.gl_avaible_spyprobes}
-		</td>
-		<td colspan="4">
-			<span id="elementID209">{$recyclers|number}</span> {$LNG.gl_avaible_recyclers}
-		</td>
+		<td colspan="4">Sondes <span id="elementID210">{$spyprobes|number}</span></td>
+		<td colspan="4">Recycleurs <span id="elementID209">{$recyclers|number}</span></td>
 	</tr>
 	<tr style="display:none;" id="fleetstatusrow">
 		<th class="text-center" colspan="8">{$LNG.cff_fleet_target}</th>

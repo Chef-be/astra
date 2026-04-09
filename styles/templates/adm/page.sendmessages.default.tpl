@@ -1,10 +1,9 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Communication globale</span>
-			<h1 class="admin-hero__title">Campagnes de messages</h1>
-			<p class="admin-hero__subtitle">Diffusez un message global ingame, par courriel ou sur les deux canaux selon la configuration active du serveur.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Communication</span>
+			<h2>Campagnes de messages</h2>
 		</div>
 	</section>
 

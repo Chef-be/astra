@@ -1,27 +1,34 @@
 {block name="content"}
-<div class="container-fluid py-3 text-white">
-	<div class="admin-mini-hero mb-4">
-		<h2 class="h3">Gestion rapide des rôles</h2>
-		<p>Version ciblée de l’affectation des niveaux d’accès, utile pour les recherches internes et les corrections rapides.</p>
-	</div>
+<div class="admin-settings-shell admin-stack">
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Recherche ciblée</span>
+			<h2>Gestion rapide des rôles</h2>
+		</div>
+	</section>
 
 	<div class="admin-card">
 		<div class="admin-card__body">
-			<form action="?page=rights&mode=usersSend" method="post">
-				<div class="admin-actions mb-3">
-					<a class="btn btn-outline-light btn-sm" href="?page=rights&mode=users&sid={$sid}&type=adm">{$ad_authlevel_aa}</a>
-					<a class="btn btn-outline-light btn-sm" href="?page=rights&mode=users&sid={$sid}&type=ope">{$ad_authlevel_oo}</a>
-					<a class="btn btn-outline-light btn-sm" href="?page=rights&mode=users&sid={$sid}&type=mod">{$ad_authlevel_mm}</a>
-					<a class="btn btn-outline-light btn-sm" href="?page=rights&mode=users&sid={$sid}&type=pla">{$ad_authlevel_jj}</a>
-					<a class="btn btn-outline-info btn-sm" href="?page=rights&mode=users&sid={$sid}">{$ad_authlevel_tt}</a>
+			<form action="?page=rights&mode=usersSend" method="post" class="admin-stack">
+				<div class="admin-table-toolbar">
+					<div class="admin-table-toolbar__meta">
+						<a class="admin-pill" href="?page=rights&mode=users&sid={$sid}&type=adm">{$ad_authlevel_aa}</a>
+						<a class="admin-pill" href="?page=rights&mode=users&sid={$sid}&type=ope">{$ad_authlevel_oo}</a>
+						<a class="admin-pill" href="?page=rights&mode=users&sid={$sid}&type=mod">{$ad_authlevel_mm}</a>
+						<a class="admin-pill" href="?page=rights&mode=users&sid={$sid}&type=pla">{$ad_authlevel_jj}</a>
+						<a class="admin-pill admin-pill--accent" href="?page=rights&mode=users&sid={$sid}">{$ad_authlevel_tt}</a>
+					</div>
 				</div>
 				<div class="admin-split">
-					<div>
-						<select name="id_1" size="20" class="admin-select-list">{$UserList}</select>
+					<div class="admin-stack">
+						<div class="admin-field-card">
+							<span>Comptes disponibles</span>
+							<select name="id_1" size="20" class="admin-select-list">{$UserList}</select>
+						</div>
 						<script type="text/javascript">
 							var UserList = new filterlist(document.getElementsByName('id_1')[0]);
 						</script>
-						<div class="admin-filter-letters mt-3">
+						<div class="admin-filter-letters">
 							<a href="javascript:UserList.set('^A')">A</a><a href="javascript:UserList.set('^B')">B</a><a href="javascript:UserList.set('^C')">C</a><a href="javascript:UserList.set('^D')">D</a><a href="javascript:UserList.set('^E')">E</a><a href="javascript:UserList.set('^F')">F</a><a href="javascript:UserList.set('^G')">G</a><a href="javascript:UserList.set('^H')">H</a><a href="javascript:UserList.set('^I')">I</a><a href="javascript:UserList.set('^J')">J</a><a href="javascript:UserList.set('^K')">K</a><a href="javascript:UserList.set('^L')">L</a><a href="javascript:UserList.set('^M')">M</a><a href="javascript:UserList.set('^N')">N</a><a href="javascript:UserList.set('^O')">O</a><a href="javascript:UserList.set('^P')">P</a><a href="javascript:UserList.set('^Q')">Q</a><a href="javascript:UserList.set('^R')">R</a><a href="javascript:UserList.set('^S')">S</a><a href="javascript:UserList.set('^T')">T</a><a href="javascript:UserList.set('^U')">U</a><a href="javascript:UserList.set('^V')">V</a><a href="javascript:UserList.set('^W')">W</a><a href="javascript:UserList.set('^X')">X</a><a href="javascript:UserList.set('^Y')">Y</a><a href="javascript:UserList.set('^Z')">Z</a>
 						</div>
 					</div>

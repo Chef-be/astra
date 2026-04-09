@@ -5,7 +5,7 @@ var Gate	= {
 	
 	submit: function() {
 		$.getJSON('?page=information&mode=sendFleet&'+$('.jumpgate').serialize(), function(data) {
-			alert(data.message);
+			showGameToast(data.message, data.error ? 'danger' : 'success');
 			if(!data.error)
 			{
 				parent.$.fancybox.close();

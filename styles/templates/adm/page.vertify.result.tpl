@@ -1,10 +1,9 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Résultat de contrôle</span>
-			<h1 class="admin-hero__title">Analyse des écarts de fichiers</h1>
-			<p class="admin-hero__subtitle">Suivez la progression du contrôle et repérez les fichiers conformes, divergents, nouveaux ou inaccessibles.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Contrôle</span>
+			<h2>Analyse des écarts de fichiers</h2>
 		</div>
 	</section>
 
@@ -14,11 +13,11 @@
 			<div class="processbar" style="background-color: green; height: 14px; width: 0; border-radius: 999px;"></div>
 			<div class="info small text-white-50 mt-2"></div>
 		</div>
-		<div class="admin-stat-strip">
-			<div class="admin-stat-card"><span class="admin-stat-card__label">{$LNG.vt_fileok}</span><strong class="admin-stat-card__value" id="fileok">0</strong></div>
-			<div class="admin-stat-card"><span class="admin-stat-card__label">{$LNG.vt_filefail}</span><strong class="admin-stat-card__value" id="filefail">0</strong></div>
-			<div class="admin-stat-card"><span class="admin-stat-card__label">{$LNG.vt_filenew}</span><strong class="admin-stat-card__value" id="filenew">0</strong></div>
-			<div class="admin-stat-card"><span class="admin-stat-card__label">{$LNG.vt_fileerror}</span><strong class="admin-stat-card__value" id="fileerror">0</strong></div>
+		<div class="admin-kpi-grid admin-kpi-grid--vertify">
+			<div class="admin-kpi-card admin-kpi-card--micro"><span class="admin-kpi-card__label">{$LNG.vt_fileok}</span><strong class="admin-kpi-card__value" id="fileok">0</strong></div>
+			<div class="admin-kpi-card admin-kpi-card--micro"><span class="admin-kpi-card__label">{$LNG.vt_filefail}</span><strong class="admin-kpi-card__value" id="filefail">0</strong></div>
+			<div class="admin-kpi-card admin-kpi-card--micro"><span class="admin-kpi-card__label">{$LNG.vt_filenew}</span><strong class="admin-kpi-card__value" id="filenew">0</strong></div>
+			<div class="admin-kpi-card admin-kpi-card--micro"><span class="admin-kpi-card__label">{$LNG.vt_fileerror}</span><strong class="admin-kpi-card__value" id="fileerror">0</strong></div>
 		</div>
 		<div id="result" class="admin-empty-state text-start" style="max-height: 22rem; overflow-y: auto;">
 			<div>{$LNG.vt_loadfile}</div>

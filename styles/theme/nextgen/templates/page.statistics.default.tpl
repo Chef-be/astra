@@ -25,15 +25,30 @@
 	}
 
 	.stats-hero h1 {
-		margin: 0 0 0.35rem;
+		margin: 0;
 		font-size: 1.55rem;
 		color: #f8fbff;
 	}
 
-	.stats-hero p {
-		margin: 0;
-		color: rgba(255, 255, 255, 0.72);
-		line-height: 1.55;
+	.stats-hero-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	.stats-update-badge {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.32rem 0.65rem;
+		border-radius: 999px;
+		background: rgba(255, 214, 102, 0.1);
+		border: 1px solid rgba(255, 214, 102, 0.18);
+		color: rgba(255, 236, 191, 0.92);
+		font-size: 0.78rem;
+		font-weight: 600;
+		letter-spacing: 0.02em;
 	}
 
 	.stats-panel {
@@ -158,8 +173,12 @@
 
 <div class="stats-shell">
 	<section class="stats-hero">
-		<h1>{$LNG.st_statistics}</h1>
-		<p>Classements actualisés le {$stat_date}. Filtrez l’affichage par type de score, population classée et plage de positions.</p>
+		<div class="stats-hero-bar">
+			<h1>{$LNG.st_statistics}</h1>
+			{if $stat_update_timestamp > 0}
+			<div class="stats-update-badge">{$stat_update_label}</div>
+			{/if}
+		</div>
 	</section>
 
 	<form name="stats" id="stats" method="post" action="" class="stats-panel">

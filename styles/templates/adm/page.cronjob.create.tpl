@@ -1,14 +1,14 @@
 {block name="content"}
 <div class="container-fluid py-3 text-white">
-	<div class="admin-toolbar mb-4">
-		<div class="admin-mini-hero flex-grow-1">
-			<h2 class="h3">{if $cronjobID == 0}{$LNG.cronjob_new}{else}{$LNG.cronjob_headline}{$cronjobID}{/if}</h2>
-			<p>Préparez une nouvelle tâche planifiée en définissant la fréquence et la classe exécutée.</p>
+	<section class="admin-headerline admin-headerline--compact mb-3">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Planification</span>
+			<h2>{if $cronjobID == 0}{$LNG.cronjob_new}{else}{$LNG.cronjob_headline}{$cronjobID}{/if}</h2>
 		</div>
-		<div class="admin-actions">
-			<a class="btn btn-outline-light" href="admin.php?page=cronjob">Retour aux tâches</a>
+		<div class="admin-headerline__actions">
+			<a class="admin-shell-action admin-shell-action--light" href="admin.php?page=cronjob">Retour aux tâches</a>
 		</div>
-	</div>
+	</section>
 
 	<form method="post" action="?page=cronjob&mode=edit" class="admin-card">
 		<input type="hidden" name="id" value="{$cronjobID}">
