@@ -1,12 +1,18 @@
 {block name="content"}
-<form action="" method="post" class="container-fluid py-3 text-white">
-	<div class="admin-mini-hero mb-3">
-		<h2 class="h3">Recherche transversale</h2>
-		<p>Un seul formulaire pour retrouver rapidement un joueur, une planète, une alliance ou un compte signalé.</p>
-	</div>
+<div class="admin-settings-shell admin-stack">
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Recherche</span>
+			<h2>Recherche admin</h2>
+		</div>
+		<div class="admin-headerline__actions">
+			<span class="admin-pill">Limite {$limit}</span>
+			<span class="admin-pill">Tri {$OrderBY|default:'DESC'}</span>
+		</div>
+	</section>
 
-	<div class="admin-card mb-3">
-		<div class="admin-card__body">
+	<form action="" method="post" class="admin-card">
+		<div class="admin-card__body admin-stack">
 			<div class="admin-form-grid--three">
 				<div class="admin-field-card">
 					<label for="key_user">{$se_intro}</label>
@@ -38,7 +44,7 @@
 						{html_options class="form-select bg-dark text-white border-secondary" id="key_order" name=key_order options=$OrderBYParse selected=$Order}
 					</div>
 				{/if}
-				<div class="admin-field-card">
+				<div class="admin-field-card d-flex align-items-center">
 					<div class="form-check mt-2">
 						<input class="form-check-input" type="checkbox" {if isset($minimize)}{$minimize}{/if} name="minimize" id="minimize">
 						<label class="form-check-label" for="minimize">{$se_contrac}</label>
@@ -46,16 +52,16 @@
 				</div>
 			</div>
 			{if !empty($error)}
-				<div class="alert alert-danger mt-3 mb-0">{$error}</div>
+				<div class="alert alert-danger mb-0">{$error}</div>
 			{/if}
-			<div class="admin-actions mt-4">
+			<div class="admin-actions">
 				<input type="submit" value="{$se_search}" class="btn btn-primary">
 			</div>
 		</div>
-	</div>
+	</form>
 
 	{if !empty($LIST)}
-		<div class="admin-table-shell mb-3">
+		<div class="admin-table-shell">
 			<div class="admin-table-toolbar">
 				<div class="admin-table-toolbar__meta">
 					<span class="admin-pill">Résultats filtrés</span>
@@ -76,5 +82,5 @@
 			Lance une recherche pour afficher les résultats ici.
 		</div>
 	{/if}
-</form>
+</div>
 {/block}

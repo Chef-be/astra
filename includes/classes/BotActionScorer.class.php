@@ -4,6 +4,7 @@ class BotActionScorer
 {
 	public function score(array $actions, array $snapshot, array $decision)
 	{
+		require_once ROOT_PATH.'includes/classes/class.BuildFunctions.php';
 		$profileDoctrine = isset($snapshot['bot']['doctrine']) ? $snapshot['bot']['doctrine'] : '';
 		$role = isset($snapshot['state']['role_primary']) ? $snapshot['state']['role_primary'] : 'economiste';
 		$campaignBoost = empty($snapshot['campaigns']) ? 0 : 10;
@@ -14,6 +15,7 @@ class BotActionScorer
 		$globalStrategy = isset($snapshot['global_strategy']['strategic_state']) ? $snapshot['global_strategy']['strategic_state'] : array();
 		$actionMetrics = !empty($learning['action_metrics']) && is_array($learning['action_metrics']) ? $learning['action_metrics'] : array();
 		$targetSignal = !empty($learning['target_signal']) ? $learning['target_signal'] : array();
+		$hostileContext = isset($snapshot['hostile_context']) ? $snapshot['hostile_context'] : array();
 		$results = array();
 
 		foreach ($actions as $action) {
@@ -23,7 +25,7 @@ class BotActionScorer
 			$opportunity = empty($bestTarget) ? 0 : min(18, max(0, (float) $bestTarget['opportunity_score'] / 6));
 			$cost = $this->estimateCostPenalty($action['action_type'], isset($action['payload']) ? $action['payload'] : array());
 			$queuePenalty = min(15, ((int) $snapshot['queue_state']['building'] + (int) $snapshot['queue_state']['shipyard'] + (int) $snapshot['queue_state']['research']) * 2);
-			$hierarchyPriority = !empty($snapshot['hierarchy']['commander']['current_target_json']) ? 10 : 0;
+			$hierarchyPriority = (!empty($snapshot['commander_target_focus']) || !empty($snapshot['current_target_focus'])) ? 10 : 0;
 			$bonusActifs = isset($snapshot['state']['bonus_score']) ? min(12, (int) $snapshot['state']['bonus_score']) : 0;
 			$coherenceSociale = $this->socialCoherence($action['action_type'], $decision);
 			$faisabilite = $this->estimateFeasibility($action['action_type'], $snapshot, $action);
@@ -44,6 +46,9 @@ class BotActionScorer
 			$redundancyPenalty = $this->redundancyPenalty($action, $snapshot);
 			$timingPenalty = $this->timingIncoherencePenalty($action, $decision, $snapshot);
 			$exposurePenalty = $this->exposurePenalty($action, $snapshot, $decision);
+			$targetFocusBonus = $this->targetFocusBonus($action, $snapshot);
+			$hostileResponseBonus = $this->hostileResponseBonus($action, $decision, $hostileContext);
+			$pressurePenalty = $this->pressurePenalty($action, $decision, $hostileContext);
 			$opportunityCost = $queuePenalty + (int) min(8, max(0, count(isset($snapshot['own_fleets']) ? $snapshot['own_fleets'] : array()) * 2));
 
 			$utility = $directBenefit
@@ -65,6 +70,8 @@ class BotActionScorer
 				+ $informationValue
 				+ $faisabilite
 				+ $successProbability
+				+ $targetFocusBonus
+				+ $hostileResponseBonus
 				- (float) $cost
 				- (float) $action['risk']
 				- $chargeLogistique
@@ -74,6 +81,7 @@ class BotActionScorer
 			$utility -= $redundancyPenalty;
 			$utility -= $timingPenalty;
 			$utility -= $exposurePenalty;
+			$utility -= $pressurePenalty;
 
 			$action['utility'] = round($utility, 2);
 			$action['benefice_direct'] = round($directBenefit, 2);
@@ -179,7 +187,10 @@ class BotActionScorer
 	{
 		$planet = isset($snapshot['planet']) ? $snapshot['planet'] : array();
 		if ($actionType === 'send_spy') {
-			return !empty($planet['espionage_probe']) ? 10 : -4;
+			$probeCount = isset($planet['spy_sonde'])
+				? (int) $planet['spy_sonde']
+				: (isset($planet['espionage_probe']) ? (int) $planet['espionage_probe'] : 0);
+			return $probeCount > 0 ? 10 : -4;
 		}
 
 		if ($actionType === 'send_raid') {
@@ -188,10 +199,160 @@ class BotActionScorer
 		}
 
 		if ($actionType === 'enqueue_building' || $actionType === 'enqueue_research' || $actionType === 'enqueue_shipyard') {
-			return 8;
+			return $this->scoreConstructiveFeasibility($actionType, $snapshot, $action);
 		}
 
 		return 4;
+	}
+
+	protected function scoreConstructiveFeasibility($actionType, array $snapshot, array $action)
+	{
+		$user = isset($snapshot['bot']) ? $snapshot['bot'] : array();
+		$planet = isset($snapshot['planet']) ? $snapshot['planet'] : array();
+		$payload = isset($action['payload']) && is_array($action['payload']) ? $action['payload'] : array();
+		$queueState = isset($snapshot['queue_state']) ? $snapshot['queue_state'] : array();
+		$resourceLoad = isset($snapshot['resource_load']) ? $snapshot['resource_load'] : array();
+		$elementId = !empty($payload['element_id']) ? (int) $payload['element_id'] : 0;
+		if ($elementId <= 0 || empty($user) || empty($planet)) {
+			return -10;
+		}
+
+		$queuePenalty = 0;
+		if ($actionType === 'enqueue_building' && !empty($queueState['building'])) {
+			$queuePenalty += 10 + (((int) $queueState['building'] - 1) * 3);
+		}
+		if ($actionType === 'enqueue_research' && !empty($queueState['research'])) {
+			$queuePenalty += 12 + (((int) $queueState['research'] - 1) * 4);
+		}
+		if ($actionType === 'enqueue_shipyard' && !empty($queueState['shipyard'])) {
+			$queuePenalty += min(12, ((int) $queueState['shipyard'] * 2));
+		}
+
+		$prerequisitePenalty = $this->prerequisitePenalty($user, $planet, $elementId);
+		$cost = $this->resolveActionCost($actionType, $user, $planet, $payload);
+		if (empty($cost)) {
+			return -12 - $queuePenalty - $prerequisitePenalty;
+		}
+
+		$costTotal = $this->sumResourceMap($cost);
+		if ($costTotal <= 0) {
+			return 6 - $queuePenalty - $prerequisitePenalty;
+		}
+
+		$deficit = BuildFunctions::getRestPrice($user, $planet, $elementId, $cost);
+		$deficitTotal = $this->sumResourceMap($deficit);
+		$deficitRatio = $deficitTotal / max(1, $costTotal);
+		$resourceBonus = 0;
+		if ($deficitTotal === 0) {
+			$resourceBonus += 12;
+			if (!empty($resourceLoad['metal']) && !empty($resourceLoad['crystal']) && !empty($resourceLoad['deuterium'])) {
+				$resourceBonus += 4;
+			}
+		} elseif ($deficitRatio <= 0.08) {
+			$resourceBonus += 5;
+		} elseif ($deficitRatio <= 0.20) {
+			$resourceBonus += 1;
+		} elseif ($deficitRatio <= 0.35) {
+			$resourceBonus -= 4;
+		} elseif ($deficitRatio <= 0.60) {
+			$resourceBonus -= 10;
+		} else {
+			$resourceBonus -= 18;
+		}
+
+		if ($actionType === 'enqueue_shipyard') {
+			$requestedAmount = max(1, !empty($payload['amount']) ? (int) $payload['amount'] : 1);
+			$maxConstructible = max(0, (int) BuildFunctions::getMaxConstructibleElements($user, $planet, $elementId));
+			if ($maxConstructible <= 0) {
+				$resourceBonus -= 10;
+			} elseif ($maxConstructible < $requestedAmount) {
+				$resourceBonus -= min(8, (int) round((1 - ($maxConstructible / max(1, $requestedAmount))) * 10));
+			}
+		}
+
+		return $resourceBonus - $queuePenalty - $prerequisitePenalty;
+	}
+
+	protected function resolveActionCost($actionType, array $user, array $planet, array $payload)
+	{
+		global $resource;
+
+		$elementId = !empty($payload['element_id']) ? (int) $payload['element_id'] : 0;
+		if ($elementId <= 0) {
+			return array();
+		}
+
+		if ($actionType === 'enqueue_building') {
+			if (empty($resource[$elementId]) || !isset($planet[$resource[$elementId]])) {
+				return array();
+			}
+
+			$nextLevel = (int) $planet[$resource[$elementId]] + 1;
+			return BuildFunctions::getElementPrice($user, $planet, $elementId, false, $nextLevel);
+		}
+
+		if ($actionType === 'enqueue_research') {
+			if (empty($resource[$elementId]) || !isset($user[$resource[$elementId]])) {
+				return array();
+			}
+
+			$nextLevel = (int) $user[$resource[$elementId]] + 1;
+			return BuildFunctions::getElementPrice($user, $planet, $elementId, false, $nextLevel);
+		}
+
+		if ($actionType === 'enqueue_shipyard') {
+			$amount = max(1, !empty($payload['amount']) ? (int) $payload['amount'] : 1);
+			return BuildFunctions::getElementPrice($user, $planet, $elementId, false, $amount);
+		}
+
+		return array();
+	}
+
+	protected function prerequisitePenalty(array $user, array $planet, $elementId)
+	{
+		global $requeriments, $resource;
+
+		if (BuildFunctions::isTechnologieAccessible($user, $planet, $elementId)) {
+			return 0;
+		}
+
+		if (empty($requeriments[$elementId]) || !is_array($requeriments[$elementId])) {
+			return 12;
+		}
+
+		$missingCount = 0;
+		$missingGap = 0;
+		foreach ($requeriments[$elementId] as $requireId => $requireLevel) {
+			$currentLevel = 0;
+			if (!empty($resource[$requireId]) && isset($planet[$resource[$requireId]])) {
+				$currentLevel = (int) $planet[$resource[$requireId]];
+			} elseif (!empty($resource[$requireId]) && isset($user[$resource[$requireId]])) {
+				$currentLevel = (int) $user[$resource[$requireId]];
+			}
+
+			if ($currentLevel >= (int) $requireLevel) {
+				continue;
+			}
+
+			$missingCount++;
+			$missingGap += max(1, (int) $requireLevel - $currentLevel);
+		}
+
+		if ($missingCount === 0) {
+			return 0;
+		}
+
+		return min(16, 4 + ($missingCount * 2) + min(6, $missingGap));
+	}
+
+	protected function sumResourceMap(array $values)
+	{
+		$total = 0.0;
+		foreach ($values as $value) {
+			$total += (float) $value;
+		}
+
+		return $total;
 	}
 
 	protected function tacticalIncoherencePenalty($actionType, array $snapshot, array $decision)
@@ -279,6 +440,10 @@ class BotActionScorer
 
 		if (!empty($bestTarget['threat_score'])) {
 			$value += min(6, (int) round($bestTarget['threat_score'] / 20));
+		}
+
+		if (!empty($action['payload']['retaliation_value'])) {
+			$value += 6;
 		}
 
 		return $value;
@@ -408,5 +573,81 @@ class BotActionScorer
 		}
 
 		return $penalty;
+	}
+
+	protected function targetFocusBonus(array $action, array $snapshot)
+	{
+		$targetCoordinates = !empty($action['payload']['target_coordinates']) ? (string) $action['payload']['target_coordinates'] : '';
+		if ($targetCoordinates === '') {
+			return 0;
+		}
+
+		$hostileCoordinates = !empty($snapshot['hostile_context']['retaliation_target']['target_coordinates'])
+			? (string) $snapshot['hostile_context']['retaliation_target']['target_coordinates']
+			: '';
+		if ($hostileCoordinates !== '' && $hostileCoordinates === $targetCoordinates) {
+			return 18;
+		}
+
+		$currentCoordinates = !empty($snapshot['current_target_focus']['target_coordinates'])
+			? (string) $snapshot['current_target_focus']['target_coordinates']
+			: '';
+		if ($currentCoordinates !== '' && $currentCoordinates === $targetCoordinates) {
+			return 12;
+		}
+
+		$commanderCoordinates = !empty($snapshot['commander_target_focus']['target_coordinates'])
+			? (string) $snapshot['commander_target_focus']['target_coordinates']
+			: '';
+		if ($commanderCoordinates !== '' && $commanderCoordinates === $targetCoordinates) {
+			return 10;
+		}
+
+		return 0;
+	}
+
+	protected function hostileResponseBonus(array $action, array $decision, array $hostileContext)
+	{
+		$pressure = !empty($hostileContext['pressure_score']) ? (int) $hostileContext['pressure_score'] : 0;
+		if ($pressure <= 0) {
+			return 0;
+		}
+
+		$bonus = 0;
+		if ($action['action_type'] === 'send_spy') {
+			$bonus += !empty($hostileContext['spy_count']) ? 10 : 6;
+		}
+
+		if ($action['action_type'] === 'enqueue_shipyard' && isset($decision['primary_need']) && $decision['primary_need'] === 'besoin_defensif') {
+			$bonus += 10;
+		}
+
+		if ($action['action_type'] === 'send_raid' && !empty($hostileContext['attack_count'])) {
+			$bonus += 8;
+		}
+
+		if ($action['action_type'] === 'queue_private_message' && !empty($hostileContext['spy_count'])) {
+			$bonus += 4;
+		}
+
+		return $bonus;
+	}
+
+	protected function pressurePenalty(array $action, array $decision, array $hostileContext)
+	{
+		$pressure = !empty($hostileContext['pressure_score']) ? (int) $hostileContext['pressure_score'] : 0;
+		if ($pressure < 55) {
+			return 0;
+		}
+
+		if (in_array($action['action_type'], array('enqueue_building', 'enqueue_research'), true)) {
+			return 10;
+		}
+
+		if ($pressure >= 75 && $action['action_type'] === 'queue_social_message' && empty($action['payload']['psychological_value'])) {
+			return 6;
+		}
+
+		return 0;
 	}
 }

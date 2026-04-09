@@ -169,7 +169,7 @@ class BotCommandParser
 
 	protected function parsePrivateMessage($command, array $tokens)
 	{
-		$payload = $this->extractPayload($tokens);
+		$payload = $this->extractPayload(array_slice($tokens, 2));
 		return array(
 			'is_valid' => true,
 			'raw_command' => $command,
@@ -183,8 +183,10 @@ class BotCommandParser
 
 	protected function parseSocialMessage($command, array $tokens)
 	{
-		$payload = $this->extractPayload($tokens);
-		$payload['channel_key'] = 'bots';
+		$payload = $this->extractPayload(array_slice($tokens, 2));
+		if (empty($payload['channel_key'])) {
+			$payload['channel_key'] = 'bots';
+		}
 		return array(
 			'is_valid' => true,
 			'raw_command' => $command,
@@ -248,6 +250,9 @@ class BotCommandParser
 			}
 			if ($normalized === 'intervalle' && isset($tokens[$index + 1])) {
 				$payload['interval'] = $tokens[$index + 1];
+			}
+			if (($normalized === 'canal' || $normalized === 'channel') && isset($tokens[$index + 1])) {
+				$payload['channel_key'] = $this->normalizeToken($tokens[$index + 1]);
 			}
 			if ($normalized === 'duree' && isset($tokens[$index + 1])) {
 				$payload['duration'] = $tokens[$index + 1];

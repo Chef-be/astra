@@ -10,12 +10,14 @@ class BotInferenceService
 
 		foreach ($targets as $target) {
 			$targetUserId = (int) $target['id_owner'];
+			$botTotalPoints = isset($bot['total_points']) ? (float) $bot['total_points'] : 0;
+			$targetTotalPoints = isset($target['total_points']) ? (float) $target['total_points'] : 0;
 			$relationship = isset($relationshipIndex['player:'.$targetUserId]) ? $relationshipIndex['player:'.$targetUserId] : array();
 			$memorySignal = isset($memorySignals[$targetUserId]) ? $memorySignals[$targetUserId] : array();
 			$distance = abs((int) $planet['system'] - (int) $target['system']);
 			$richesse = min(100, (int) round((((float) $target['metal'] + (float) $target['crystal'] + (float) $target['deuterium']) / 30000)));
 			$inactivite = min(100, max(0, (int) round((TIMESTAMP - (int) $target['onlinetime']) / 1800)));
-			$danger = min(100, (int) round((((float) $target['total_points']) / max(1, (float) $bot['total_points'] ?: 1)) * 40));
+			$danger = min(100, (int) round(($targetTotalPoints / max(1, $botTotalPoints ?: 1)) * 40));
 			$vulnerabilite = max(0, min(100, $richesse + $inactivite - min(40, $distance * 2)));
 			$hostilite = min(100, max(
 				isset($relationship['resentment']) ? (int) $relationship['resentment'] : 0,
@@ -28,7 +30,7 @@ class BotInferenceService
 				- (isset($relationship['resentment']) ? (int) $relationship['resentment'] : 0)
 			);
 			$psychologique = min(100, (int) round(($inactivite * 0.35) + ($hostilite * 0.30) + ($vulnerabilite * 0.35)));
-			$prestige = min(100, max(0, (int) round((((float) $target['total_points']) / 100000) * 12)));
+			$prestige = min(100, max(0, (int) round(($targetTotalPoints / 100000) * 12)));
 			$revanche = min(100, (int) ($memorySignal['revenge'] ?? 0));
 			$territorial = min(100, max(0, 75 - min(60, $distance * 3)));
 			$nuisance = min(100, (int) round(($danger * 0.45) + ($hostilite * 0.35) + ($prestige * 0.20)));

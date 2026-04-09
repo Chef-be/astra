@@ -4,7 +4,6 @@
 	<div class="d-flex justify-content-between align-items-center mb-4">
 		<div>
 			<h1 class="h3 text-white mb-1">{$LNG.ti_create_head}</h1>
-			<p class="text-white-50 mb-0">Décrivez votre demande avec le plus de précision possible.</p>
 		</div>
 		<a class="btn btn-outline-light btn-sm" href="game.php?page=ticket">Retour à la liste</a>
 	</div>
@@ -13,7 +12,6 @@
 		<input type="hidden" name="id" value="0">
 		<div class="card bg-dark border-secondary">
 			<div class="card-body">
-				<div class="mb-3 small text-white-50">{$LNG.ti_create_info}</div>
 				<div class="mb-3">
 					<label class="form-label text-white" for="category">{$LNG.ti_category}</label>
 					<select id="category" name="category" class="form-select bg-dark text-white border-secondary">{html_options options=$categoryList}</select>

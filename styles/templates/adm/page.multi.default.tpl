@@ -1,16 +1,12 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Détection technique</span>
-			<h1 class="admin-hero__title">Multi-comptes et recouvrements IP</h1>
-			<p class="admin-hero__subtitle">Visualisez rapidement les comptes partageant une même adresse IP et marquez les cas connus pour le suivi d’exploitation.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Détection</span>
+			<h2>Multi-comptes et recouvrements IP</h2>
 		</div>
-		<div class="admin-stat-strip">
-			<div class="admin-stat-card">
-				<span class="admin-stat-card__label">Groupes IP</span>
-				<strong class="admin-stat-card__value">{$multiGroups|@count}</strong>
-			</div>
+		<div class="admin-headerline__actions">
+			<span class="admin-pill">Groupes {$multiGroups|@count}</span>
 		</div>
 	</section>
 

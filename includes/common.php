@@ -135,9 +135,10 @@ if(isset($config->timezone) && $config->timezone != '') {
 
 if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 {
+	$isCliCron = MODE === 'CRON' && PHP_SAPI === 'cli';
 	$session	= Session::load();
 
-	if(!(!$session->isValidSession() && isset($_GET['page']) && $_GET['page']=="raport" && isset($_GET['raport']) && count($_GET)==2 && MODE === 'INGAME'))
+	if(!$isCliCron && !(!$session->isValidSession() && isset($_GET['page']) && $_GET['page']=="raport" && isset($_GET['raport']) && count($_GET)==2 && MODE === 'INGAME'))
 	if(!$session->isValidSession())
 	{
 	    $session->delete();
@@ -148,11 +149,18 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 	require 'includes/classes/class.BuildFunctions.php';
 	require 'includes/classes/class.PlanetRessUpdate.php';
 
-	if(!AJAX_REQUEST && MODE === 'INGAME' && isModuleAvailable(MODULE_FLEET_EVENTS)) {
-		require('includes/FleetHandler.php');
+	if($isCliCron)
+	{
+		$db	= Database::get();
 	}
+	else
+	{
 
-	$db		= Database::get();
+		if(!AJAX_REQUEST && MODE === 'INGAME' && isModuleAvailable(MODULE_FLEET_EVENTS)) {
+			require('includes/FleetHandler.php');
+		}
+
+		$db		= Database::get();
 
 
 	$sql	= "SELECT
@@ -235,13 +243,14 @@ if (MODE === 'INGAME' || MODE === 'ADMIN' || MODE === 'CRON')
 
 		$USER['factor']		= getFactors($USER);
 		$USER['PLANETS']	= getPlanets($USER);
-	}
-	elseif (MODE === 'ADMIN')
-	{
-		error_reporting(E_ERROR | E_WARNING | E_PARSE);
+		}
+		elseif (MODE === 'ADMIN')
+		{
+			error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
-		$USER['rights']		= unserialize($USER['rights']);
-		$LNG->includeData(array('ADMIN', 'CUSTOM'));
+			$USER['rights']		= unserialize($USER['rights']);
+			$LNG->includeData(array('ADMIN', 'CUSTOM'));
+		}
 	}
 }
 elseif(MODE === 'LOGIN')

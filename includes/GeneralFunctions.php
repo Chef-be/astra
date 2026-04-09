@@ -665,6 +665,9 @@ function exceptionHandler($exception)
 
 
 	$DIR		= MODE == 'INSTALL' ? '..' : '.';
+	$requestUri = isset($_SERVER['REQUEST_URI'])
+		? $_SERVER['REQUEST_URI']
+		: (isset($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : '[cli]');
 	ob_start();
 	echo '<!DOCTYPE html>
 <!--[if lt IE 7 ]> <html lang="de" class="no-js ie6"> <![endif]-->
@@ -723,7 +726,7 @@ function exceptionHandler($exception)
 			<b>Message: </b>' . $exception->getMessage() . '<br>
 			<b>File: </b>' . $exception->getFile() . '<br>
 			<b>Line: </b>' . $exception->getLine() . '<br>
-			<b>URL: </b>' . PROTOCOL . HTTP_HOST . $_SERVER['REQUEST_URI'] . '<br>
+			<b>URL: </b>' . PROTOCOL . HTTP_HOST . $requestUri . '<br>
 			<b>PHP-Version: </b>' . PHP_VERSION . '<br>
 			<b>PHP-API: </b>' . php_sapi_name() . '<br>
 			<b>Version de la plateforme : </b>' . $VERSION . '<br>
@@ -739,12 +742,16 @@ function exceptionHandler($exception)
 	$errorLabel = isset($errorType[$errno]) ? $errorType[$errno] : ('PHP Error '.$errno);
 	$errorText	= date("[d-M-Y H:i:s]", TIMESTAMP) . ' ' . $errorLabel . ': "' . strip_tags($exception->getMessage()) . "\"\r\n";
 	$errorText	.= 'File: ' . $exception->getFile() . ' | Line: ' . $exception->getLine() . "\r\n";
-	$errorText	.= 'URL: ' . PROTOCOL . HTTP_HOST . $_SERVER['REQUEST_URI'] . ' | Version: ' . $VERSION . "\r\n";
+	$errorText	.= 'URL: ' . PROTOCOL . HTTP_HOST . $requestUri . ' | Version: ' . $VERSION . "\r\n";
 	$errorText	.= "Stack trace:\r\n";
 	$errorText	.= str_replace(ROOT_PATH, '/', htmlspecialchars(str_replace('\\', '/', $exception->getTraceAsString()))) . "\r\n";
 
 	if (is_writable('includes/error.log')) {
 		file_put_contents('includes/error.log', $errorText, FILE_APPEND);
+	}
+
+	if (PHP_SAPI === 'cli') {
+		exit;
 	}
 
 	/* Debug via Support Ticket */

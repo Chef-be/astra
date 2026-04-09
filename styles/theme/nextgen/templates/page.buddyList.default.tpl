@@ -194,7 +194,6 @@
 <div class="buddy-shell">
 	<section class="buddy-hero">
 		<h1>Liste d’amis</h1>
-		<p>Suivez vos demandes en cours, vos invitations reçues et vos contacts validés depuis une vue unique plus claire.</p>
 	</section>
 
 	<div class="buddy-stats">

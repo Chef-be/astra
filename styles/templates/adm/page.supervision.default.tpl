@@ -1,5 +1,5 @@
 {block name="content"}
-<div class="container-fluid py-4 text-white admin-stack admin-supervision-page">
+<div class="admin-settings-shell text-white admin-stack admin-supervision-page">
 	<section class="admin-kpi-grid">
 		<article class="admin-kpi-card">
 			<span class="admin-kpi-card__label">Charge 1 min</span>
@@ -39,8 +39,7 @@
 				<summary class="admin-fold__summary">
 					<div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 						<div>
-							<h2 class="h4 mb-1">Capacité système et conteneurs</h2>
-							<p class="text-white-50 mb-0">Charge hôte et statut Docker, repliés par défaut.</p>
+							<h2 class="h5 mb-0">Capacité système et conteneurs</h2>
 						</div>
 						<span class="admin-pill">Infra</span>
 					</div>
@@ -48,7 +47,7 @@
 				<div class="admin-fold__body admin-stack">
 					<div class="admin-card">
 						<div class="card-body">
-							<h2 class="h4 mb-3">Capacité système</h2>
+							<h2 class="h5 mb-2">Capacité système</h2>
 							<div class="admin-summary-list">
 								<div class="admin-summary-row">
 									<span>Mémoire hôte</span>
@@ -70,7 +69,7 @@
 
 					<div class="admin-card">
 						<div class="card-body">
-							<h2 class="h4 mb-3">Conteneurs Astra</h2>
+							<h2 class="h5 mb-2">Conteneurs Astra</h2>
 							{if $dashboard.docker.available && $dashboard.docker.astraDetected}
 								<div class="row g-3">
 									{foreach from=$dashboard.docker.astraServices item=service}
@@ -101,8 +100,7 @@
 				<summary class="admin-fold__summary">
 					<div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 						<div>
-							<h2 class="h4 mb-1">Cache et Redis</h2>
-							<p class="text-white-50 mb-0">Signaux cache et base mémoire, repliés par défaut.</p>
+							<h2 class="h5 mb-0">Cache et Redis</h2>
 						</div>
 						<span class="admin-pill">Cache</span>
 					</div>
@@ -110,7 +108,7 @@
 				<div class="admin-fold__body admin-stack">
 					<div class="admin-card">
 						<div class="card-body">
-							<h2 class="h4 mb-3">Cache applicatif</h2>
+							<h2 class="h5 mb-2">Cache applicatif</h2>
 							<div class="admin-status-list">
 								<div class="admin-status-row">
 									<span>Fichiers</span>
@@ -133,7 +131,7 @@
 
 					<div class="admin-card">
 						<div class="card-body">
-							<h2 class="h4 mb-3">Redis</h2>
+							<h2 class="h5 mb-2">Redis</h2>
 							{if $cacheSnapshot.redis.available}
 								<div class="admin-status-list">
 									<div class="admin-status-row">

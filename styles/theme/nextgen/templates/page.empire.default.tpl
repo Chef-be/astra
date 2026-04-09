@@ -24,14 +24,48 @@
 
 	.imperium-hero-grid {
 		display: grid;
-		grid-template-columns: minmax(0, 1.6fr) minmax(220px, 1fr);
-		gap: 0.85rem;
+		grid-template-columns: 1fr;
+		gap: 0.9rem;
 		align-items: start;
+	}
+
+	.imperium-hero-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.85rem;
+		margin-bottom: 0.85rem;
+	}
+
+	.imperium-hero-title {
+		display: grid;
+		gap: 0.3rem;
+	}
+
+	.imperium-hero-title h1 {
+		margin: 0;
+		color: #ffd666;
+		font-size: 1.35rem;
+	}
+
+	.imperium-hero-badge {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.3rem 0.6rem;
+		border-radius: 999px;
+		background: rgba(255, 214, 102, 0.08);
+		border: 1px solid rgba(255, 214, 102, 0.16);
+		color: rgba(255, 240, 214, 0.88);
+		font-size: 0.76rem;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
 	}
 
 	.imperium-hero-metrics {
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-columns: repeat(4, minmax(0, 1fr));
 		gap: 0.6rem;
 	}
 
@@ -53,7 +87,7 @@
 	.imperium-metric strong {
 		display: block;
 		margin-top: 0.16rem;
-		font-size: 1rem;
+		font-size: 1.08rem;
 		color: #f8fbff;
 	}
 
@@ -200,9 +234,21 @@
 		font-size: 0.7rem;
 	}
 
+	@media (max-width: 1199px) {
+		.imperium-hero-metrics {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
 	@media (max-width: 991px) {
 		.imperium-hero-grid,
 		.imperium-row {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (max-width: 575px) {
+		.imperium-hero-metrics {
 			grid-template-columns: 1fr;
 		}
 	}
@@ -212,14 +258,19 @@
 	<section class="imperium-card imperium-card--hero">
 		<div class="imperium-hero-grid">
 			<div>
-				<h1 class="fs-4 m-0 text-yellow">{$LNG.lv_imperium_title}</h1>
-				<p class="text-white-50 mb-0 mt-2">Vue condensée de vos planètes, ressources, constructions et flottes. Les domaines détaillés sont regroupés plus bas dans des sections repliables.</p>
-			</div>
-			<div class="imperium-hero-metrics">
-				<div class="imperium-metric"><span>Planètes</span><strong>{count($planetList.name)}</strong></div>
-				<div class="imperium-metric"><span>Ressources suivies</span><strong>{count($planetList.resource)}</strong></div>
-				<div class="imperium-metric"><span>Bâtiments</span><strong>{count($planetList.build)}</strong></div>
-				<div class="imperium-metric"><span>Flottes et défenses</span><strong>{count($planetList.fleet) + count($planetList.defense)}</strong></div>
+				<div class="imperium-hero-head">
+					<div class="imperium-hero-title">
+						<h1>{$LNG.lv_imperium_title}</h1>
+					</div>
+					<div class="imperium-hero-badge">{count($planetList.name)} positions suivies</div>
+				</div>
+
+				<div class="imperium-hero-metrics">
+					<div class="imperium-metric"><span>Planètes</span><strong>{count($planetList.name)}</strong></div>
+					<div class="imperium-metric"><span>Ressources</span><strong>{count($planetList.resource)}</strong></div>
+					<div class="imperium-metric"><span>Bâtiments</span><strong>{count($planetList.build)}</strong></div>
+					<div class="imperium-metric"><span>Flottes et défenses</span><strong>{count($planetList.fleet) + count($planetList.defense) + count($planetList.missiles)}</strong></div>
+				</div>
 			</div>
 		</div>
 	</section>
@@ -251,12 +302,12 @@
 	</section>
 
 	<div class="imperium-sections">
-		<details class="imperium-section" open>
+		<details class="imperium-section ng-disclosure ng-disclosure--chevron" id="imperium-section-resources" open>
 			<summary class="imperium-section-summary">
-				<div><strong>{$LNG.lv_resources}</strong><span class="d-block">Stocks et production horaire de vos planètes.</span></div>
+				<div><strong>{$LNG.lv_resources}</strong></div>
 				<span>{count($planetList.resource)} lignes</span>
 			</summary>
-			<div class="imperium-section-body">
+			<div class="imperium-section-body ng-disclosure__body">
 				{foreach $planetList.resource as $elementID => $resourceArray}
 				<div class="imperium-row">
 					<div class="imperium-row-title">
@@ -286,12 +337,12 @@
 			</div>
 		</details>
 
-		<details class="imperium-section">
+		<details class="imperium-section ng-disclosure ng-disclosure--chevron" id="imperium-section-buildings">
 			<summary class="imperium-section-summary">
-				<div><strong>{$LNG.lv_buildings}</strong><span class="d-block">Niveaux par planète, regroupés dans une vue dense.</span></div>
+				<div><strong>{$LNG.lv_buildings}</strong></div>
 				<span>{count($planetList.build)} lignes</span>
 			</summary>
-			<div class="imperium-section-body">
+			<div class="imperium-section-body ng-disclosure__body">
 				{foreach $planetList.build as $elementID => $buildArray}
 				<div class="imperium-row">
 					<div class="imperium-row-title">
@@ -309,12 +360,12 @@
 			</div>
 		</details>
 
-		<details class="imperium-section">
+		<details class="imperium-section ng-disclosure ng-disclosure--chevron" id="imperium-section-technology">
 			<summary class="imperium-section-summary">
-				<div><strong>{$LNG.lv_technology}</strong><span class="d-block">Recherche globale du compte.</span></div>
+				<div><strong>{$LNG.lv_technology}</strong></div>
 				<span>{count($planetList.tech)} lignes</span>
 			</summary>
-			<div class="imperium-section-body">
+			<div class="imperium-section-body ng-disclosure__body">
 				{foreach $planetList.tech as $elementID => $tech}
 				<div class="imperium-row">
 					<div class="imperium-row-title">
@@ -330,12 +381,12 @@
 			</div>
 		</details>
 
-		<details class="imperium-section">
+		<details class="imperium-section ng-disclosure ng-disclosure--chevron" id="imperium-section-ships">
 			<summary class="imperium-section-summary">
-				<div><strong>{$LNG.lv_ships}</strong><span class="d-block">Flottes réparties par planète.</span></div>
+				<div><strong>{$LNG.lv_ships}</strong></div>
 				<span>{count($planetList.fleet)} lignes</span>
 			</summary>
-			<div class="imperium-section-body">
+			<div class="imperium-section-body ng-disclosure__body">
 				{foreach $planetList.fleet as $elementID => $fleetArray}
 				<div class="imperium-row">
 					<div class="imperium-row-title">
@@ -353,12 +404,12 @@
 			</div>
 		</details>
 
-		<details class="imperium-section">
+		<details class="imperium-section ng-disclosure ng-disclosure--chevron" id="imperium-section-defenses">
 			<summary class="imperium-section-summary">
-				<div><strong>{$LNG.lv_defenses}</strong><span class="d-block">Défenses et stock de missiles.</span></div>
+				<div><strong>{$LNG.lv_defenses}</strong></div>
 				<span>{count($planetList.defense) + count($planetList.missiles)} lignes</span>
 			</summary>
-			<div class="imperium-section-body">
+			<div class="imperium-section-body ng-disclosure__body">
 				{foreach $planetList.defense as $elementID => $fleetArray}
 				<div class="imperium-row">
 					<div class="imperium-row-title">

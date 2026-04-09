@@ -1,25 +1,15 @@
 {block name="content"}
 
 <div class="container-fluid py-4 bots-admin-page">
-  <section class="admin-hero bots-hero mb-4">
-    <div class="bots-hero__content">
-      <span class="admin-hero__eyebrow">Commandement bots</span>
-      <h1 class="admin-hero__title">Moteur bots Astra</h1>
-      <p class="admin-hero__description">
-        Console d’exploitation du moteur IA, de la présence continue, des campagnes, de la messagerie et de la conformité.
-        La permanence n’est plus seulement un quota : la relève et les fenêtres de session sont maintenant exposées directement ici.
-      </p>
-      <div class="admin-hero__meta">
-        <span class="admin-hero__chip">Moteur <strong>{if $botSnapshot.config.engine_enabled}actif{else}désactivé{/if}</strong></span>
-        <span class="admin-hero__chip">Cible horaire <strong>{$botSnapshot.metrics.target_online_current}</strong></span>
-        <span class="admin-hero__chip">Visible socialement <strong>{$botSnapshot.metrics.target_social_current}</strong></span>
-        <span class="admin-hero__chip">Ancrage <strong>{$botSnapshot.metrics.forced_online}</strong></span>
-        <span class="admin-hero__chip">Relève active <strong>{$botSnapshot.metrics.rotation_online}</strong></span>
-        <span class="admin-hero__chip">Repos <strong>{$botSnapshot.metrics.resting_bots}</strong></span>
-      </div>
+  <section class="admin-headerline admin-headerline--compact mb-4">
+    <div class="admin-headerline__copy">
+      <span class="admin-pill">Commandement bots</span>
+      <h2>Moteur bots Astra</h2>
     </div>
-
-    <div class="bots-hero__actions">
+    <div class="admin-headerline__actions">
+      <span class="admin-pill">Moteur {if $botSnapshot.config.engine_enabled}actif{else}désactivé{/if}</span>
+      <span class="admin-pill">Cible {$botSnapshot.metrics.target_online_current}</span>
+      <span class="admin-pill">Visible {$botSnapshot.metrics.target_social_current}</span>
       <a class="btn btn-success btn-sm" href="?page=bots&mode=runEngine&phase=cycle&limit=18">Lancer un cycle complet</a>
       <a class="btn btn-outline-warning btn-sm" href="?page=bots&mode=runEngine&phase=campaigns&limit=12">Relancer les campagnes</a>
       <a class="btn btn-outline-info btn-sm" href="?page=bots&mode=runEngine&phase=maintenance&limit=24">Exécuter la maintenance</a>
@@ -99,22 +89,22 @@
                 <div class="bots-presence-stat">
                   <span class="bots-presence-stat__label">En ligne</span>
                   <strong class="bots-presence-stat__value">{$botSnapshot.metrics.logical_connected}</strong>
-                  <span class="bots-presence-stat__meta">sur {$botSnapshot.metrics.target_online_current}</span>
+                  <span class="bots-presence-stat__meta">/ {$botSnapshot.metrics.target_online_current}</span>
                 </div>
                 <div class="bots-presence-stat">
                   <span class="bots-presence-stat__label">Ancrage permanent</span>
                   <strong class="bots-presence-stat__value">{$botSnapshot.metrics.forced_online}</strong>
-                  <span class="bots-presence-stat__meta">chefs, campagnes, profils forcés</span>
+                  <span class="bots-presence-stat__meta">forcés</span>
                 </div>
                 <div class="bots-presence-stat">
                   <span class="bots-presence-stat__label">Relève active</span>
                   <strong class="bots-presence-stat__value">{$botSnapshot.metrics.rotation_online}</strong>
-                  <span class="bots-presence-stat__meta">bots tournants actuellement connectés</span>
+                  <span class="bots-presence-stat__meta">rotations</span>
                 </div>
                 <div class="bots-presence-stat">
                   <span class="bots-presence-stat__label">Repos</span>
                   <strong class="bots-presence-stat__value">{$botSnapshot.metrics.resting_bots}</strong>
-                  <span class="bots-presence-stat__meta">fenêtres de repos en cours</span>
+                  <span class="bots-presence-stat__meta">hors ligne</span>
                 </div>
               </div>
 

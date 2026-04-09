@@ -76,40 +76,32 @@ $(document).ready(function(){
 </script>
 
 <div class="admin-settings-shell">
-	<div class="admin-card">
-		<div class="card-body">
-			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-				<div>
-					<h2 class="h4 mb-1">Organisation des paramètres</h2>
-					<p class="text-white-50 mb-0">Les réglages sont regroupés par usage réel : identité, exposition publique, protection, diffusion et maintenance.</p>
-				</div>
-				<div class="admin-hero__meta">
-					<div class="admin-hero__chip">Thème <strong>{$server_default_theme|default:'nextgen'}</strong></div>
-					<div class="admin-hero__chip">Fuseau <strong>{$timezone}</strong></div>
-					<div class="admin-hero__chip">SMTP <strong>{if $mail_active}actif{else}inactif{/if}</strong></div>
-				</div>
-			</div>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Serveur</span>
+			<h2>Paramètres serveur</h2>
 		</div>
+		<div class="admin-headerline__actions">
+			<span class="admin-pill">Thème {$server_default_theme|default:'nextgen'}</span>
+			<span class="admin-pill">Fuseau {$timezone}</span>
+			<span class="admin-pill">SMTP {if $mail_active}actif{else}inactif{/if}</span>
+		</div>
+	</section>
+
+<div class="admin-section-nav">
+	<a class="admin-section-link" href="#server-general">Général</a>
+	<a class="admin-section-link" href="#server-players">Joueurs</a>
+	<a class="admin-section-link" href="#server-recaptcha">Protection</a>
+	<a class="admin-section-link" href="#server-smtp">Courriels</a>
+	<a class="admin-section-link" href="#server-messages">Messagerie</a>
+	<a class="admin-section-link" href="#server-analytics">Mesure</a>
 	</div>
 
-	<div class="admin-section-nav">
-		<a class="admin-section-link" href="#server-general">Général</a>
-		<a class="admin-section-link" href="#server-links">Liens publics</a>
-		<a class="admin-section-link" href="#server-players">Joueurs</a>
-		<a class="admin-section-link" href="#server-recaptcha">Protection</a>
-		<a class="admin-section-link" href="#server-smtp">Courriels</a>
-		<a class="admin-section-link" href="#server-messages">Messagerie</a>
-		<a class="admin-section-link" href="#server-analytics">Mesure</a>
-	</div>
-
-<form id="serverSettings" class="text-white fs-12" action="?page=server&mode=saveSettings" method="post">
+<form id="serverSettings" class="text-white fs-12 admin-settings-form admin-stack" action="?page=server&mode=saveSettings" method="post">
 <input type="hidden" name="opt_save" value="1">
 
 <div class="form-group d-flex justify-content-between admin-settings-toolbar admin-field--full">
-	<div class="admin-form-submitbar__copy">
-		<strong>{$LNG.se_server_parameters}</strong>
-		<span>Recherche rapide, modifications guidées et sauvegarde globale des paramètres serveur.</span>
-	</div>
+	<strong>{$LNG.se_server_parameters}</strong>
 	<input style="max-width:320px;" class="form-control bg-dark text-white border-secondary" id="searchInServerSettings" type="text" name="" placeholder="Rechercher un paramètre…">
 </div>
 
@@ -172,18 +164,6 @@ $(document).ready(function(){
 		<option {if $password_recover_type == '1'}selected{/if} value="1">Par e-mail</option>
 		<option {if $password_recover_type == '2'}selected{/if} value="2">Par question secrète</option>
 	</select>
-</div>
-<div id="server-links" class="form-gorup d-flex flex-column my-1 p-2 admin-section-title">
-	<span class="text-yellow fw-bold fs-14">Liens publics</span>
-	<small>Activation et paramétrage des liens visibles depuis l’accueil.</small>
-</div>
-<div class="form-gorup d-flex my-1 p-2 ">
-	<label for="discord_active" class="text-start my-1 cursor-pointer hover-underline user-select-none">Activer le lien Discord public</label>
-	<input id="discord_active" class="mx-2" name="discord_active"{if $discord_active} checked="checked"{/if} type="checkbox">
-</div>
-<div class="form-gorup d-flex flex-column my-1 p-2 ">
-	<label for="discord_url" class="text-start my-1 cursor-pointer hover-underline user-select-none">URL Discord</label>
-	<input id="discord_url" class="form-control bg-dark text-white border-secondary" name="discord_url" value="{$discord_url}" type="url" placeholder="https://discord.gg/...">
 </div>
 <div id="server-players" class="form-gorup d-flex flex-column my-1 p-2 admin-section-title">
 	<span class="text-yellow fw-bold fs-14">{$LNG.se_player_settings}</span>

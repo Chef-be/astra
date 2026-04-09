@@ -93,6 +93,7 @@ $dbTableNames	= array(
 	'TICKETS_CATEGORY'	=> DB_PREFIX.'ticket_category',
 	'TOPKB'				=> DB_PREFIX.'topkb',
 	'TOPKB_USERS'		=> DB_PREFIX.'users_to_topkb',
+	'TRADER_ACTIVITY'	=> DB_PREFIX.'trader_activity',
 	'USERS'				=> DB_PREFIX.'users',
 	'USER_MISSIONS'		=> DB_PREFIX.'user_missions',
 	'USERS_ACS'			=> DB_PREFIX.'users_to_acs',

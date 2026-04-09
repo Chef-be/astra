@@ -1,10 +1,9 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Éditeur de compte</span>
-			<h1 class="admin-hero__title">Ressources et matière noire</h1>
-			<p class="admin-hero__subtitle">Distribuez ou retirez des ressources par identifiant de planète, par coordonnées, ou directement sur le compte pour la matière noire.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Éditeur de compte</span>
+			<h2>Ressources et matière noire</h2>
 		</div>
 	</section>
 
@@ -64,10 +63,7 @@
 		</form>
 
 		<form action="admin.php?page=accounts&amp;mode=darkmatterSend" method="post" class="admin-table-shell admin-stack">
-			<div>
-				<h2 class="h5 mb-1">{$LNG.tech.921}</h2>
-				<p class="text-white-50 mb-0">Intervenez directement sur la matière noire d’un compte joueur.</p>
-			</div>
+			<div><h2 class="h5 mb-1">{$LNG.tech.921}</h2></div>
 			<label class="admin-field-card">
 				<span>{$LNG.input_id_user}</span>
 				<input class="form-control bg-dark text-white border-secondary" name="user_id" type="text" value="0" size="3">

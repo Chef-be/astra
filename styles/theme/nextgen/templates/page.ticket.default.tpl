@@ -4,7 +4,6 @@
 	<div class="d-flex justify-content-between align-items-center mb-4">
 		<div>
 			<h1 class="h3 text-white mb-1">{$LNG.lm_support}</h1>
-			<p class="text-white-50 mb-0">Consultez vos tickets et échangez avec l’équipe de support.</p>
 		</div>
 		<a class="btn btn-primary" href="game.php?page=ticket&amp;mode=create">{$LNG.ti_new}</a>
 	</div>

@@ -1,11 +1,13 @@
 {block name="content"}
 {nocache}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Édition</span>
-			<h1 class="admin-hero__title">Modifier une actualité</h1>
-			<p class="admin-hero__subtitle">Mettez à jour le texte, le titre et la mise en forme sans perdre l’apparence publique.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Publication</span>
+			<h2>Modifier une actualité</h2>
+		</div>
+		<div class="admin-headerline__actions">
+			<a class="admin-shell-action admin-shell-action--light" href="admin.php?page=news">Retour aux actualités</a>
 		</div>
 	</section>
 
@@ -21,7 +23,6 @@
 		</label>
 		<div class="admin-actions">
 			<button class="btn btn-primary" type="submit">{$LNG.button_submit}</button>
-			<a class="btn btn-outline-light" href="admin.php?page=news">Retour aux actualités</a>
 		</div>
 	</form>
 </div>

@@ -1,44 +1,63 @@
 {include file="overall_header.tpl"}
-<form action="" method="post" onsubmit="return confirm('{$re_reset_universe_confirmation}');">
-<table class="table table-dark table-striped table-sm fs-12 w-50 my-5 mx-auto">
-<tr><th colspan="2">{$re_player_and_planets}</th></tr>
-<tr><td style="text-align:left">{$re_reset_player}</td><td style="text-align:right"><input type="checkbox" name="players"></td></tr>
-<tr><td style="text-align:left">{$re_reset_planets}</td><td style="text-align:right"><input type="checkbox" name="planets"></td></tr>
-<tr><td style="text-align:left">{$re_reset_moons}</td><td style="text-align:right"><input type="checkbox" name="moons"></td></tr>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+	var selectAll = document.getElementById('resetSelectAll');
+	var clearAll = document.getElementById('resetClearAll');
+	var toggles = document.querySelectorAll('.admin-asset-toggle__input');
 
-<tr><th colspan="2">{$re_defenses_and_ships}</th></tr>
-<tr><td style="text-align:left">{$re_defenses}</td><td style="text-align:right"><input type="checkbox" name="defenses"></td></tr>
-<tr><td style="text-align:left">{$re_ships}</td><td style="text-align:right"><input type="checkbox" name="ships"></td></tr>
-<tr><td style="text-align:left">{$re_reset_hangar}</td><td style="text-align:right"><input type="checkbox" name="h_d"></td></tr>
+	if (selectAll) {
+		selectAll.addEventListener('click', function () {
+			toggles.forEach(function (toggle) {
+				toggle.checked = true;
+			});
+		});
+	}
 
-<tr><th colspan="2">{$re_buldings}</th></tr>
-<tr><td style="text-align:left">{$re_buildings_pl}</td><td style="text-align:right"><input type="checkbox" name="edif_p"></td></tr>
-<tr><td style="text-align:left">{$re_buildings_lu}</td><td style="text-align:right"><input type="checkbox" name="edif_l"></td></tr>
-<tr><td style="text-align:left">{$re_reset_buldings}</td><td style="text-align:right"><input type="checkbox" name="edif"></td></tr>
+	if (clearAll) {
+		clearAll.addEventListener('click', function () {
+			toggles.forEach(function (toggle) {
+				toggle.checked = false;
+			});
+		});
+	}
+});
+</script>
 
-<tr><th colspan="2">{$re_inve_ofis}</th></tr>
-<tr><td style="text-align:left">{$re_ofici}</td><td style="text-align:right"><input type="checkbox" name="ofis"></td></tr>
-<tr><td style="text-align:left">{$re_investigations}</td><td style="text-align:right"><input type="checkbox" name="inves"></td></tr>
-<tr><td style="text-align:left">{$re_reset_invest}</td><td style="text-align:right"><input type="checkbox" name="inves_c"></td></tr>
+<div class="admin-settings-shell admin-stack my-4">
+	<section class="admin-headerline">
+		<div class="admin-headerline__lead">
+			<span class="admin-headerline__eyebrow">Maintenance lourde</span>
+			<h1 class="admin-headerline__title">Réinitialisation d’univers</h1>
+		</div>
+		<div class="admin-actions admin-actions--header">
+			<button id="resetSelectAll" type="button" class="btn btn-outline-light">Tout sélectionner</button>
+			<button id="resetClearAll" type="button" class="btn btn-outline-light">Tout désélectionner</button>
+		</div>
+	</section>
 
-<tr><th colspan="2">{$re_resources}</th></tr>
-<tr><td style="text-align:left">{$re_resources_dark}</td><td style="text-align:right"><input type="checkbox" name="dark"></td></tr>
-<tr><td style="text-align:left">{$re_resources_met_cry}</td><td style="text-align:right"><input type="checkbox" name="resources"></td></tr>
+	<form action="" method="post" class="admin-stack" onsubmit="return confirm('{$re_reset_universe_confirmation}');">
+		{foreach from=$resetGroups item=group}
+			<section class="admin-asset-panel">
+				<div class="admin-asset-panel__header">
+					<h4>{$group.title}</h4>
+				</div>
+				<div class="admin-asset-board admin-asset-board--dense">
+					{foreach from=$group.items item=item}
+						{include file='component.asset_toggle.tpl'
+							name=$item.name
+							title=$item.label
+							tag=$item.tag
+							image=$item.image
+							checked=false
+						}
+					{/foreach}
+				</div>
+			</section>
+		{/foreach}
 
-<tr><th colspan="2">{$re_general}</th></tr>
-<tr><td style="text-align:left">{$re_reset_notes}</td><td style="text-align:right"><input type="checkbox" name="notes"></td></tr>
-<tr><td style="text-align:left">{$re_reset_rw}</td><td style="text-align:right"><input type="checkbox" name="rw"></td></tr>
-<tr><td style="text-align:left">{$re_reset_buddies}</td><td style="text-align:right"><input type="checkbox" name="friends"></td></tr>
-<tr><td style="text-align:left">{$re_reset_allys}</td><td style="text-align:right"><input type="checkbox" name="alliances"></td></tr>
-<tr><td style="text-align:left">{$re_reset_fleets}</td><td style="text-align:right"><input type="checkbox" name="fleets"></td></tr>
-<tr><td style="text-align:left">{$re_reset_errors}</td><td style="text-align:right"><input type="checkbox" name="errors"></td></tr>
-<tr><td style="text-align:left">{$re_reset_banned}</td><td style="text-align:right"><input type="checkbox" name="banneds"></td></tr>
-<tr><td style="text-align:left">{$re_reset_messages}</td><td style="text-align:right"><input type="checkbox" name="messages"></td></tr>
-<tr><td style="text-align:left">{$re_reset_statpoints}</td><td style="text-align:right"><input type="checkbox" name="statpoints"></td></tr>
-
-<tr><th style="text-align:left;">{$re_reset_all}</th><th style="text-align:right;margin-right:2px;padding-right:5px;width:10px;"><input type="checkbox" name="resetall" onclick="$('input').attr('checked', this.checked ? 'checked' : false)"></th></tr>
-
-
-<tr><td colspan="2" height="60"><input type="submit" value="{$button_submit}"></td></tr>
-</table>
+		<div class="admin-actions">
+			<button type="submit" class="btn btn-primary">{$button_submit}</button>
+		</div>
+	</form>
+</div>
 {include file="overall_footer.tpl"}

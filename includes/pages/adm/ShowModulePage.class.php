@@ -36,6 +36,8 @@ class ShowModulePage extends AbstractAdminPage
 
 		$module	= explode(';', $config->moduls);
 		$hiddenModuleIds = array(41);
+		$activeCount = 0;
+		$inactiveCount = 0;
 
 		$IDs	= range(0, MODULE_AMOUNT - 1);
 
@@ -48,6 +50,12 @@ class ShowModulePage extends AbstractAdminPage
 				'name'	=> $LNG['modul_'.$ID],
 				'state'	=> isset($module[$ID]) ? $module[$ID] : 1,
 			);
+
+			if (!empty($Modules[$ID]['state'])) {
+				$activeCount++;
+			} else {
+				$inactiveCount++;
+			}
 		}
 
 		asort($Modules);
@@ -55,6 +63,8 @@ class ShowModulePage extends AbstractAdminPage
 
 		$this->assign(array(
 			'Modules'				=> $Modules,
+			'moduleActiveCount'		=> $activeCount,
+			'moduleInactiveCount'	=> $inactiveCount,
 		));
 
 		$this->display('page.modules.default.tpl');

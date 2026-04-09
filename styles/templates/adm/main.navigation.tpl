@@ -1,10 +1,10 @@
 <script>
 $(function() {
-	function filterAdminNav() {
-		var value = ($('#adminNavSearch').val() || '').toLowerCase();
+	function filterBridgeNav() {
+		var value = ($('#bridgeNavSearch').val() || '').toLowerCase();
 		var visible = 0;
 
-		$('#menu [data-menu-item]').each(function() {
+		$('#bridgeMenu [data-menu-item]').each(function() {
 			var haystack = ($(this).data('keywords') || $(this).text() || '').toLowerCase();
 			var matches = value.length === 0 || haystack.indexOf(value) !== -1;
 			$(this).toggleClass('d-none', !matches);
@@ -13,134 +13,93 @@ $(function() {
 			}
 		});
 
-		$('#menu .menu-section').each(function() {
+		$('#bridgeMenu .menu-section').each(function() {
 			var visibleItems = $(this).find('[data-menu-item]:not(.d-none)').length;
 			$(this).toggleClass('d-none', visibleItems === 0);
-			if (value.length > 0 && visibleItems > 0) {
-				$(this).find('.accordion-collapse').addClass('show');
-				$(this).find('.accordion-button').removeClass('collapsed');
-			}
 		});
 
-		$('#adminNavSearchCount').text(visible);
+		$('#bridgeNavSearchCount').text(visible);
 	}
 
-	$('#adminNavSearch').on('keyup change', filterAdminNav);
-	$('#adminNavSearchClear').on('click', function() {
-		$('#adminNavSearch').val('');
-		filterAdminNav();
+	$('#bridgeNavSearch').on('keyup change', filterBridgeNav);
+	$('#bridgeNavSearchClear').on('click', function() {
+		$('#bridgeNavSearch').val('');
+		filterBridgeNav();
 	});
 
-       $('#adminSidebarToggle').on('click', function() {
-               if (window.matchMedia('(max-width: 1199px)').matches) {
-                       $('body').toggleClass('admin-sidebar-open');
-                       return;
-               }
+	$('#bridgeCloseNav').on('click', function() {
+		$('body').removeClass('bridge-nav-open');
+	});
 
-               $('body').toggleClass('admin-sidebar-collapsed');
-               localStorage.setItem('astra-admin-sidebar-collapsed', $('body').hasClass('admin-sidebar-collapsed') ? '1' : '0');
-       });
-
-       $(document).on('click', function(event) {
-               if (!window.matchMedia('(max-width: 1199px)').matches || !$('body').hasClass('admin-sidebar-open')) {
-                       return;
-               }
-
-               var $target = $(event.target);
-               if ($target.closest('.admin-shell__sidebar, #adminSidebarToggle').length === 0) {
-                       $('body').removeClass('admin-sidebar-open');
-               }
-       });
-
-       $('.admin-nav-link').on('click', function() {
-               if (window.matchMedia('(max-width: 1199px)').matches) {
-                       $('body').removeClass('admin-sidebar-open');
-               }
-       });
-
-       if (localStorage.getItem('astra-admin-sidebar-collapsed') === '1') {
-               $('body').addClass('admin-sidebar-collapsed');
-       }
-
-       $(window).on('resize', function() {
-               if (!window.matchMedia('(max-width: 1199px)').matches) {
-                       $('body').removeClass('admin-sidebar-open');
-               }
-       });
+	$('.bridge-nav__link').on('click', function() {
+		$('body').removeClass('bridge-nav-open');
+	});
 });
 </script>
 
-<nav id="leftmenu" class="admin-sidebar">
-	<div class="admin-sidebar__sticky">
-		<a href="admin.php?page=overview" class="admin-sidebar__brand text-decoration-none">
+<nav class="bridge-nav">
+	<div class="bridge-nav__head">
+		<a href="admin.php?page=overview" class="bridge-nav__brand" title="Retour au tableau de bord">
 			{if $brandLogoUrl}
-				<div class="admin-brandmark">
-					<img src="{$brandLogoUrl}" alt="{$title|escape:'html'}" class="admin-brandmark__image">
+				<div class="bridge-nav__logo">
+					<img src="{$brandLogoUrl}" alt="{$gameName|escape:'html'}">
 				</div>
 			{/if}
-			<div class="admin-sidebar__brand-text">
+			<div class="bridge-nav__brand-copy">
 				<strong>{$gameName|default:'Astra Dominion'}</strong>
-				<span>Administration centrale</span>
+				<span>Palette de commandes</span>
 			</div>
 		</a>
+		<button id="bridgeCloseNav" class="bridge-nav__close" type="button" aria-label="Fermer">
+			<i class="bi bi-x-lg"></i>
+		</button>
+	</div>
 
-		<div class="admin-sidebar__search">
-			<div class="admin-searchbox">
-				<i class="bi bi-search"></i>
-				<input id="adminNavSearch" type="text" placeholder="Trouver une page, un module, un outil…">
-				<button id="adminNavSearchClear" type="button" aria-label="Effacer la recherche">
-					<i class="bi bi-x-lg"></i>
-				</button>
-			</div>
-			<div class="admin-sidebar__microcopy">
-				<span>{$adminSectionLabel}</span>
-				<span><strong id="adminNavSearchCount">{$adminNavigationFlat|@count}</strong> entrées visibles</span>
-			</div>
+	<div class="bridge-nav__search">
+		<div class="bridge-nav__searchbox">
+			<i class="bi bi-search"></i>
+			<input id="bridgeNavSearch" type="text" placeholder="Trouver une page ou un réglage">
+			<button id="bridgeNavSearchClear" type="button" aria-label="Effacer">
+				<i class="bi bi-x-lg"></i>
+			</button>
 		</div>
-
-		<div class="admin-sidebar__context">
-			<div class="admin-context-card">
-				<span class="admin-context-card__label">Univers actif</span>
-				<strong class="admin-context-card__value">{$UNI}</strong>
-			</div>
-			<div class="admin-context-card">
-				<span class="admin-context-card__label">Tickets ouverts</span>
-				<strong class="admin-context-card__value">{$supportticks|default:0}</strong>
-			</div>
+		<div class="bridge-nav__meta">
+			<span>{$adminSectionLabel}</span>
+			<span><strong id="bridgeNavSearchCount">{$adminNavigationFlat|@count}</strong> entrées</span>
 		</div>
+	</div>
 
-		<div id="menu" class="accordion accordion-flush admin-nav-accordion">
-			{foreach from=$adminNavigation item=section}
-				<div class="accordion-item bg-transparent border-0 menu-section">
-					<h2 class="accordion-header" id="heading-{$section.key}">
-						<button class="accordion-button {if $adminSectionLabel != $section.label}collapsed{/if}" type="button" data-bs-toggle="collapse" data-bs-target="#section-{$section.key}">
-							<span class="admin-section-trigger__icon"><i class="bi {$section.icon}"></i></span>
-							<span class="admin-section-trigger__content">
-								<span class="admin-section-trigger__label">{$section.label}</span>
-								<span class="admin-section-trigger__description">{$section.description}</span>
-							</span>
-							<span class="admin-section-trigger__count">{$section.count}</span>
-						</button>
-					</h2>
-					<div id="section-{$section.key}" class="accordion-collapse collapse {if $adminSectionLabel == $section.label}show{/if}">
-						<div class="accordion-body">
-							<ul class="list-unstyled m-0 admin-nav-list">
-								{foreach from=$section.items item=menuItem}
-									<li data-menu-item data-keywords="{$section.label} {$menuItem.label}" class="{if $currentPage == $menuItem.page}menu-active{/if}">
-										<a class="admin-nav-link" href="{$menuItem.url}">
-											<span class="admin-nav-link__icon"><i class="bi {$menuItem.icon|default:'bi-dot'}"></i></span>
-											<span class="admin-nav-link__text">{$menuItem.label}</span>
-											{if $menuItem.page == 'support' && isset($supportticks) && $supportticks > 0}
-												<span class="admin-nav-link__badge">{$supportticks}</span>
-											{/if}
-										</a>
-									</li>
-								{/foreach}
-							</ul>
+	<div class="bridge-nav__summary">
+		<span class="bridge-nav__token">Univers {$UNI}</span>
+		<span class="bridge-nav__token">{$supportticks|default:0} ticket(s)</span>
+		<span class="bridge-nav__token">{$adminTabs|@count} onglet(s)</span>
+	</div>
+
+	<div id="bridgeMenu" class="bridge-nav__sections">
+		{foreach from=$adminNavigation item=section}
+			<section class="bridge-nav-section menu-section">
+				<div class="bridge-nav-section__head" title="{$section.description|escape:'html'}">
+					<div class="bridge-nav-section__title">
+						<i class="bi {$section.icon}"></i>
+						<div>
+							<strong>{$section.label}</strong>
 						</div>
 					</div>
+					<em>{$section.count}</em>
 				</div>
-			{/foreach}
-		</div>
+
+				<div class="bridge-nav-section__links">
+					{foreach from=$section.items item=menuItem}
+						<a class="bridge-nav__link {if $currentPage == $menuItem.page}is-active{/if}" href="{$menuItem.url}" data-menu-item data-keywords="{$section.label} {$menuItem.label}">
+							<i class="bi {$menuItem.icon|default:'bi-dot'}"></i>
+							<span>{$menuItem.label}</span>
+							{if $menuItem.page == 'support' && isset($supportticks) && $supportticks > 0}
+								<small>{$supportticks}</small>
+							{/if}
+						</a>
+					{/foreach}
+				</div>
+			</section>
+		{/foreach}
 	</div>
 </nav>

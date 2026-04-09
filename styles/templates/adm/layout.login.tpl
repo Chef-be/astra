@@ -1,12 +1,12 @@
 {include file="main.header.tpl" bodyclass="full"}
 
-<div class="container-fluid">
-
-			<content>
-				{block name="content"}{/block}
-			</content>
-
-</div>
+<main class="admin-auth-page">
+	<div class="container-fluid">
+		<content>
+			{block name="content"}{/block}
+		</content>
+	</div>
+</main>
 
 
 </body>

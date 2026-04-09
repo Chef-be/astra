@@ -161,6 +161,43 @@ class BotCommanderService
 			));
 	}
 
+	public function clearCurrentTarget($botUserId)
+	{
+		Database::get()->update('UPDATE %%BOT_STATE%% SET
+			current_target_json = NULL,
+			updated_at = :updatedAt
+			WHERE bot_user_id = :botUserId;', array(
+				':updatedAt' => TIMESTAMP,
+				':botUserId' => (int) $botUserId,
+			));
+	}
+
+	public function clearStaleTargets($maxAgeSeconds = 21600)
+	{
+		$db = Database::get();
+		$rows = $db->select('SELECT bot_user_id, current_target_json
+			FROM %%BOT_STATE%%
+			WHERE current_target_json IS NOT NULL
+			  AND current_target_json <> \'\';');
+
+		$cleared = 0;
+		foreach ($rows as $row) {
+			$target = json_decode($row['current_target_json'], true);
+			if (!is_array($target)) {
+				$this->clearCurrentTarget((int) $row['bot_user_id']);
+				$cleared++;
+				continue;
+			}
+
+			if (!empty($target['updated_at']) && (int) $target['updated_at'] < (TIMESTAMP - (int) $maxAgeSeconds)) {
+				$this->clearCurrentTarget((int) $row['bot_user_id']);
+				$cleared++;
+			}
+		}
+
+		return $cleared;
+	}
+
 	public function getSubordinateIds($commanderBotUserId)
 	{
 		return array_map('intval', array_column(Database::get()->select('SELECT bot_user_id

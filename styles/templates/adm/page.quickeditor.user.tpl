@@ -1,10 +1,9 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Édition rapide</span>
-			<h1 class="admin-hero__title">Joueur #{$targetID}</h1>
-			<p class="admin-hero__subtitle">Modifiez le profil, la matière noire, les recherches et les officiers sans quitter la fenêtre rapide.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Édition rapide</span>
+			<h2>Joueur #{$targetID}</h2>
 		</div>
 	</section>
 

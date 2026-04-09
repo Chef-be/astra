@@ -1,20 +1,13 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Audit de communication</span>
-			<h1 class="admin-hero__title">Historique des messages</h1>
-			<p class="admin-hero__subtitle">Filtrez les échanges conservés par type, période, expéditeur ou destinataire pour faciliter le support et l’analyse.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Audit</span>
+			<h2>Historique des messages</h2>
 		</div>
-		<div class="admin-stat-strip">
-			<div class="admin-stat-card">
-				<span class="admin-stat-card__label">Page courante</span>
-				<strong class="admin-stat-card__value">{$page}</strong>
-			</div>
-			<div class="admin-stat-card">
-				<span class="admin-stat-card__label">Pages disponibles</span>
-				<strong class="admin-stat-card__value">{$maxPage}</strong>
-			</div>
+		<div class="admin-headerline__actions">
+			<span class="admin-pill">Page {$page}</span>
+			<span class="admin-pill">Total {$maxPage}</span>
 		</div>
 	</section>
 
@@ -23,9 +16,8 @@
 
 		<div class="admin-table-shell">
 			<div class="admin-table-toolbar">
-				<div>
-					<h2 class="h5 mb-1">Filtres de recherche</h2>
-					<p class="text-white-50 mb-0">Affinez le périmètre avant d’ouvrir les messages détaillés.</p>
+				<div class="admin-table-toolbar__meta">
+					<span class="admin-pill">Filtres</span>
 				</div>
 			</div>
 
@@ -71,9 +63,8 @@
 
 		<div class="admin-table-shell">
 			<div class="admin-table-toolbar">
-				<div>
-					<h2 class="h5 mb-1">Résultats</h2>
-					<p class="text-white-50 mb-0">Cliquez sur une ligne pour afficher le contenu complet du message.</p>
+				<div class="admin-table-toolbar__meta">
+					<span class="admin-pill">Résultats</span>
 				</div>
 				<div class="admin-table-toolbar__meta">
 					{if $page != 1}

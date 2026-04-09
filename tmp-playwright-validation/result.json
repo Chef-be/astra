@@ -1,0 +1,43 @@
+{
+  "result": {
+    "galaxy": {
+      "title": "Positions actives",
+      "disclosures": 2,
+      "cards": 6
+    },
+    "resources": {
+      "disclosures": 4,
+      "heroSingleRow": true,
+      "title": "Production de ressources sur la planète \"Main Planet\""
+    },
+    "techtree": {
+      "visibleEntries": 77,
+      "hasSearch": true,
+      "sectionTitles": 6
+    },
+    "officier": {
+      "count": 4,
+      "rows": [
+        408,
+        408,
+        408,
+        408
+      ]
+    },
+    "trader": {
+      "title": "Matière noire - Magasin",
+      "marketCards": 3,
+      "offers": 3
+    },
+    "traderTrade": {
+      "rows": 3,
+      "overviewCards": 2
+    },
+    "information": {
+      "title": "Métal",
+      "cards": 1
+    }
+  },
+  "pageErrors": [],
+  "consoleErrors": []
+}

@@ -1,10 +1,9 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Assistance</span>
-			<h1 class="admin-hero__title">Créer un ticket</h1>
-			<p class="admin-hero__subtitle">Ouvrez une demande structurée pour suivre un incident, une demande de joueur ou une action d’exploitation.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Assistance</span>
+			<h2>Créer un ticket</h2>
 		</div>
 	</section>
 

@@ -1,19 +1,15 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Distribution de masse</span>
-			<h1 class="admin-hero__title">Distribution globale</h1>
-			<p class="admin-hero__subtitle">Définissez les cibles, puis répartissez visuellement les éléments à attribuer sur l’ensemble des colonies concernées.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Distribution</span>
+			<h2>Distribution globale</h2>
 		</div>
 	</section>
 
 	<form method="post" action="admin.php?page=giveaway&amp;mode=send" class="admin-stack">
 		<div class="admin-table-shell admin-stack">
-			<div>
-				<h2 class="h5 mb-1">{$LNG.ga_definetarget}</h2>
-				<p class="text-white-50 mb-0">Choisissez précisément le périmètre avant d’exécuter la distribution globale.</p>
-			</div>
+			<div><h2 class="h5 mb-1">{$LNG.ga_definetarget}</h2></div>
 			<div class="admin-form-row">
 				<label class="admin-field-card"><span>{$LNG.fcm_planet}</span><input class="form-check-input mt-2" type="checkbox" name="planet" value="1" checked></label>
 				<label class="admin-field-card"><span>{$LNG.fcm_moon}</span><input class="form-check-input mt-2" type="checkbox" name="moon" value="1"></label>
@@ -24,10 +20,7 @@
 
 		{foreach from=$giveawayGroups item=group}
 			<div class="admin-table-shell admin-stack">
-				<div>
-					<h2 class="h5 mb-1">{$group.title}</h2>
-					<p class="text-white-50 mb-0">{$group.description}</p>
-				</div>
+				<div><h2 class="h5 mb-1">{$group.title}</h2></div>
 				<div class="admin-media-grid">
 					{foreach from=$group.items item=item}
 						<label class="admin-media-tile">

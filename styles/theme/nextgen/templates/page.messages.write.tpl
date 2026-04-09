@@ -33,12 +33,12 @@
 <script type="text/javascript">
 function check(){
 	if($('#text').val().length == 0) {
-		alert('{$LNG.mg_empty_text}');
+		Dialog.alert('{$LNG.mg_empty_text}', null, { title: '{$LNG.write_message|escape:"javascript"}' });
 		return false;
 	} else {
-		$('submit').attr('disabled','disabled');
+		$('#submit').attr('disabled','disabled');
 		$.post('game.php?page=messages&mode=send&id={$id}&ajax=1', $('#message').serialize(), function(data) {
-			alert(data);
+			showGameToast(data, 'success');
 			parent.$.fancybox.close();
 			return true;
 		}, 'json');

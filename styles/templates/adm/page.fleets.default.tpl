@@ -1,24 +1,19 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Trafic en vol</span>
-			<h1 class="admin-hero__title">Flottes actives</h1>
-			<p class="admin-hero__subtitle">Suivez les missions en cours, les ressources transportées et l’état de verrouillage des événements de flotte.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Trafic</span>
+			<h2>Flottes actives</h2>
 		</div>
-		<div class="admin-stat-strip">
-			<div class="admin-stat-card">
-				<span class="admin-stat-card__label">Flottes actives</span>
-				<strong class="admin-stat-card__value">{$FleetList|@count}</strong>
-			</div>
+		<div class="admin-headerline__actions">
+			<span class="admin-pill">Flottes {$FleetList|@count}</span>
 		</div>
 	</section>
 
 	<div class="admin-table-shell">
 		<div class="admin-table-toolbar">
-			<div>
-				<h2 class="h5 mb-1">Journal opérationnel</h2>
-				<p class="text-white-50 mb-0">Les visuels des vaisseaux et des ressources facilitent la lecture sans devoir interpréter des identifiants techniques.</p>
+			<div class="admin-table-toolbar__meta">
+				<span class="admin-pill">Journal opérationnel</span>
 			</div>
 		</div>
 

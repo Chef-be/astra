@@ -16,6 +16,10 @@ function doit(missionID, planetID) {
 		}
 		var element		= $('<td />').attr('colspan', 8).attr('class', data.code == 600 ? "text-success text-center" : "text-danger text-center").text(data.mess).wrap('<tr />').parent();
 		statustable.removeAttr('style').after(element);
+
+		if (typeof showGameToast === "function" && typeof data.mess !== "undefined") {
+			showGameToast(data.mess, data.code == 600 ? 'success' : 'danger');
+		}
 	});
 }
 

@@ -128,7 +128,6 @@
 			{/foreach}
 		</div>
 		<div class="notes-actions">
-			<span class="text-white-50">Sélectionnez une ou plusieurs notes pour les supprimer.</span>
 			<input class="btn btn-outline-danger btn-sm" value="{$LNG.nt_dlte_note}" type="submit">
 		</div>
 		{else}

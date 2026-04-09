@@ -1,5 +1,14 @@
 {block name="content"}
-<div class="container-fluid py-3 text-white admin-mailtemplates-page">
+<div class="admin-settings-shell admin-stack admin-mailtemplates-page">
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Communication</span>
+			<h2>Modèles d’e-mails</h2>
+		</div>
+		<div class="admin-headerline__actions">
+			<span class="admin-pill">{$mailTemplates|@count} modèles</span>
+		</div>
+	</section>
 	<div class="row g-4">
 		<div class="col-12 col-xl-3">
 			<details class="admin-fold admin-fold--compact">
@@ -7,7 +16,6 @@
 					<div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
 						<div>
 							<h2 class="h5 mb-1">Modèles et variables</h2>
-							<p class="text-white-50 mb-0">Catalogue des courriels disponibles, replié par défaut sur mobile.</p>
 						</div>
 						<span class="admin-pill">{$mailTemplates|@count} modèle(s)</span>
 					</div>
@@ -40,8 +48,7 @@
 		<div class="col-12 col-xl-5">
 			<div class="admin-card h-100">
 				<div class="admin-card__body">
-					<h2 class="h4 mb-1">{$mailTemplateMeta.label}</h2>
-					<p class="text-white-50 mb-3">{$mailTemplateMeta.description}</p>
+					<h2 class="h5 mb-1">{$mailTemplateMeta.label}</h2>
 					<form action="?page=mailtemplates&mode=save" method="post" class="d-flex flex-column gap-3">
 						<input type="hidden" name="template" value="{$mailTemplateName|escape:'html'}">
 						<textarea name="content" class="form-control admin-code-editor" rows="20">{$mailTemplateContent|escape:'html'}</textarea>
@@ -58,7 +65,6 @@
 					<div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
 						<div>
 							<h2 class="h5 mb-1">Aperçu</h2>
-							<p class="text-white-50 mb-0">Rendu du modèle courant, replié par défaut pour privilégier l’édition.</p>
 						</div>
 						<span class="admin-pill">Prévisualisation</span>
 					</div>
@@ -66,7 +72,6 @@
 				<div class="admin-fold__body">
 					<div class="admin-card h-100">
 						<div class="admin-card__body">
-							<h2 class="h4 mb-3">Aperçu</h2>
 							<pre class="admin-mail-preview">{$mailTemplatePreview|escape:'html'}</pre>
 						</div>
 					</div>

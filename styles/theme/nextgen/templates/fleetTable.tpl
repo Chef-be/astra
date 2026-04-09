@@ -38,11 +38,11 @@
   {/if}
 
     {foreach $fleets as $index => $fleet}
-    <div class="fs-11 fleetRow {if $show_fleets_active}d-none{/if}" style="margin-top:8px;padding:8px 10px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#e6edf7;">
-      <span id="fleettime_{$index}" class="fleets" data-fleet-end-time="{$fleet.returntime}" data-fleet-time="{$fleet.resttime}">
+    <div class="fs-11 fleetRow {if $show_fleets_active}d-none{/if}" style="margin-top:7px;padding:7px 9px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#e6edf7;">
+      <span id="fleettime_{$index}" class="fleets fleetRow__timer" data-fleet-end-time="{$fleet.returntime}" data-fleet-time="{$fleet.resttime}">
         {pretty_fly_time({$fleet.resttime})}
       </span>
-      <span id="fleettime_{$index}">{$fleet.text}</span>
+      <span class="fleetRow__body">{$fleet.text}</span>
     </div>
     {/foreach}
 

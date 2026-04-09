@@ -1,16 +1,22 @@
 {block name="content"}
-<div class="container-fluid py-3 text-white">
-	<div class="admin-toolbar mb-4">
-		<div class="admin-mini-hero flex-grow-1">
-			<h2 class="h3">Liste des journaux</h2>
-			<p>Chaque ligne permet d’ouvrir le détail complet d’une modification enregistrée.</p>
+<div class="admin-settings-shell admin-stack">
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Audit</span>
+			<h2>Liste des journaux</h2>
 		</div>
-		<div class="admin-actions">
-			<a class="btn btn-outline-light" href="?page=log">Retour aux catégories</a>
+		<div class="admin-headerline__actions">
+			<a class="admin-shell-action admin-shell-action--light" href="?page=log">Retour aux catégories</a>
 		</div>
-	</div>
+	</section>
 
 	<div class="admin-table-shell">
+		<div class="admin-table-toolbar">
+			<div class="admin-table-toolbar__meta">
+				<span class="admin-pill">Historique filtré</span>
+				<span class="admin-pill">Détail disponible</span>
+			</div>
+		</div>
 		<div class="table-responsive">
 			<table class="table table-dark table-striped align-middle mb-0">
 				<thead>
@@ -26,7 +32,7 @@
 				<tbody>
 					{foreach item=LogInfo from=$LogArray}
 						<tr>
-							<td>#{$LogInfo.id}</td>
+							<td class="fw-semibold">#{$LogInfo.id}</td>
 							<td>{$LogInfo.admin}</td>
 							<td>{$LogInfo.target_uni}</td>
 							<td>{$LogInfo.target}</td>

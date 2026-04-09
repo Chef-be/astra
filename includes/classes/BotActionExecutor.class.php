@@ -4,6 +4,7 @@ class BotActionExecutor
 {
 	protected $journalService;
 	protected $dynamicStateService;
+	protected $traitService;
 	protected $messagingService;
 	protected $presenceService;
 
@@ -11,6 +12,7 @@ class BotActionExecutor
 	{
 		require_once ROOT_PATH.'includes/classes/BotJournalService.class.php';
 		require_once ROOT_PATH.'includes/classes/BotDynamicStateService.class.php';
+		require_once ROOT_PATH.'includes/classes/BotTraitService.class.php';
 		require_once ROOT_PATH.'includes/classes/BotMessagingService.class.php';
 		require_once ROOT_PATH.'includes/classes/BotPresenceService.class.php';
 		require_once ROOT_PATH.'includes/classes/class.PlanetRessUpdate.php';
@@ -19,6 +21,7 @@ class BotActionExecutor
 
 		$this->journalService = new BotJournalService();
 		$this->dynamicStateService = new BotDynamicStateService();
+		$this->traitService = new BotTraitService();
 		$this->messagingService = new BotMessagingService();
 		$this->presenceService = new BotPresenceService();
 	}
@@ -26,7 +29,20 @@ class BotActionExecutor
 	public function enqueueActions($botUserId, array $actions, $sourceType = 'engine', $sourceReference = '')
 	{
 		$db = Database::get();
-		foreach ($actions as $action) {
+		$queuedCount = (int) $db->selectSingle('SELECT COUNT(*) AS total
+			FROM %%BOT_ACTION_QUEUE%%
+			WHERE bot_user_id = :botUserId
+			  AND status = \'queued\';', array(
+				':botUserId' => (int) $botUserId,
+			), 'total');
+
+			foreach ($actions as $action) {
+			$payload = isset($action['payload']) && is_array($action['payload']) ? $action['payload'] : array();
+			$payloadJson = json_encode($payload);
+			if ($this->shouldSkipQueueInsertion((int) $botUserId, $action, $payloadJson, $queuedCount)) {
+				continue;
+			}
+
 			$plannedAt = isset($action['planned_at']) ? (int) $action['planned_at'] : TIMESTAMP;
 			if (!empty($action['due_delay'])) {
 				$plannedAt += max(0, (int) $action['due_delay']);
@@ -62,9 +78,10 @@ class BotActionExecutor
 					':estimatedCost' => isset($action['estimated_cost']) ? (float) $action['estimated_cost'] : 0,
 					':estimatedRisk' => isset($action['estimated_risk']) ? (float) $action['estimated_risk'] : 0,
 					':confidence' => isset($action['confidence']) ? (int) $action['confidence'] : 0,
-					':payloadJson' => json_encode(isset($action['payload']) ? $action['payload'] : array()),
+					':payloadJson' => $payloadJson,
 					':justification' => isset($action['justification']) ? (string) $action['justification'] : '',
 				));
+			$queuedCount++;
 		}
 
 		$db->update('UPDATE %%BOT_STATE%% SET action_queue_size = (
@@ -92,6 +109,11 @@ class BotActionExecutor
 
 		$executed = 0;
 		foreach ($actions as $action) {
+			$payload = !empty($action['payload_json']) ? json_decode($action['payload_json'], true) : array();
+			if (!is_array($payload)) {
+				$payload = array();
+			}
+
 			$db->update('UPDATE %%BOT_ACTION_QUEUE%% SET status = :status, locked_at = :lockedAt, started_at = :startedAt WHERE id = :id AND status = \'queued\';', array(
 				':status' => 'running',
 				':lockedAt' => TIMESTAMP,
@@ -99,22 +121,41 @@ class BotActionExecutor
 				':id' => (int) $action['id'],
 			));
 
-			$result = $this->executeAction($action);
-			$status = !empty($result['success']) ? 'done' : 'failed';
+				$result = $this->executeAction($action);
+				$isDeferred = empty($result['success']) && !empty($result['defer']);
+				$queueStatus = $isDeferred ? 'queued' : (!empty($result['success']) ? 'done' : 'failed');
+				$resultStatus = $isDeferred ? 'deferred' : $queueStatus;
+				$retryAt = !empty($result['retry_at']) ? (int) $result['retry_at'] : TIMESTAMP;
 
-			$db->update('UPDATE %%BOT_ACTION_QUEUE%% SET
-				status = :status,
-				finished_at = :finishedAt,
-				result_summary = :resultSummary
-				WHERE id = :id;', array(
-					':status' => $status,
-					':finishedAt' => TIMESTAMP,
-					':resultSummary' => isset($result['summary']) ? $result['summary'] : 'Action exécutée.',
-					':id' => (int) $action['id'],
-				));
+				if ($isDeferred) {
+					$db->update('UPDATE %%BOT_ACTION_QUEUE%% SET
+						status = :status,
+						locked_at = NULL,
+						started_at = NULL,
+						due_at = :dueAt,
+						finished_at = NULL,
+						result_summary = :resultSummary
+						WHERE id = :id;', array(
+							':status' => 'queued',
+							':dueAt' => $retryAt,
+							':resultSummary' => isset($result['summary']) ? $result['summary'] : 'Action reportée.',
+							':id' => (int) $action['id'],
+						));
+				} else {
+					$db->update('UPDATE %%BOT_ACTION_QUEUE%% SET
+						status = :status,
+						finished_at = :finishedAt,
+						result_summary = :resultSummary
+						WHERE id = :id;', array(
+							':status' => $queueStatus,
+							':finishedAt' => TIMESTAMP,
+							':resultSummary' => isset($result['summary']) ? $result['summary'] : 'Action exécutée.',
+							':id' => (int) $action['id'],
+						));
+				}
 
-			$db->insert('INSERT INTO %%BOT_ACTION_RESULTS%% SET
-				action_queue_id = :actionQueueId,
+				$db->insert('INSERT INTO %%BOT_ACTION_RESULTS%% SET
+					action_queue_id = :actionQueueId,
 				universe = :universe,
 				bot_user_id = :botUserId,
 				status = :status,
@@ -123,27 +164,52 @@ class BotActionExecutor
 					':actionQueueId' => (int) $action['id'],
 					':universe' => Universe::getEmulated(),
 					':botUserId' => (int) $action['bot_user_id'],
-					':status' => $status,
-					':resultJson' => json_encode($result),
-					':createdAt' => TIMESTAMP,
-				));
+						':status' => $resultStatus,
+						':resultJson' => json_encode($result),
+						':createdAt' => TIMESTAMP,
+					));
+
+			$cooldownUntil = !empty($result['cooldown_until'])
+				? (int) $result['cooldown_until']
+				: (TIMESTAMP + (!empty($result['cooldown']) ? (int) $result['cooldown'] : 120));
+			$sessionRestUntil = !empty($result['session_rest_until']) ? (int) $result['session_rest_until'] : null;
 
 			$db->update('UPDATE %%BOT_STATE%% SET
 				last_action_at = :lastActionAt,
 				cooldown_until = :cooldownUntil,
+				session_rest_until = :sessionRestUntil,
 				action_queue_size = (
 					SELECT COUNT(*) FROM %%BOT_ACTION_QUEUE%% WHERE bot_user_id = :botUserId AND status = \'queued\'
 				),
 				updated_at = :updatedAt
 				WHERE bot_user_id = :botUserId;', array(
 					':lastActionAt' => TIMESTAMP,
-					':cooldownUntil' => TIMESTAMP + (!empty($result['cooldown']) ? (int) $result['cooldown'] : 120),
+					':cooldownUntil' => $cooldownUntil,
+					':sessionRestUntil' => $sessionRestUntil,
 					':botUserId' => (int) $action['bot_user_id'],
 					':updatedAt' => TIMESTAMP,
 				));
 
 			if (!empty($result['dynamic_delta']) && is_array($result['dynamic_delta'])) {
 				$this->dynamicStateService->applyDelta((int) $action['bot_user_id'], $result['dynamic_delta']);
+			}
+				if (!$isDeferred) {
+					$this->traitService->applyActionFeedback(
+						(int) $action['bot_user_id'],
+						$action['action_type'],
+						$queueStatus === 'done',
+						isset($action['objective_type']) ? $action['objective_type'] : '',
+						$payload
+					);
+				}
+
+				if ($queueStatus !== 'failed' && $sessionRestUntil !== null && $sessionRestUntil > TIMESTAMP + 60) {
+					$this->presenceService->applyPresence((int) $action['bot_user_id'], 'latent', 'discret', 'attente_action', false, array(
+						'session_started_at' => null,
+						'session_target_until' => null,
+					'session_rest_until' => $sessionRestUntil,
+					'force_snapshot' => true,
+				));
 			}
 
 			$this->journalService->logActivity((int) $action['bot_user_id'], 'execution', isset($result['summary']) ? $result['summary'] : 'Action exécutée.', array(
@@ -188,6 +254,111 @@ class BotActionExecutor
 		));
 
 		return (int) $stale;
+	}
+
+	public function compactQueue($maxQueuedPerBot = 12)
+	{
+		$db = Database::get();
+		$rows = $db->select('SELECT id, bot_user_id, action_type, objective_type, payload_json, priority
+			FROM %%BOT_ACTION_QUEUE%%
+			WHERE universe = :universe
+			  AND status = \'queued\'
+			ORDER BY bot_user_id ASC, priority DESC, id ASC;', array(
+				':universe' => Universe::getEmulated(),
+			));
+
+		$keepByBot = array();
+		$seen = array();
+		$deleteIds = array();
+		foreach ($rows as $row) {
+			$botUserId = (int) $row['bot_user_id'];
+			if (!isset($keepByBot[$botUserId])) {
+				$keepByBot[$botUserId] = 0;
+			}
+
+			$signature = $this->buildQueueSignature($row['action_type'], $row['objective_type'], $row['payload_json']);
+			if (isset($seen[$botUserId][$signature])) {
+				$deleteIds[] = (int) $row['id'];
+				continue;
+			}
+
+			if ($keepByBot[$botUserId] >= (int) $maxQueuedPerBot) {
+				$deleteIds[] = (int) $row['id'];
+				continue;
+			}
+
+			$seen[$botUserId][$signature] = true;
+			$keepByBot[$botUserId]++;
+		}
+
+		if (!empty($deleteIds)) {
+			$db->delete('DELETE FROM %%BOT_ACTION_QUEUE%% WHERE id IN ('.implode(',', array_map('intval', $deleteIds)).');');
+			$db->update('UPDATE %%BOT_STATE%% SET
+				action_queue_size = (
+					SELECT COUNT(*) FROM %%BOT_ACTION_QUEUE%% q
+					WHERE q.bot_user_id = %%BOT_STATE%%.bot_user_id
+					  AND q.status = \'queued\'
+				),
+				updated_at = :updatedAt
+				WHERE universe = :universe;', array(
+				':updatedAt' => TIMESTAMP,
+				':universe' => Universe::getEmulated(),
+			));
+		}
+
+		return count($deleteIds);
+	}
+
+	public function purgeHistoricalFailures($maxAgeSeconds = 21600, $keepRecentPerSignature = 1)
+	{
+		$db = Database::get();
+		$threshold = TIMESTAMP - max(3600, (int) $maxAgeSeconds);
+		$rows = $db->select('SELECT id, bot_user_id, action_type, result_summary, finished_at
+			FROM %%BOT_ACTION_QUEUE%%
+			WHERE universe = :universe
+			  AND status = \'failed\'
+			  AND finished_at IS NOT NULL
+			  AND finished_at <= :threshold
+			ORDER BY bot_user_id ASC, action_type ASC, result_summary ASC, finished_at DESC, id DESC;', array(
+				':universe' => Universe::getEmulated(),
+				':threshold' => $threshold,
+			));
+
+		$kept = array();
+		$deleteIds = array();
+		$obsoleteSummaries = array(
+			'Pré-requis du chantier non atteints.',
+			'Ressources insuffisantes pour lancer ce bâtiment.',
+			'Recherche indisponible pour ce bot.',
+		);
+		foreach ($rows as $row) {
+			if (in_array((string) $row['result_summary'], $obsoleteSummaries, true)) {
+				$deleteIds[] = (int) $row['id'];
+				continue;
+			}
+
+			$signature = implode('|', array(
+				(int) $row['bot_user_id'],
+				(string) $row['action_type'],
+				(string) $row['result_summary'],
+			));
+			if (!isset($kept[$signature])) {
+				$kept[$signature] = 0;
+			}
+
+			if ($kept[$signature] >= max(0, (int) $keepRecentPerSignature)) {
+				$deleteIds[] = (int) $row['id'];
+				continue;
+			}
+
+			$kept[$signature]++;
+		}
+
+		if (!empty($deleteIds)) {
+			$db->delete('DELETE FROM %%BOT_ACTION_QUEUE%% WHERE id IN ('.implode(',', array_map('intval', $deleteIds)).');');
+		}
+
+		return count($deleteIds);
 	}
 
 	protected function executeAction(array $action)
@@ -242,7 +413,7 @@ class BotActionExecutor
 		);
 	}
 
-	protected function enqueueBuilding($botUserId, $elementId)
+	protected function enqueueBuilding($botUserId, $elementId, array $visited = array())
 	{
 		$context = $this->loadBotContext($botUserId);
 		if (empty($context)) {
@@ -257,8 +428,13 @@ class BotActionExecutor
 			return array('success' => false, 'summary' => 'Bâtiment non disponible sur ce type d’astre.');
 		}
 
+		if (in_array((int) $elementId, $visited, true)) {
+			return array('success' => false, 'summary' => 'Boucle de pré-requis détectée pour ce bâtiment.');
+		}
+		$visited[] = (int) $elementId;
+
 		if (!BuildFunctions::isTechnologieAccessible($user, $planet, $elementId)) {
-			return array('success' => false, 'summary' => 'Pré-requis bâtiment manquants.');
+			return $this->resolvePrerequisiteAction($botUserId, $user, $planet, $elementId, $visited, 'bâtiment');
 		}
 
 		$currentQueue = empty($planet['b_building_id']) ? array() : unserialize($planet['b_building_id']);
@@ -271,10 +447,10 @@ class BotActionExecutor
 			return array('success' => false, 'summary' => 'Niveau maximum atteint.');
 		}
 
-		$cost = BuildFunctions::getElementPrice($user, $planet, $elementId, false, $nextLevel);
-		if (!BuildFunctions::isElementBuyable($user, $planet, $elementId, $cost)) {
-			return array('success' => false, 'summary' => 'Ressources insuffisantes pour lancer ce bâtiment.');
-		}
+			$cost = BuildFunctions::getElementPrice($user, $planet, $elementId, false, $nextLevel);
+			if (!BuildFunctions::isElementBuyable($user, $planet, $elementId, $cost)) {
+				return $this->deferForResources($user, $planet, $elementId, $cost, 'Bâtiment différé en attente des ressources.');
+			}
 
 		if (isset($cost[901])) { $planet[$resource[901]] -= $cost[901]; }
 		if (isset($cost[902])) { $planet[$resource[902]] -= $cost[902]; }
@@ -294,12 +470,14 @@ class BotActionExecutor
 		return array(
 			'success' => true,
 			'summary' => sprintf('File bâtiment mise à jour pour %s.', $resource[$elementId]),
-			'cooldown' => 300,
+			'cooldown' => max(300, $endTime - TIMESTAMP),
+			'cooldown_until' => $endTime,
+			'session_rest_until' => $endTime,
 			'dynamic_delta' => array('satisfaction_economique' => 4, 'fatigue' => 2),
 		);
 	}
 
-	protected function enqueueResearch($botUserId, $elementId)
+	protected function enqueueResearch($botUserId, $elementId, array $visited = array())
 	{
 		$context = $this->loadBotContext($botUserId);
 		if (empty($context)) {
@@ -310,8 +488,15 @@ class BotActionExecutor
 		$planet = $context['planet'];
 		global $resource, $reslist, $pricelist;
 
-		if (!in_array($elementId, $reslist['tech']) || !BuildFunctions::isTechnologieAccessible($user, $planet, $elementId)) {
+		if (!in_array($elementId, $reslist['tech'])) {
 			return array('success' => false, 'summary' => 'Recherche indisponible pour ce bot.');
+		}
+		if (in_array((int) $elementId, $visited, true)) {
+			return array('success' => false, 'summary' => 'Boucle de pré-requis détectée pour cette recherche.');
+		}
+		$visited[] = (int) $elementId;
+		if (!BuildFunctions::isTechnologieAccessible($user, $planet, $elementId)) {
+			return $this->resolvePrerequisiteAction($botUserId, $user, $planet, $elementId, $visited, 'recherche');
 		}
 
 		$currentQueue = empty($user['b_tech_queue']) ? array() : unserialize($user['b_tech_queue']);
@@ -324,10 +509,10 @@ class BotActionExecutor
 			return array('success' => false, 'summary' => 'Niveau de recherche maximum atteint.');
 		}
 
-		$cost = BuildFunctions::getElementPrice($user, $planet, $elementId, false, $nextLevel);
-		if (!BuildFunctions::isElementBuyable($user, $planet, $elementId, $cost)) {
-			return array('success' => false, 'summary' => 'Ressources insuffisantes pour la recherche.');
-		}
+			$cost = BuildFunctions::getElementPrice($user, $planet, $elementId, false, $nextLevel);
+			if (!BuildFunctions::isElementBuyable($user, $planet, $elementId, $cost)) {
+				return $this->deferForResources($user, $planet, $elementId, $cost, 'Recherche différée en attente des ressources.');
+			}
 
 		if (isset($cost[901])) { $planet[$resource[901]] -= $cost[901]; }
 		if (isset($cost[902])) { $planet[$resource[902]] -= $cost[902]; }
@@ -349,12 +534,14 @@ class BotActionExecutor
 		return array(
 			'success' => true,
 			'summary' => 'Recherche ajoutée à la file scientifique.',
-			'cooldown' => 300,
+			'cooldown' => max(300, $endTime - TIMESTAMP),
+			'cooldown_until' => $endTime,
+			'session_rest_until' => $endTime,
 			'dynamic_delta' => array('confiance' => 3, 'fatigue' => 2),
 		);
 	}
 
-	protected function enqueueShipyard($botUserId, $elementId, $amount)
+	protected function enqueueShipyard($botUserId, $elementId, $amount, array $visited = array())
 	{
 		$context = $this->loadBotContext($botUserId);
 		if (empty($context)) {
@@ -369,15 +556,22 @@ class BotActionExecutor
 			return array('success' => false, 'summary' => 'Élément chantier invalide.');
 		}
 
+		if (in_array((int) $elementId, $visited, true)) {
+			return array('success' => false, 'summary' => 'Boucle de pré-requis détectée pour ce chantier.');
+		}
+		$visited[] = (int) $elementId;
+
 		if (!BuildFunctions::isTechnologieAccessible($user, $planet, $elementId)) {
-			return array('success' => false, 'summary' => 'Pré-requis du chantier non atteints.');
+			return $this->resolvePrerequisiteAction($botUserId, $user, $planet, $elementId, $visited, 'chantier');
 		}
 
-		$max = BuildFunctions::getMaxConstructibleElements($user, $planet, $elementId);
-		$amount = max(1, min($amount, (int) $max));
-		if ($amount <= 0) {
-			return array('success' => false, 'summary' => 'Ressources insuffisantes pour le chantier.');
-		}
+			$requestedAmount = max(1, (int) $amount);
+			$max = BuildFunctions::getMaxConstructibleElements($user, $planet, $elementId);
+			if ((int) $max <= 0) {
+				$requestedCost = BuildFunctions::getElementPrice($user, $planet, $elementId, false, $requestedAmount);
+				return $this->deferForResources($user, $planet, $elementId, $requestedCost, 'Chantier différé en attente des ressources.');
+			}
+			$amount = max(1, min($requestedAmount, (int) $max));
 
 		$buildArray = empty($planet['b_hangar_id']) ? array() : unserialize($planet['b_hangar_id']);
 		if (!is_array($buildArray)) {
@@ -397,10 +591,18 @@ class BotActionExecutor
 		$planetRess->setData($user, $planet);
 		$planetRess->SavePlanetToDB($user, $planet);
 
+		$queueSeconds = 0;
+		foreach ($buildArray as $queuedItem) {
+			$queueSeconds += BuildFunctions::getBuildingTime($user, $planet, (int) $queuedItem[0]) * max(1, (int) $queuedItem[1]);
+		}
+		$waitUntil = TIMESTAMP + max(180, (int) $queueSeconds);
+
 		return array(
 			'success' => true,
 			'summary' => 'Chantier spatial ajouté à la file.',
-			'cooldown' => 240,
+			'cooldown' => max(240, $waitUntil - TIMESTAMP),
+			'cooldown_until' => $waitUntil,
+			'session_rest_until' => $waitUntil,
 			'dynamic_delta' => array('excitation_offensive' => 3, 'fatigue' => 1),
 		);
 	}
@@ -419,7 +621,10 @@ class BotActionExecutor
 
 		$user = $context['user'];
 		$planet = $context['planet'];
-		if ((int) $planet['espionage_probe'] <= 0) {
+		$probeCount = isset($planet['spy_sonde'])
+			? (int) $planet['spy_sonde']
+			: (isset($planet['espionage_probe']) ? (int) $planet['espionage_probe'] : 0);
+		if ($probeCount <= 0) {
 			return $this->enqueueShipyard($botUserId, 210, 2);
 		}
 
@@ -464,7 +669,9 @@ class BotActionExecutor
 		return array(
 			'success' => true,
 			'summary' => 'Reconnaissance réelle envoyée vers '.$coordinates.'.',
-			'cooldown' => 420,
+			'cooldown' => max(420, $duration),
+			'cooldown_until' => TIMESTAMP + $duration,
+			'session_rest_until' => TIMESTAMP + $duration,
 			'dynamic_delta' => array('vigilance' => 4, 'excitation_offensive' => 5),
 		);
 	}
@@ -535,7 +742,9 @@ class BotActionExecutor
 		return array(
 			'success' => true,
 			'summary' => 'Raid réel lancé vers '.$coordinates.'.',
-			'cooldown' => 900,
+			'cooldown' => max(900, $duration * 2),
+			'cooldown_until' => TIMESTAMP + ($duration * 2),
+			'session_rest_until' => TIMESTAMP + ($duration * 2),
 			'dynamic_delta' => array('appetit_raid' => 6, 'excitation_offensive' => 7, 'fatigue' => 4),
 		);
 	}
@@ -629,5 +838,173 @@ class BotActionExecutor
 				':system' => (int) $matches[2],
 				':planet' => (int) $matches[3],
 			));
+	}
+
+	protected function resolvePrerequisiteAction($botUserId, array $user, array $planet, $elementId, array $visited = array(), $contextLabel = 'action')
+	{
+		global $requeriments, $resource, $reslist;
+
+		if (empty($requeriments[$elementId]) || !is_array($requeriments[$elementId])) {
+			return array('success' => false, 'summary' => 'Pré-requis '.$contextLabel.' non atteints.');
+		}
+
+		foreach ($requeriments[$elementId] as $requireId => $requireLevel) {
+			$currentLevel = 0;
+			if (isset($planet[$resource[$requireId]])) {
+				$currentLevel = (int) $planet[$resource[$requireId]];
+			} elseif (isset($user[$resource[$requireId]])) {
+				$currentLevel = (int) $user[$resource[$requireId]];
+			}
+
+			if ($currentLevel >= (int) $requireLevel) {
+				continue;
+			}
+
+			if (in_array((int) $requireId, $visited, true)) {
+				return array('success' => false, 'summary' => 'Chaîne de pré-requis impossible à résoudre automatiquement.');
+			}
+
+			if (in_array($requireId, $reslist['build'])) {
+				$result = $this->enqueueBuilding($botUserId, (int) $requireId, $visited);
+			} elseif (in_array($requireId, $reslist['tech'])) {
+				$result = $this->enqueueResearch($botUserId, (int) $requireId, $visited);
+			} elseif (in_array($requireId, array_merge($reslist['fleet'], $reslist['defense'], $reslist['missile']), true)) {
+				$result = $this->enqueueShipyard($botUserId, (int) $requireId, max(1, (int) $requireLevel - $currentLevel), $visited);
+			} else {
+				return array('success' => false, 'summary' => 'Pré-requis '.$contextLabel.' non automatisable.');
+			}
+
+			if (!empty($result['success'])) {
+				$result['summary'] = sprintf('Pré-requis #%d planifié avant le %s demandé.', (int) $requireId, (string) $contextLabel);
+			}
+
+			return $result;
+		}
+
+		return array('success' => false, 'summary' => 'Pré-requis '.$contextLabel.' non atteints.');
+	}
+
+	protected function deferForResources(array $user, array $planet, $elementId, array $cost, $summaryPrefix)
+	{
+		$deficit = BuildFunctions::getRestPrice($user, $planet, $elementId, $cost);
+		$retryDelay = $this->estimateResourceWaitSeconds($user, $planet, $deficit);
+		$retryAt = TIMESTAMP + $retryDelay;
+
+		return array(
+			'success' => false,
+			'defer' => true,
+			'retry_at' => $retryAt,
+			'cooldown' => $retryDelay,
+			'cooldown_until' => $retryAt,
+			'session_rest_until' => $retryAt,
+			'summary' => sprintf('%s Reprise estimée dans %d min.', $summaryPrefix, (int) ceil($retryDelay / 60)),
+			'dynamic_delta' => array(
+				'fatigue' => -1,
+				'discipline' => 1,
+			),
+		);
+	}
+
+	protected function estimateResourceWaitSeconds(array $user, array $planet, array $deficit)
+	{
+		$config = Config::get((int) $user['universe']);
+		$perHour = array(
+			901 => max(60.0, ((float) $config->metal_basic_income * (float) $config->resource_multiplier) + (float) $planet['metal_perhour']),
+			902 => max(40.0, ((float) $config->crystal_basic_income * (float) $config->resource_multiplier) + (float) $planet['crystal_perhour']),
+			903 => max(20.0, ((float) $config->deuterium_basic_income * (float) $config->resource_multiplier) + (float) $planet['deuterium_perhour']),
+			921 => 0.0,
+		);
+		$maxWait = 0;
+		foreach ($deficit as $resourceId => $missingAmount) {
+			$missingAmount = (float) $missingAmount;
+			if ($missingAmount <= 0) {
+				continue;
+			}
+
+			if (empty($perHour[$resourceId])) {
+				$maxWait = max($maxWait, 7200);
+				continue;
+			}
+
+			$maxWait = max($maxWait, (int) ceil(($missingAmount * 3600) / $perHour[$resourceId]));
+		}
+
+		return max(300, min(21600, (int) ceil($maxWait * 1.15)));
+	}
+
+	protected function shouldSkipQueueInsertion($botUserId, array $action, $payloadJson, $queuedCount)
+	{
+		$actionType = isset($action['action_type']) ? (string) $action['action_type'] : '';
+		$objectiveType = isset($action['goal']) ? (string) $action['goal'] : '';
+		$payload = isset($action['payload']) && is_array($action['payload']) ? $action['payload'] : array();
+		$db = Database::get();
+
+		if ($queuedCount >= 12 && in_array($actionType, array('presence_ping', 'queue_social_message', 'queue_private_message'), true)) {
+			return true;
+		}
+
+		$duplicateCount = (int) $db->selectSingle('SELECT COUNT(*) AS total
+			FROM %%BOT_ACTION_QUEUE%%
+			WHERE bot_user_id = :botUserId
+			  AND status IN (\'queued\', \'running\')
+			  AND action_type = :actionType
+			  AND objective_type = :objectiveType
+			  AND payload_json = :payloadJson;', array(
+				':botUserId' => (int) $botUserId,
+				':actionType' => $actionType,
+				':objectiveType' => $objectiveType,
+				':payloadJson' => $payloadJson,
+			), 'total');
+		if ($duplicateCount > 0) {
+			return true;
+		}
+
+		$typeCount = (int) $db->selectSingle('SELECT COUNT(*) AS total
+			FROM %%BOT_ACTION_QUEUE%%
+			WHERE bot_user_id = :botUserId
+			  AND status IN (\'queued\', \'running\')
+			  AND action_type = :actionType;', array(
+				':botUserId' => (int) $botUserId,
+				':actionType' => $actionType,
+			), 'total');
+
+		$limits = array(
+			'presence_ping' => 1,
+			'queue_social_message' => 2,
+			'queue_private_message' => 2,
+			'send_spy' => 2,
+			'send_raid' => 1,
+			'enqueue_building' => 2,
+			'enqueue_research' => 2,
+			'enqueue_shipyard' => 3,
+		);
+		if (isset($limits[$actionType]) && $typeCount >= $limits[$actionType]) {
+			return true;
+		}
+
+		if ($actionType === 'presence_ping') {
+			$state = $this->presenceService->getState((int) $botUserId);
+			$targetLogical = !empty($payload['target_logical']) ? (string) $payload['target_logical'] : 'connecte';
+			$targetSocial = !empty($payload['target_social']) ? (string) $payload['target_social'] : (!empty($payload['force_discretion']) ? 'discret' : 'visible');
+			if (!empty($state)
+				&& $state['presence_logical'] === $targetLogical
+				&& $state['presence_social'] === $targetSocial
+				&& empty($payload['relay_value'])
+				&& empty($payload['continuity_value'])
+				&& empty($payload['manual_order_count'])) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	protected function buildQueueSignature($actionType, $objectiveType, $payloadJson)
+	{
+		if ($actionType === 'presence_ping') {
+			return $actionType;
+		}
+
+		return sha1((string) $actionType.'|'.(string) $objectiveType.'|'.(string) $payloadJson);
 	}
 }

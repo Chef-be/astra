@@ -8,9 +8,9 @@
 
 	.resource-hero {
 		display: grid;
-		grid-template-columns: 1fr;
-		gap: 1rem;
-		padding: 1.1rem 1.2rem;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 0.85rem;
+		padding: 0.95rem 1rem;
 		border-radius: 1.25rem;
 		border: 1px solid rgba(255, 214, 102, 0.16);
 		background:
@@ -21,29 +21,18 @@
 	}
 
 	.resource-hero h1 {
-		margin: 0 0 0.4rem;
-		font-size: 1.6rem;
-		color: #f8fbff;
-	}
-
-	.resource-hero p {
 		margin: 0;
-		max-width: none;
-		color: rgba(255, 255, 255, 0.74);
-		line-height: 1.55;
+		font-size: 1.34rem;
+		color: #f8fbff;
+		line-height: 1.2;
 	}
 
 	.resource-hero-actions {
 		display: flex;
 		flex-wrap: wrap;
-		justify-content: space-between;
+		justify-content: flex-end;
 		align-items: center;
 		gap: 0.75rem;
-	}
-
-	.resource-hero-note {
-		color: rgba(255, 255, 255, 0.58);
-		font-size: 0.82rem;
 	}
 
 	.resource-metrics {
@@ -110,26 +99,32 @@
 		border: 1px solid rgba(255, 214, 102, 0.14);
 		background: linear-gradient(180deg, rgba(10, 18, 34, 0.94), rgba(7, 12, 24, 0.96));
 		box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.24);
+		overflow: hidden;
 	}
 
-	.resource-main-head {
+	.resource-disclosure > summary {
 		display: flex;
 		flex-wrap: wrap;
-		align-items: end;
+		align-items: center;
 		justify-content: space-between;
-		gap: 0.8rem;
-		padding: 1rem 1.1rem 0.85rem;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+		gap: 0.75rem;
+		padding: 0.82rem 0.95rem;
+		list-style: none;
+		cursor: pointer;
+	}
+
+	.resource-disclosure > summary::-webkit-details-marker {
+		display: none;
 	}
 
 	.resource-main-head h2,
-	.resource-rail h3 {
+	.resource-rail-head h3 {
 		margin: 0;
 		color: #ffd666;
 	}
 
 	.resource-main-head p,
-	.resource-rail p {
+	.resource-rail-head p {
 		margin: 0.2rem 0 0;
 		color: rgba(255, 255, 255, 0.68);
 	}
@@ -152,11 +147,15 @@
 		grid-template-columns: 1fr;
 		gap: 0.75rem;
 		align-items: center;
-		padding: 0.85rem 1rem;
+		padding: 0.78rem 0.95rem;
 	}
 
 	.resource-line {
 		border-top: 1px solid rgba(255, 255, 255, 0.05);
+	}
+
+	.resource-main-body > .resource-line:first-child {
+		border-top: 0;
 	}
 
 	.resource-line--summary {
@@ -258,13 +257,17 @@
 		border-radius: 0.85rem;
 	}
 
+	.resource-main-body {
+		padding-bottom: 0.95rem;
+	}
+
 	.resource-footer {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
 		justify-content: space-between;
 		gap: 0.85rem;
-		padding: 1rem 1.1rem;
+		padding: 0.95rem 0.95rem 0;
 		border-top: 1px solid rgba(255, 255, 255, 0.06);
 	}
 
@@ -273,21 +276,22 @@
 		font-size: 0.84rem;
 	}
 
-	.resource-rail {
-		position: static;
-		padding: 1rem 1.1rem;
+	.resource-rail-grid {
+		display: grid;
+		gap: 0.85rem;
 	}
 
-	.resource-rail-section + .resource-rail-section {
-		margin-top: 0.85rem;
-		padding-top: 0.85rem;
-		border-top: 1px solid rgba(255, 255, 255, 0.08);
+	.resource-rail-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.6rem;
 	}
 
 	.resource-rail-list {
 		display: grid;
 		gap: 0.55rem;
-		margin-top: 0.9rem;
+		padding: 0 0.95rem 0.95rem;
 	}
 
 	.resource-rail-line {
@@ -317,6 +321,10 @@
 	}
 
 	@media (max-width: 767px) {
+		.resource-hero {
+			grid-template-columns: 1fr;
+		}
+
 		.resource-metrics {
 			grid-template-columns: 1fr;
 		}
@@ -336,12 +344,8 @@
 <input type="hidden" name="mode" value="send">
 <div class="resource-shell">
 	<section class="resource-hero">
-		<div>
-			<h1>{$header}</h1>
-			<p>Réglez les mines, centrales et synthétiseurs depuis une vue de pilotage plus compacte. Les rendements, le stockage et les cadences restent visibles sans allonger inutilement la page.</p>
-		</div>
+		<h1>{$header}</h1>
 		<div class="resource-hero-actions">
-			<span class="resource-hero-note">Les nouveaux réglages sont appliqués à cette planète.</span>
 			<button class="btn btn-warning fw-semibold text-dark" type="submit">{$LNG.rs_calculate}</button>
 		</div>
 	</section>
@@ -402,24 +406,24 @@
 	</div>
 
 	<div class="resource-workspace">
-		<section class="resource-panel">
-			<div class="resource-main-head">
+		<details class="resource-panel resource-disclosure ng-disclosure ng-disclosure--chevron" open>
+			<summary class="resource-main-head">
 				<div>
 					<h2>Pilotage des installations</h2>
-					<p>Réglez le pourcentage de fonctionnement directement depuis chaque ligne.</p>
 				</div>
 				<span class="resource-head-badge">{$resourceEntryCount|number} installation{if $resourceEntryCount > 1}s{/if}</span>
-			</div>
+			</summary>
 
+			<div class="resource-main-body ng-disclosure__body">
 			<div class="resource-line resource-line--summary">
 				<div class="resource-line-top">
 					<div class="resource-meta">
 						<div class="resource-meta-text">
 							<strong>{$LNG.rs_basic_income}</strong>
-							<span class="resource-meta-sub">Base appliquée à la planète avant bonus spécifiques.</span>
+							<span class="resource-meta-sub">Base planète</span>
 						</div>
 					</div>
-					<div class="resource-control text-white-50">Aucun réglage</div>
+					<div class="resource-control text-white-50">-</div>
 				</div>
 				<div class="resource-yields">
 					<span class="resource-chip is-pos">{$LNG.tech.901} <strong>{$basicProduction.901|number}</strong></span>
@@ -457,10 +461,10 @@
 					<div class="resource-meta">
 						<div class="resource-meta-text">
 							<strong>{$LNG.rs_ress_bonus}</strong>
-							<span class="resource-meta-sub">Bonus cumulés appliqués à la production brute.</span>
+							<span class="resource-meta-sub">Bonus cumulés</span>
 						</div>
 					</div>
-					<div class="resource-control text-white-50">Aucun réglage</div>
+					<div class="resource-control text-white-50">-</div>
 				</div>
 				<div class="resource-yields">
 					<span class="resource-chip {if $bonusProduction.901 > 0}is-pos{elseif $bonusProduction.901 < 0}is-neg{else}is-neutral{/if}">{$LNG.tech.901} <strong>{$bonusProduction.901|number}</strong></span>
@@ -475,10 +479,10 @@
 					<div class="resource-meta">
 						<div class="resource-meta-text">
 							<strong>{$LNG.rs_sum}</strong>
-							<span class="resource-meta-sub">Production nette prise en compte après réglages.</span>
+							<span class="resource-meta-sub">Production nette</span>
 						</div>
 					</div>
-					<div class="resource-control text-white-50">Aucun réglage</div>
+					<div class="resource-control text-white-50">-</div>
 				</div>
 				<div class="resource-yields">
 					<span class="resource-chip {if $totalProduction.901 > 0}is-pos{elseif $totalProduction.901 < 0}is-neg{else}is-neutral{/if}">{$LNG.tech.901} <strong>{if $totalProduction.901 > 0}+{/if}{$totalProduction.901|number}/h</strong></span>
@@ -489,44 +493,50 @@
 			</div>
 
 			<div class="resource-footer">
-				<span class="resource-footer-note">Un seul enregistrement suffit pour appliquer tous les pourcentages de production.</span>
 				<button class="btn btn-warning fw-semibold text-dark" type="submit">{$LNG.rs_calculate}</button>
 			</div>
-		</section>
+			</div>
+		</details>
 
-		<aside class="resource-panel resource-rail">
-			<div class="resource-rail-section">
-				<h3>Capacité de stockage</h3>
-				<p>État des silos disponibles sur la planète.</p>
+		<div class="resource-rail-grid">
+			<details class="resource-panel resource-disclosure ng-disclosure ng-disclosure--chevron" open>
+				<summary class="resource-rail-head">
+					<h3>Capacité de stockage</h3>
+					<span class="resource-head-badge">3 ressources</span>
+				</summary>
 				<div class="resource-rail-list">
 					<div class="resource-rail-line"><span>{$LNG.tech.901}</span><strong>{$storage.901}</strong></div>
 					<div class="resource-rail-line"><span>{$LNG.tech.902}</span><strong>{$storage.902}</strong></div>
 					<div class="resource-rail-line"><span>{$LNG.tech.903}</span><strong>{$storage.903}</strong></div>
 				</div>
-			</div>
+			</details>
 
-			<div class="resource-rail-section">
-				<h3>Cadence journalière</h3>
-				<p>Projection de production sur vingt-quatre heures.</p>
+			<details class="resource-panel resource-disclosure ng-disclosure ng-disclosure--chevron" open>
+				<summary class="resource-rail-head">
+					<h3>Cadence journalière</h3>
+					<span class="resource-head-badge">24 h</span>
+				</summary>
 				<div class="resource-rail-list">
 					<div class="resource-rail-line"><span>{$LNG.tech.901}</span><strong class="{if $dailyProduction.901 > 0}is-pos{elseif $dailyProduction.901 < 0}is-neg{/if}">{if $dailyProduction.901 > 0}+{/if}{$dailyProduction.901|number}</strong></div>
 					<div class="resource-rail-line"><span>{$LNG.tech.902}</span><strong class="{if $dailyProduction.902 > 0}is-pos{elseif $dailyProduction.902 < 0}is-neg{/if}">{if $dailyProduction.902 > 0}+{/if}{$dailyProduction.902|number}</strong></div>
 					<div class="resource-rail-line"><span>{$LNG.tech.903}</span><strong class="{if $dailyProduction.903 > 0}is-pos{elseif $dailyProduction.903 < 0}is-neg{/if}">{if $dailyProduction.903 > 0}+{/if}{$dailyProduction.903|number}</strong></div>
 					<div class="resource-rail-line"><span>{$LNG.tech.911}</span><strong class="{if $dailyProduction.911 > 0}is-pos{elseif $dailyProduction.911 < 0}is-neg{/if}">{if $dailyProduction.911 > 0}+{/if}{$dailyProduction.911|number}</strong></div>
 				</div>
-			</div>
+			</details>
 
-			<div class="resource-rail-section">
-				<h3>Cadence hebdomadaire</h3>
-				<p>Projection sur sept jours avec les réglages actuels.</p>
+			<details class="resource-panel resource-disclosure ng-disclosure ng-disclosure--chevron" open>
+				<summary class="resource-rail-head">
+					<h3>Cadence hebdomadaire</h3>
+					<span class="resource-head-badge">7 jours</span>
+				</summary>
 				<div class="resource-rail-list">
 					<div class="resource-rail-line"><span>{$LNG.tech.901}</span><strong class="{if $weeklyProduction.901 > 0}is-pos{elseif $weeklyProduction.901 < 0}is-neg{/if}">{if $weeklyProduction.901 > 0}+{/if}{$weeklyProduction.901|number}</strong></div>
 					<div class="resource-rail-line"><span>{$LNG.tech.902}</span><strong class="{if $weeklyProduction.902 > 0}is-pos{elseif $weeklyProduction.902 < 0}is-neg{/if}">{if $weeklyProduction.902 > 0}+{/if}{$weeklyProduction.902|number}</strong></div>
 					<div class="resource-rail-line"><span>{$LNG.tech.903}</span><strong class="{if $weeklyProduction.903 > 0}is-pos{elseif $weeklyProduction.903 < 0}is-neg{/if}">{if $weeklyProduction.903 > 0}+{/if}{$weeklyProduction.903|number}</strong></div>
 					<div class="resource-rail-line"><span>{$LNG.tech.911}</span><strong class="{if $weeklyProduction.911 > 0}is-pos{elseif $weeklyProduction.911 < 0}is-neg{/if}">{if $weeklyProduction.911 > 0}+{/if}{$weeklyProduction.911|number}</strong></div>
 				</div>
-			</div>
-		</aside>
+			</details>
+		</div>
 	</div>
 </div>
 </form>

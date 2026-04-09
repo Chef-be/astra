@@ -1,15 +1,15 @@
 {block name="content"}
-<div class="container-fluid py-3 text-white">
-	<div class="admin-toolbar mb-4">
-		<div class="admin-mini-hero flex-grow-1">
-			<h2 class="h3">Créer une planète</h2>
-			<p>Ajoutez une planète à un joueur existant en définissant sa position orbitale et sa capacité initiale.</p>
+<div class="admin-settings-shell admin-stack">
+	<section class="admin-headerline">
+		<div class="admin-headerline__lead">
+			<span class="admin-headerline__eyebrow">Création orbitale</span>
+			<h1 class="admin-headerline__title">Créer une planète</h1>
 		</div>
-		<div class="admin-actions">
-			<a class="btn btn-outline-light" href="?page=create">Retour</a>
-			<a class="btn btn-outline-info" href="?page=create&mode=planet">Réinitialiser</a>
+		<div class="admin-actions admin-actions--header">
+			<a class="admin-shell-action admin-shell-action--light" href="?page=create">Retour</a>
+			<a class="admin-shell-action admin-shell-action--light" href="?page=create&mode=planet">Réinitialiser</a>
 		</div>
-	</div>
+	</section>
 
 	<form class="admin-card" action="?page=create&mode=createPlanet" method="post">
 		<div class="admin-card__body">

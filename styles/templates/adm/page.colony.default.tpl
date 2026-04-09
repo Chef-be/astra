@@ -1,10 +1,12 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Paramètres d’univers</span>
-			<h1 class="admin-hero__title">Réglages des colonies</h1>
-			<p class="admin-hero__subtitle">Définissez le kit de départ appliqué aux nouvelles colonies, par groupes de ressources, bâtiments, vaisseaux et défenses.</p>
+	<section class="admin-headerline">
+		<div class="admin-headerline__lead">
+			<span class="admin-headerline__eyebrow">Paramètres d’univers</span>
+			<h1 class="admin-headerline__title">Réglages des colonies</h1>
+		</div>
+		<div class="admin-headerline__meta">
+			<span class="admin-pill">{$colonySettingGroups|@count} groupe(s)</span>
 		</div>
 	</section>
 

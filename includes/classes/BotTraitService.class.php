@@ -73,4 +73,77 @@ class BotTraitService
 			':botUserId' => (int) $botUserId,
 		));
 	}
+
+	public function applyActionFeedback($botUserId, $actionType, $success, $goal = '', array $payload = array())
+	{
+		$current = $this->load($botUserId);
+		if (empty($current)) {
+			return;
+		}
+
+		$delta = array();
+		switch ((string) $actionType) {
+			case 'enqueue_building':
+				$delta['economie'] = $success ? 1 : 0;
+				$delta['patience_strategique'] = $success ? 1 : 0;
+				$delta['prudence'] = $success ? 0 : 1;
+				break;
+
+			case 'enqueue_research':
+				$delta['technologie'] = $success ? 1 : 0;
+				$delta['discipline_execution'] = $success ? 1 : 0;
+				break;
+
+			case 'enqueue_shipyard':
+				$delta['defense'] = ($success && $goal === 'defense_zone') ? 1 : 0;
+				$delta['intensite_offensive'] = ($success && in_array($goal, array('pression_locale', 'campagne_harcelement', 'expansion_coloniale'), true)) ? 1 : 0;
+				$delta['prudence'] = $success ? 0 : 1;
+				break;
+
+			case 'send_spy':
+				$delta['espionnage'] = $success ? 1 : 0;
+				$delta['sens_opportunite'] = $success ? 1 : 0;
+				$delta['prudence'] = $success ? 0 : 1;
+				break;
+
+			case 'send_raid':
+				$delta['aggressivite'] = $success ? 1 : 0;
+				$delta['gout_chasse_ciblee'] = $success ? 1 : 0;
+				$delta['prudence'] = $success ? 0 : 2;
+				break;
+
+			case 'queue_private_message':
+			case 'queue_social_message':
+				$delta['aptitude_communication'] = $success ? 1 : 0;
+				$delta['sociabilite'] = $success ? 1 : 0;
+				break;
+
+			case 'presence_ping':
+				$delta['discipline'] = $success ? 1 : 0;
+				$delta['capacite_relai'] = !empty($payload['relay_value']) && $success ? 1 : 0;
+				break;
+		}
+
+		$set = array('updated_at = :updatedAt');
+		$params = array(
+			':updatedAt' => TIMESTAMP,
+			':botUserId' => (int) $botUserId,
+		);
+
+		foreach ($delta as $column => $value) {
+			if (!array_key_exists($column, $current) || (int) $value === 0) {
+				continue;
+			}
+
+			$newValue = max(0, min(100, (int) $current[$column] + (int) $value));
+			$set[] = $column.' = :'.$column;
+			$params[':'.$column] = $newValue;
+		}
+
+		if (count($set) === 1) {
+			return;
+		}
+
+		Database::get()->update('UPDATE %%BOT_TRAITS%% SET '.implode(', ', $set).' WHERE bot_user_id = :botUserId;', $params);
+	}
 }

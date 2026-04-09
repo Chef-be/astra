@@ -50,7 +50,7 @@ class GalaxyRows
 		p.galaxy, p.system, p.planet, p.id, p.id_owner, p.name, p.image, p.last_update, p.diameter, p.temp_min, p.destruyed, p.der_metal, p.der_crystal, p.id_luna,
 		u.id as userid, u.ally_id, u.username, u.onlinetime, u.urlaubs_modus, u.banaday,
 		m.id as m_id, m.diameter as m_diameter, m.name as m_name, m.temp_min as m_temp_min, m.last_update as m_last_update,
-		s.total_points, s.total_rank,
+		s.total_points, s.total_rank, s.fleet_points, s.fleet_count,
 		a.id as allyid, a.ally_tag, a.ally_web, a.ally_members, a.ally_name,
 		allys.total_rank as ally_rank,
 		COUNT(buddy.id) as buddy,
@@ -58,7 +58,7 @@ class GalaxyRows
 		FROM %%PLANETS%% p
 		LEFT JOIN %%USERS%% u ON p.id_owner = u.id
 		LEFT JOIN %%PLANETS%% m ON m.id = p.id_luna
-		LEFT JOIN %%USER_POINTS%% s ON s.id_owner = u.id
+		LEFT JOIN %%USER_POINTS%% s ON s.id_owner = u.id AND s.universe = p.universe
 		LEFT JOIN %%ALLIANCE%% a ON a.id = u.ally_id
 		LEFT JOIN %%DIPLO%% as d ON (d.owner_1 = :allianceId AND d.owner_2 = a.id) OR (d.owner_1 = a.id AND d.owner_2 = :allianceId) AND d.accept = :accept
 		LEFT JOIN %%ALLIANCE_POINTS%% allys ON allys.id_owner = a.id
@@ -162,7 +162,14 @@ class GalaxyRows
         if($this->galaxyData[$this->galaxyRow['planet']]['ownPlanet']) {
             $this->galaxyData[$this->galaxyRow['planet']]['action'] = false;
         } else {
+			$attackAvailable = $this->galaxyData[$this->galaxyRow['planet']]['missions'][1];
+			$attackAlert = $attackAvailable
+				&& !empty($this->galaxyData[$this->galaxyRow['planet']]['lastActivity'])
+				&& !empty($this->galaxyData[$this->galaxyRow['planet']]['user']['fleet_count']);
+
             $this->galaxyData[$this->galaxyRow['planet']]['action'] = array(
+                'attack'	=> $attackAvailable,
+                'attackAlert'	=> $attackAlert,
                 'esp'		=> $USER['settings_esp'] == 1 && $this->galaxyData[$this->galaxyRow['planet']]['missions'][6],
                 'message'	=> $USER['settings_wri'] == 1 && isModuleAvailable(MODULE_MESSAGES),
                 'buddy'		=> $USER['settings_bud'] == 1 && isModuleAvailable(MODULE_BUDDYLIST) && $this->galaxyRow['buddy'] == 0,
@@ -183,6 +190,8 @@ class GalaxyRows
 			'username'		=> htmlspecialchars($this->galaxyRow['username'], ENT_QUOTES, "UTF-8"),
 			'rank'			=> $this->galaxyRow['total_rank'],
 			'points'		=> pretty_number($this->galaxyRow['total_points']),
+			'fleet_points'	=> pretty_number($this->galaxyRow['fleet_points']),
+			'fleet_count'	=> (int) $this->galaxyRow['fleet_count'],
 			'playerrank'	=> isModuleAvailable(25)?sprintf($LNG['gl_in_the_rank'], htmlspecialchars($this->galaxyRow['username'],ENT_QUOTES,"UTF-8"), $this->galaxyRow['total_rank']):htmlspecialchars($this->galaxyRow['username'],ENT_QUOTES,"UTF-8"),
 			'class'			=> $Class,
 			'isBuddy'		=> $this->galaxyRow['buddy'] == 0,

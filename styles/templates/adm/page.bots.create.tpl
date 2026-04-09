@@ -1,10 +1,9 @@
 {block name="content"}
 <div class="admin-settings-shell">
-	<section class="admin-hero">
-		<div>
-			<span class="admin-hero__eyebrow">Population automatisée</span>
-			<h1 class="admin-hero__title">Création de bots</h1>
-			<p class="admin-hero__subtitle">Préparez une vague cohérente de bots avec profil, dotation initiale, galaxie cible, adresse mail commune et mots de passe aléatoires distincts.</p>
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Population</span>
+			<h2>Création de bots</h2>
 		</div>
 	</section>
 

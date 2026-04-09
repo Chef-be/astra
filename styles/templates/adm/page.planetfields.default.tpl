@@ -1,36 +1,32 @@
 {block name="content"}
 <div class="admin-settings-shell admin-stack">
-	<section class="admin-kpi-grid">
-		<article class="admin-kpi-card">
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Orbites</span>
+			<h2>Champs planétaires</h2>
+		</div>
+		<div class="admin-headerline__actions">
+			<a class="admin-shell-action admin-shell-action--light" href="?page=universe">Univers</a>
+			<a class="admin-shell-action admin-shell-action--warning" href="?page=planetFields&mode=default">Rétablir les valeurs par défaut</a>
+		</div>
+	</section>
+
+	<section class="admin-kpi-grid admin-kpi-grid--planetfields">
+		<article class="admin-kpi-card admin-kpi-card--micro">
 			<span class="admin-kpi-card__label">Positions orbitables</span>
 			<strong class="admin-kpi-card__value">15</strong>
 			<span class="admin-kpi-card__meta">de la plus chaude à la plus froide</span>
 		</article>
-		<article class="admin-kpi-card">
+		<article class="admin-kpi-card admin-kpi-card--micro">
 			<span class="admin-kpi-card__label">Réglage</span>
 			<strong class="admin-kpi-card__value">Min / Max</strong>
 			<span class="admin-kpi-card__meta">pour chaque case orbitale</span>
 		</article>
-		<article class="admin-kpi-card">
+		<article class="admin-kpi-card admin-kpi-card--micro">
 			<span class="admin-kpi-card__label">Secours</span>
 			<strong class="admin-kpi-card__value">Valeurs par défaut</strong>
 			<span class="admin-kpi-card__meta">restauration globale disponible</span>
 		</article>
-	</section>
-
-	<section class="admin-card">
-		<div class="card-body admin-stack">
-			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-				<div>
-					<h2 class="h4 mb-1">Champs planétaires par position</h2>
-					<p class="text-white-50 mb-0">Définissez les bornes minimales et maximales de champs pour chaque position orbitale afin d’équilibrer la génération des planètes.</p>
-				</div>
-				<div class="admin-cluster">
-					<a class="admin-shell-action admin-shell-action--light" href="?page=universe">Univers</a>
-					<a class="admin-shell-action admin-shell-action--warning" href="?page=planetFields&mode=default">Rétablir les valeurs par défaut</a>
-				</div>
-			</div>
-		</div>
 	</section>
 
 	<form action="?page=planetFields&mode=send" method="post" class="admin-stack">
@@ -41,7 +37,6 @@
 				<div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
 					<div>
 						<h2 class="h5 mb-1">Grille orbitale complète</h2>
-						<p class="text-white-50 mb-0">15 positions à régler, de la plus chaude à la plus froide.</p>
 					</div>
 					<span class="admin-pill">15 positions</span>
 				</div>
@@ -168,14 +163,5 @@
 		</section>
 	</form>
 
-	<form action="?page=planetFields&mode=default" method="post" class="admin-card">
-		<div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
-			<div>
-				<h3 class="h6 mb-1">Restauration rapide</h3>
-				<p class="text-white-50 mb-0">Réapplique les valeurs orbitales par défaut prévues par la plateforme.</p>
-			</div>
-			<button class="btn btn-outline-light" type="submit">Rétablir les valeurs par défaut</button>
-		</div>
-	</form>
 </div>
 {/block}

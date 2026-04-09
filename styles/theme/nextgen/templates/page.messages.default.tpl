@@ -314,7 +314,6 @@
 	<section class="messages-hero">
 		<div>
 			<h1>Messagerie joueur</h1>
-			<p>Retrouvez les échanges entre joueurs, les messages d’alliance et vos envois dans une vue unique plus claire. Les notifications système restent séparées du courrier joueur.</p>
 		</div>
 		<div class="messages-hero-stats">
 			<div class="messages-stat">
@@ -335,7 +334,6 @@
 	<div class="messages-layout">
 		<aside class="messages-panel messages-sidebar">
 			<h2>Dossiers</h2>
-			<p class="messages-sidebar-note">Naviguez par type d’échange sans mélanger les notifications système avec les messages joueur.</p>
 			<div class="messages-folder-list">
 				{foreach $CategoryList as $CategoryID => $CategoryRow}
 					<a class="messages-folder{if $MessID == $CategoryID} is-active{/if}" href="game.php?page=messages&category={$CategoryID}">

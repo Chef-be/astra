@@ -64,22 +64,25 @@
                 </a>
               </li>
               {/if}
-              <li class="hover-underline d-flex align-items-center h-100 position-relative">
-                <a class="text-white d-flex align-items-center text-decoration-none fs-12 m-0" href="#" id="astraNotificationToggle" data-bs-toggle="tooltip"
+              <li class="hover-underline d-flex align-items-center h-100 position-relative astra-notification-dropdown">
+                <a class="text-white d-flex align-items-center text-decoration-none fs-12 m-0 astra-notification-toggle" href="#" id="astraNotificationToggle" data-bs-toggle="tooltip"
                 data-bs-placement="bottom"
                 data-bs-html="true" title="Notifications en temps réel">
                   <i style="font-size:20px;" class="bi bi-bell {if $page == 'notifications'}text-danger{/if}"></i>
-                  <span id="astraNotificationBadge" class="badge bg-danger" style="display:none;position:absolute;right:-12px;top:2px;min-width:22px;">0</span>
+                  <span id="astraNotificationBadge" class="badge bg-danger astra-notification-badge" style="display:none;">0</span>
                 </a>
-                <div id="astraNotificationPanel" class="d-none" style="position:absolute;top:42px;right:-40px;width:360px;max-width:90vw;background:rgba(7,12,18,0.96);border:1px solid rgba(255,255,255,0.16);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,0.45);backdrop-filter:blur(14px);z-index:1100;">
-                  <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom border-secondary">
-                    <div class="fw-bold text-white">Notifications</div>
-                    <div class="d-flex gap-2">
+                <div id="astraNotificationPanel" class="astra-notification-panel d-none">
+                  <div class="astra-notification-panel__header">
+                    <div class="astra-notification-panel__titlewrap">
+                      <div class="fw-bold text-white">Notifications</div>
+                      <span class="astra-notification-panel__subtitle">Centre temps réel</span>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap justify-content-end">
                       <button id="astraNotificationReadAll" class="btn btn-sm btn-outline-light">Tout lire</button>
                       <a href="game.php?page=notifications" class="btn btn-sm btn-primary">Centre</a>
                     </div>
                   </div>
-                  <div id="astraNotificationList" style="max-height:420px;overflow-y:auto;"></div>
+                  <div id="astraNotificationList" class="astra-notification-list"></div>
                 </div>
               </li>
               {if isModuleAvailable($smarty.const.MODULE_STATISTICS)}
@@ -233,7 +236,7 @@ $(function() {
 }
 </style>
 <script src="scripts/game/topnav.js?v={$VERSION}-mission2"></script>
-<script src="scripts/game/realtime.js?v={$VERSION}-realtime4"></script>
+<script src="scripts/game/realtime.js?v={$VERSION}-realtime5"></script>
 {if $hasGate}<script src="scripts/game/gate.js"></script>{/if}
 {/if}
 

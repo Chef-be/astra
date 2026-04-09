@@ -1,48 +1,64 @@
-<form action="?page=fleetTable&amp;action=acs" method="post">
-<input name="fleetID" value="{$acsData.mainFleetID}" type="hidden">
-	<table class="table519">
-		<tr style="height:20px;">
-			<th colspan="2">{$LNG.fl_sac_of_fleet}</th>
-		</tr>
-		<tr style="height:20px;">
-			<th colspan="2">{$LNG.fl_modify_sac_name} (<a href="javascript:Rename();">{$LNG.fl_acs_change}</a>)</th>
-		</tr>
-		<tr>
-			<td colspan="2" id="acsName">{$acsData.acsName}</td>
-		</tr>
-		<tr style="height:20px;">
-			<th style="width:50%;">{$LNG.fl_members_invited}</th>
-            <th style="width:50%;">{$LNG.fl_invite_members}</th>
-		</tr>
-		{if !empty($acsData.statusMessage)}
-		<tr>
-			<td colspan="2">
+<form action="?page=fleetTable&amp;action=acs" method="post" class="fleet-acs-form">
+	<input name="fleetID" value="{$acsData.mainFleetID}" type="hidden">
+
+	<div class="fleet-acs-grid">
+		<section class="fleet-acs-card fleet-acs-card--wide">
+			<div class="fleet-acs-card__head">
+				<div>
+					<span class="fleet-acs-card__eyebrow">{$LNG.fl_sac_of_fleet}</span>
+					<h3>{$acsData.acsName}</h3>
+				</div>
+				<button type="button" class="btn btn-sm btn-outline-light" onclick="Rename();">{$LNG.fl_acs_change}</button>
+			</div>
+
+			<div class="fleet-acs-name" id="acsName">{$acsData.acsName}</div>
+
+			{if !empty($acsData.statusMessage)}
+			<div class="fleet-acs-status">
 				{$acsData.statusMessage}
-			</td>
-		</tr>
-		{/if}
-		<tr>
-			<td>
-				<select size="5" style="width:80%;">
+			</div>
+			{/if}
+
+			<div class="fleet-acs-select-shell">
+				<label class="form-label" for="fleetAcsInvited">{$LNG.fl_members_invited}</label>
+				<select id="fleetAcsInvited" class="form-select bg-dark text-white border-secondary" size="6">
 					{html_options options=$acsData.invitedUsers}
-                </select>
-			</td>
-			<td>
-				<p><input name="username" type="text"></p>
-				<p><input type="submit" value="{$LNG.fl_continue}"></p>
-			</td>
-		</tr>
-	</table>
+				</select>
+			</div>
+		</section>
+
+		<section class="fleet-acs-card">
+			<div class="fleet-acs-card__head">
+				<div>
+					<span class="fleet-acs-card__eyebrow">{$LNG.fl_invite_members}</span>
+					<h3>Ajouter un joueur</h3>
+				</div>
+			</div>
+			<label class="form-label" for="fleetAcsUsername">Pseudo</label>
+			<input id="fleetAcsUsername" class="form-control bg-dark text-white border-secondary" name="username" type="text" autocomplete="off">
+			<input class="btn btn-primary mt-3" type="submit" value="{$LNG.fl_continue}">
+		</section>
+	</div>
 </form>
+
 <script type="text/javascript">
 function Rename(){
-	var Name = prompt("{$LNG.fl_acs_change_name}", "{$acsData.acsName}");
-	$.getJSON('?page=fleetTable&action=acs&fleetID={$acsData.mainFleetID}&acsName='+Name, function(data) {
-		if(data != "") {
-			alert(data);
+	Dialog.prompt("{$LNG.fl_acs_change_name|escape:'javascript'}", "{$acsData.acsName|escape:'javascript'}", {
+		title: 'ACS',
+		confirmLabel: 'Renommer'
+	}).then(function(Name) {
+		if (Name === null) {
 			return;
 		}
-		$('#acsName').text(Name);
+
+		$.getJSON('?page=fleetTable&action=acs&fleetID={$acsData.mainFleetID}&acsName=' + encodeURIComponent(Name), function(data) {
+			if(data != "") {
+				Dialog.alert(data, null, { title: 'ACS' });
+				return;
+			}
+			$('#acsName').text(Name);
+			showGameToast('Nom ACS mis à jour.', 'success');
+		});
 	});
 }
 </script>

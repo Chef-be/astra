@@ -191,7 +191,6 @@
 <div class="settings-shell">
 	<section class="settings-hero">
 		<h1>{$LNG.lm_options}</h1>
-		<p>Personnalisez votre compte, vos préférences d’affichage, vos raccourcis galaxie et votre mode de jeu depuis une page plus claire.</p>
 	</section>
 
 	{if $userAuthlevel > 0}

@@ -71,8 +71,6 @@
       'server_default_theme' => $config->server_default_theme,
       'let_users_change_theme' => $config->let_users_change_theme,
       'password_recover_type' => $config->password_recover_type,
-      'discord_active' => $config->discord_active,
-      'discord_url' => $config->discord_url,
       'Selector'						=> array(
           'timezone' => $TimeZones,
               'mail' => $LNG['se_mail_sel'],
@@ -125,8 +123,6 @@
         'server_default_theme' => $config->server_default_theme,
         'let_users_change_theme' => $config->let_users_change_theme,
         'password_recover_type' => $config->password_recover_type,
-        'discord_active' => $config->discord_active,
-        'discord_url' => $config->discord_url,
       );
 
       $capaktiv 				= isset($_POST['capaktiv']) && $_POST['capaktiv'] == 'on' ? 1 : 0;
@@ -162,8 +158,6 @@
       $server_default_theme = HTTP::_GP('server_default_theme', 'gow');
       $let_users_change_theme = (HTTP::_GP('let_users_change_theme', 'off') == 'on') ? 1 : 0;
       $password_recover_type = HTTP::_GP('password_recover_type','2');
-      $discord_active = (HTTP::_GP('discord_active', 'off') == 'on') ? 1 : 0;
-      $discord_url = HTTP::_GP('discord_url', '', true);
 
       $config_after = array(
         'ttf_file'				=> $ttf_file,
@@ -197,9 +191,7 @@
         'use_recaptcha_on_admin_login' => $use_recaptcha_on_admin_login,
         'server_default_theme' => $server_default_theme,
         'let_users_change_theme' => $let_users_change_theme,
-        'password_recover_type' => $password_recover_type,
-        'discord_active' => $discord_active,
-        'discord_url' => $discord_url
+        'password_recover_type' => $password_recover_type
       );
 
       foreach($config_after as $key => $value)

@@ -1,41 +1,37 @@
 {block name="content"}
 <div class="container-fluid py-4 text-white admin-stack admin-chat-page">
-	<section class="admin-kpi-grid">
-		<article class="admin-kpi-card">
+	<section class="admin-headerline admin-headerline--compact">
+		<div class="admin-headerline__copy">
+			<span class="admin-pill">Communication</span>
+			<h2>Pilotage du chat</h2>
+		</div>
+		<div class="admin-headerline__actions">
+			<a class="admin-shell-action admin-shell-action--light" href="game.php?page=chat" target="_blank" rel="noopener">Ouvrir le chat joueur</a>
+			<a class="admin-shell-action admin-shell-action--accent" href="{$realtimeStatus.healthUrl}" target="_blank" rel="noopener">Santé du relais</a>
+		</div>
+	</section>
+
+	<section class="admin-kpi-grid admin-kpi-grid--chat">
+		<article class="admin-kpi-card admin-kpi-card--micro">
 			<span class="admin-kpi-card__label">Relais temps réel</span>
 			<strong class="admin-kpi-card__value">{if $realtimeStatus.available}En ligne{else}Hors ligne{/if}</strong>
 			<span class="admin-kpi-card__meta">état courant du serveur WebSocket</span>
 		</article>
-		<article class="admin-kpi-card">
+		<article class="admin-kpi-card admin-kpi-card--micro">
 			<span class="admin-kpi-card__label">Restrictions</span>
 			<strong class="admin-kpi-card__value">{$muteCountTotal}</strong>
 			<span class="admin-kpi-card__meta">joueur(s) actuellement bridés</span>
 		</article>
-		<article class="admin-kpi-card">
+		<article class="admin-kpi-card admin-kpi-card--micro">
 			<span class="admin-kpi-card__label">Canaux</span>
 			<strong class="admin-kpi-card__value">{$channelSettings|@count}</strong>
 			<span class="admin-kpi-card__meta">espaces structurés administrés</span>
 		</article>
-		<article class="admin-kpi-card">
+		<article class="admin-kpi-card admin-kpi-card--micro">
 			<span class="admin-kpi-card__label">Messages inspectés</span>
 			<strong class="admin-kpi-card__value">{$messageCountTotal}</strong>
 			<span class="admin-kpi-card__meta">fenêtre récente de modération</span>
 		</article>
-	</section>
-
-	<section class="admin-card">
-		<div class="card-body admin-stack">
-			<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-				<div>
-					<h2 class="h4 mb-1">Pilotage du chat temps réel</h2>
-					<p class="text-white-50 mb-0">Réglez le relais, la modération, la rétention et les canaux depuis une vue unique, sans basculer entre plusieurs écrans techniques.</p>
-				</div>
-				<div class="admin-cluster">
-					<a class="admin-shell-action admin-shell-action--light" href="game.php?page=chat" target="_blank" rel="noopener">Ouvrir le chat joueur</a>
-					<a class="admin-shell-action admin-shell-action--accent" href="{$realtimeStatus.healthUrl}" target="_blank" rel="noopener">Santé du relais</a>
-				</div>
-			</div>
-		</div>
 	</section>
 
 	<section class="admin-panel-grid">

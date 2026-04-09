@@ -112,6 +112,7 @@ class BotMessagingService
 			if (!is_array($payload)) {
 				$payload = array();
 			}
+			$channelKey = $this->resolveSocialChannelKey($row, $payload);
 
 			if (!$this->shouldSendSocialMessage($row, $payload)) {
 				$db->update('UPDATE %%BOT_SOCIAL_MESSAGES%% SET status = :status, sent_at = :sentAt WHERE id = :id;', array(
@@ -128,7 +129,7 @@ class BotMessagingService
 			}
 
 			LiveChatService::createChannelMessage(
-				$row['channel_key'],
+				$channelKey,
 				$row['bot_name'],
 				$row['message_text'],
 				(int) $row['bot_user_id'],
@@ -142,7 +143,7 @@ class BotMessagingService
 				':id' => (int) $row['id'],
 			));
 
-			$journal->logActivity((int) $row['bot_user_id'], 'message_chat', sprintf('%s publie un message social sur %s.', $row['bot_name'], $row['channel_key']), array(
+			$journal->logActivity((int) $row['bot_user_id'], 'message_chat', sprintf('%s publie un message social sur %s.', $row['bot_name'], $channelKey), array(
 				'message' => $row['message_text'],
 			));
 			$sent++;
@@ -159,7 +160,13 @@ class BotMessagingService
 			'intimidation' => $target.' Nous surveillons votre secteur '.$coordinates.'.',
 			'pression_locale' => 'Pression maintenue sur '.$coordinates.'. Rotation offensive en cours.',
 			'defense_zone' => 'Renforcement défensif engagé. La zone reste sous contrôle.',
-			'presence_visible' => 'Commandement Astra actif. Ordres et supervision en cours.',
+			'croissance_signal' => 'Production Astra en hausse. Les lignes économiques tournent à plein régime.',
+			'expansion_signal' => 'Préparatifs d’expansion en cours. Les convois Astra restent coordonnés.',
+				'contre_espionnage' => $target.' Surveillance relevée autour de '.$coordinates.'. Les prochains passages seront suivis.',
+				'riposte_zone' => $target.' Origine hostile repérée vers '.$coordinates.'. La riposte se prépare.',
+				'riposte_directe' => $target.' Votre activité sur '.$coordinates.' a été notée. La réponse suivra le même trajet.',
+				'soutien_alliance' => 'Renfort Astra dirigé vers '.$coordinates.'. '.$target.' Les relais d’alliance se mettent en place.',
+				'presence_visible' => 'Commandement Astra actif. Ordres et supervision en cours.',
 			'presence_continue' => 'Relève tactique engagée. La présence Astra reste continue sur '.$coordinates.'.',
 			'brouillage' => $target.' Des mouvements s’organisent. Tous les indices ne disent pas la même chose.',
 			'supervision' => 'Supervision stratégique en cours. Les zones chaudes restent sous observation.',
@@ -213,5 +220,35 @@ class BotMessagingService
 		$contextScore -= min(30, $duplicateCount * 18);
 
 		return $contextScore >= 28;
+	}
+
+	protected function resolveSocialChannelKey(array $row, array $payload)
+	{
+		$channelKey = trim((string) $row['channel_key']);
+		if ($channelKey !== 'auto') {
+			if ($channelKey === 'alliance' && empty($row['ally_id'])) {
+				return 'global';
+			}
+
+			return $channelKey !== '' ? $channelKey : 'bots';
+		}
+
+		$preference = !empty($payload['channel_preference']) ? trim((string) $payload['channel_preference']) : '';
+		if ($preference === 'alliance' && !empty($row['ally_id'])) {
+			return 'alliance';
+		}
+		if ($preference === 'global') {
+			return 'global';
+		}
+
+		$templateKey = !empty($payload['template_key']) ? (string) $payload['template_key'] : '';
+		if (in_array($templateKey, array('presence_continue', 'defense_zone', 'contre_espionnage', 'expansion_signal', 'supervision'), true) && !empty($row['ally_id'])) {
+			return 'alliance';
+		}
+		if (in_array($templateKey, array('presence_visible', 'croissance_signal', 'ambiance_zone'), true)) {
+			return 'global';
+		}
+
+		return !empty($row['ally_id']) ? 'alliance' : 'global';
 	}
 }

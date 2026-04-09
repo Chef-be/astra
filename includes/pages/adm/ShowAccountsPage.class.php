@@ -47,6 +47,7 @@ class ShowAccountsPage extends AbstractAdminPage
 				'id' => $ID,
 				'type' => $resource[$ID],
 				'label' => $LNG['tech'][$ID],
+				'tooltip' => isset($LNG['shortDescription'][$ID]) ? $LNG['shortDescription'][$ID] : '',
 				'image' => $this->resolveTechImage($ID),
 			);
 		}
@@ -1194,11 +1195,54 @@ function officersSend(){
 
 	function planets(){
 		global $LNG;
+		require_once ROOT_PATH.'includes/classes/AdminUiService.class.php';
 
 		$this->assign(array(
 			'planetHero' => array(
 				'title' => 'Éditeur de planètes',
 				'subtitle' => 'Ajustez les attributs clés d’une planète ou d’une lune, y compris sa position et ses remises à zéro.',
+			),
+			'planetResetCards' => array(
+				array(
+					'name' => '0_buildings',
+					'title' => $LNG['ad_pla_delete_b'],
+					'tag' => 'Remise à zéro',
+					'tooltip' => 'Supprime tous les bâtiments de la planète ciblée.',
+					'image' => AdminUiService::getThemeAssetUrl(1),
+					'checked' => false,
+				),
+				array(
+					'name' => '0_ships',
+					'title' => $LNG['ad_pla_delete_s'],
+					'tag' => 'Remise à zéro',
+					'tooltip' => 'Supprime tous les vaisseaux présents sur la planète ciblée.',
+					'image' => AdminUiService::getThemeAssetUrl(202),
+					'checked' => false,
+				),
+				array(
+					'name' => '0_defenses',
+					'title' => $LNG['ad_pla_delete_d'],
+					'tag' => 'Remise à zéro',
+					'tooltip' => 'Supprime toutes les défenses de la planète ciblée.',
+					'image' => AdminUiService::getThemeAssetUrl(401),
+					'checked' => false,
+				),
+				array(
+					'name' => '0_c_hangar',
+					'title' => $LNG['ad_pla_delete_hd'],
+					'tag' => 'File',
+					'tooltip' => 'Vide la file de construction du chantier spatial.',
+					'image' => AdminUiService::getThemeAssetUrl(21),
+					'checked' => false,
+				),
+				array(
+					'name' => '0_c_buildings',
+					'title' => $LNG['ad_pla_delete_cb'],
+					'tag' => 'File',
+					'tooltip' => 'Vide la file de construction des bâtiments.',
+					'image' => AdminUiService::getThemeAssetUrl(14),
+					'checked' => false,
+				),
 			),
 		));
 
